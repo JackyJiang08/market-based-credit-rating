@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import pandas as pd
 
-from . import lineage
-from .credit import CreditEstimate
+from raw_data_architecture import lineage
+
+if TYPE_CHECKING:
+    from signal_construction.credit import CreditEstimate
 
 
 @dataclass
@@ -43,4 +45,4 @@ class CompanyData:
     a_cashflow: pd.DataFrame = field(default_factory=pd.DataFrame)
 
     # Credit assessment
-    credit: Optional[CreditEstimate] = None
+    credit: Optional["CreditEstimate"] = None

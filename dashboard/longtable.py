@@ -11,10 +11,12 @@ import os
 
 import pandas as pd
 
-from . import config, lineage
-from .company import CompanyData
+from data_cleaning.company import CompanyData
+from raw_data_architecture import lineage
 
-LOG = logging.getLogger("mdtoolkit.longtable")
+from . import config
+
+LOG = logging.getLogger("pfpa.dashboard.longtable")
 
 LONG_COLUMNS = ["Ticker", "AsOf", "Category", "Period", "Metric", "Value"]
 

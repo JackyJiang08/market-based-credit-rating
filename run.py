@@ -15,8 +15,8 @@ import argparse
 import logging
 from typing import Optional, Sequence
 
-from mdtoolkit import RunConfig, run
-from mdtoolkit.config import DEFAULT_TICKERS, DEFAULT_YEARS
+from data_cleaning.workflow import RunConfig, run
+from raw_data_architecture.config import DEFAULT_TICKERS, DEFAULT_YEARS
 
 
 def parse_args(argv: Optional[Sequence[str]] = None) -> RunConfig:

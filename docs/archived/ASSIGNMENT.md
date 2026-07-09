@@ -21,7 +21,7 @@ demonstrable in a bank interview for a credit-risk role).
 | --- | --- | --- |
 | 1 | Read the instructor's updated TIC theory article | (your reading — posted to WeChat) |
 | 2 | Watch the pre-recorded lecture | (your reading — link in WeChat) |
-| 3 | **Program the tool to auto-calculate the required metrics and define the interface** | ✅ `mdtoolkit` package + `credit.CreditModel` interface |
+| 3 | **Program the tool to auto-calculate the required metrics and define the interface** | 🚧 Layers 1–2 active; `signal_construction.credit.CreditModel` retained as a prototype |
 | 4 | **Collect the required data for the 10 companies** | ✅ `run.py` (default universe) |
 | 5 | Send questions to WeChat / email | — |
 
@@ -31,7 +31,7 @@ demonstrable in a bank interview for a credit-risk role).
 > Pick one day, `shares outstanding = market cap ÷ stock price`, then use this
 > **constant** share count for daily market cap calculations.
 
-- `transforms.reference_shares(market_cap, last_close, fallback)` computes it.
+- `data_cleaning.transforms.reference_shares(market_cap, last_close, fallback)` computes it.
 - The aligned panel then sets `MarketCap_E = Shares × Close` for **every** day.
 - **Why constant shares?** Share count changes slowly (buybacks/issuance), while
   price changes every day. Holding shares fixed isolates the price effect and
@@ -52,10 +52,10 @@ demonstrable in a bank interview for a credit-risk role).
 > long-term debt** (a firm defaulting within a year likely won't repay all of
 > its long-term debt).
 
-- The 6-line **Debt & Liabilities** schedule: `transforms.build_debt_schedule`.
+- The 6-line **Debt & Liabilities** schedule: `data_cleaning.transforms.build_debt_schedule`.
 - The model's **default point** `D = 1.0·ST + 0.5·LT`:
-  `transforms.default_point_debt`, surfaced as `DefaultPointDebt_D`.
-- Robust fallbacks (`transforms.split_term_debt`) handle issuers/banks that
+  `data_cleaning.transforms.default_point_debt`, surfaced as `DefaultPointDebt_D`.
+- Robust fallbacks (`data_cleaning.transforms.split_term_debt`) handle issuers/banks that
   don't report a clean current/non-current split.
 
 ### 4. One-year Treasury bill rate
@@ -70,9 +70,11 @@ demonstrable in a bank interview for a credit-risk role).
 > Calculations must match stock trading dates, quarterly balance-sheet statement
 > dates, and interest-rate observation dates.
 
-- `alignment.build_panel` fuses the three calendars with **as-of (backward)**
-  joins: each trading day takes the most recent statement and rate known *on or
-  before* that day — no look-ahead bias.
+- `data_cleaning.alignment.build_panel` currently fuses the three calendars with
+  **as-of (backward)** joins.
+- **Open timing issue:** statement period-end is not the same as publication
+  time. Layer 2 must add `available_at` and join on that field before the panel
+  can be considered free of look-ahead bias.
 - Output: the **Aligned Panel** sheet, the model-ready daily table.
 
 ## From data to a credit rating (the modelling arc)
@@ -85,7 +87,7 @@ reads off the **distance to default** and **probability of default**.
 
 - Interface: `credit.CreditModel` (`estimate(inputs) → CreditEstimate`).
 - Baseline: `credit.MertonKMVModel` (iterative KMV procedure).
-- Instructor's method: `credit.TICModel` — a documented **stub** that plugs into
+- Instructor's method: `signal_construction.credit.TICModel` — a documented **stub** that plugs into
   the same interface, to be implemented when the TIC formula is taught.
 
 See [`GLOSSARY.md`](GLOSSARY.md) for the full intuition and formulas.

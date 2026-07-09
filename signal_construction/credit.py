@@ -49,7 +49,7 @@ from scipy.stats import norm
 
 from . import config
 
-LOG = logging.getLogger("mdtoolkit.credit")
+LOG = logging.getLogger("pfpa.signal_construction")
 
 
 # --------------------------------------------------------------------------- #

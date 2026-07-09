@@ -196,7 +196,7 @@ The instructor's **Time-Consistent Credit (TIC)** model is the eventual method:
   cannot, since their PDs there are all ~0.
 - Published at the World Finance Conference (2021) and NYU (2019).
 
-In this repo, `credit.TICModel` is a **stub** that already conforms to the
+In this repo, `signal_construction.credit.TICModel` is a **stub** that already conforms to the
 `CreditModel` interface; the formula is filled in once it's covered in class.
 
 ---
@@ -212,4 +212,3 @@ In this repo, `credit.TICModel` is a **stub** that already conforms to the
 | `ShortTermDebt`, `LongTermDebt` | From the balance sheet, as-of each day |
 | `DefaultPointDebt_D` | `D` = 100% short-term + 50% long-term |
 | `RiskFree_R` | 1-Year Treasury as a decimal (e.g. 0.0394) |
-| `Horizon_T` | Credit horizon in years (1.0) |

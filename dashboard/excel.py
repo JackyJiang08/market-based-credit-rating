@@ -16,10 +16,14 @@ import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from . import config, lineage
-from .company import CompanyData
+from data_cleaning.company import CompanyData
+from raw_data_architecture import config as raw_config
+from raw_data_architecture import lineage
+from signal_construction import config as signal_config
 
-LOG = logging.getLogger("mdtoolkit.excel")
+from . import config
+
+LOG = logging.getLogger("pfpa.dashboard.excel")
 
 HEADER_FILL = PatternFill("solid", fgColor="1F4E78")
 HEADER_FONT = Font(bold=True, color="FFFFFF")
@@ -100,7 +104,7 @@ def write_company_workbook(data: CompanyData, years: int) -> str:
                 if not data.panel.empty and data.panel["DefaultPointDebt_D"].notna().any() else None,
                 _pct(data.panel["RiskFree_R"].dropna().iloc[-1])
                 if not data.panel.empty and data.panel["RiskFree_R"].notna().any() else "N/A",
-                config.HORIZON_YEARS,
+                signal_config.HORIZON_YEARS,
                 _pct(_equity_vol(data)),
                 c.asset_value, _pct(c.asset_vol),
                 round(c.distance_to_default, 4) if c.distance_to_default is not None else None,
@@ -143,7 +147,7 @@ def _equity_vol(data: CompanyData) -> Optional[float]:
     rets = data.panel["EquityLogReturn"].dropna()
     if len(rets) < 6:
         return None
-    return float(rets.std() * np.sqrt(config.TRADING_DAYS_PER_YEAR))
+    return float(rets.std() * np.sqrt(signal_config.TRADING_DAYS_PER_YEAR))
 
 
 # --------------------------------------------------------------------------- #
@@ -199,7 +203,7 @@ def write_master_workbook(companies: list[CompanyData], rates: pd.DataFrame) -> 
 
     rates_display = pd.DataFrame()
     if rates is not None and not rates.empty:
-        rates_display = rates.rename(columns=config.FRED_SERIES)
+        rates_display = rates.rename(columns=raw_config.FRED_SERIES)
 
     with pd.ExcelWriter(path, engine="openpyxl") as writer:
         summary.to_excel(writer, sheet_name="Company Summary", index=False)

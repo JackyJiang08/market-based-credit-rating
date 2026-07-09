@@ -16,7 +16,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from . import config, transforms
+from . import transforms
 
 
 def build_panel(prices: pd.DataFrame,
@@ -33,7 +33,6 @@ def build_panel(prices: pd.DataFrame,
         ShortTermDebt, LongTermDebt
         DefaultPointDebt_D       : 1.0*ST + 0.5*LT  (model strike)
         RiskFree_R               : 1Y Treasury as a decimal (e.g. 0.0498)
-        Horizon_T                : credit horizon in years (1.0)
     """
     if prices is None or prices.empty:
         return pd.DataFrame()
@@ -82,5 +81,4 @@ def build_panel(prices: pd.DataFrame,
     else:
         panel["RiskFree_R"] = np.nan
 
-    panel["Horizon_T"] = config.HORIZON_YEARS
     return panel

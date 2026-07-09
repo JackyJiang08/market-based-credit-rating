@@ -1,6 +1,8 @@
-"""Orchestration: fetch -> transform -> align -> model -> write.
+"""Compatibility orchestration: fetch -> transform -> align -> model -> write.
 
-`run(RunConfig)` is the single entry point used by the CLI and the launcher.
+The active project scope currently ends after alignment. Model and publishing
+calls remain here temporarily so the existing CLI keeps working while the
+four-layer workflow is separated into stage-specific commands.
 """
 
 from __future__ import annotations
@@ -15,16 +17,19 @@ from typing import Optional, Sequence
 import pandas as pd
 import yfinance as yf
 
-from . import alignment, config, credit, excel, longtable, sources, transforms
+from raw_data_architecture import config as raw_config
+from raw_data_architecture import sources
+
+from . import alignment, transforms
 from .company import CompanyData
 
-LOG = logging.getLogger("mdtoolkit.pipeline")
+LOG = logging.getLogger("pfpa.workflow")
 
 
 @dataclass
 class RunConfig:
     tickers: Sequence[str]
-    years: int = config.DEFAULT_YEARS
+    years: int = raw_config.DEFAULT_YEARS
     include_rates: bool = True
     run_credit_model: bool = True
 
@@ -99,13 +104,17 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
 
     # --- date-aligned model panel ---
     rf_series = None
-    if rates is not None and not rates.empty and config.RISK_FREE_SERIES in rates:
-        rf_series = rates.set_index("Date")[config.RISK_FREE_SERIES]
+    if rates is not None and not rates.empty and raw_config.RISK_FREE_SERIES in rates:
+        rf_series = rates.set_index("Date")[raw_config.RISK_FREE_SERIES]
     data.panel = alignment.build_panel(
         data.prices, data.reference_shares, balance_for_debt, rf_series)
 
     # --- credit model ---
     if cfg.run_credit_model and not data.panel.empty:
+        # Layer 3 is a retained prototype. Import it only when explicitly used
+        # so Layer 1/2 tooling and CLI help do not require modelling packages.
+        from signal_construction import credit
+
         inputs = credit.build_inputs(ticker, data.panel)
         if inputs is not None:
             try:
@@ -123,7 +132,13 @@ def _fmt(x: Optional[float]) -> str:
 
 
 def run(cfg: RunConfig) -> list[CompanyData]:
-    os.makedirs(config.OUTPUT_DIR, exist_ok=True)
+    # Layer 4 remains a compatibility publisher while only Layers 1/2 are
+    # active. Keeping this import local prevents a dashboard dependency from
+    # becoming part of the cleaning package's import contract.
+    from dashboard import config as dashboard_config
+    from dashboard import excel, longtable
+
+    os.makedirs(dashboard_config.OUTPUT_DIR, exist_ok=True)
     LOG.info("Universe: %s | window: %dy | rates: %s | credit-model: %s",
              ", ".join(cfg.tickers), cfg.years, cfg.include_rates, cfg.run_credit_model)
 
@@ -139,12 +154,12 @@ def run(cfg: RunConfig) -> list[CompanyData]:
         except Exception as exc:  # noqa: BLE001
             LOG.error("Ticker %s aborted: %s", ticker, exc)
         if i < len(cfg.tickers) - 1:
-            time.sleep(config.INTER_TICKER_DELAY_SECONDS)
+            time.sleep(raw_config.INTER_TICKER_DELAY_SECONDS)
 
     if companies:
         excel.write_master_workbook(companies, rates)
         longtable.write_long_table(longtable.build_long_table(companies, rates))
 
     LOG.info("Done. %d/%d companies succeeded. Output: %s",
-             len(companies), len(cfg.tickers), config.OUTPUT_DIR)
+             len(companies), len(cfg.tickers), dashboard_config.OUTPUT_DIR)
     return companies

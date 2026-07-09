@@ -1,7 +1,10 @@
 # Generated data artifacts (regenerate by running the pipeline)
-output/*.xlsx
-output/*.csv
-output/*.parquet
+raw_data_architecture/data/*
+!raw_data_architecture/data/.gitkeep
+data_cleaning/data/*
+!data_cleaning/data/.gitkeep
+dashboard/output/*
+!dashboard/output/.gitkeep
 
 # macOS
 .DS_Store

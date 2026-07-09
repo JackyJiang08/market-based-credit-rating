@@ -19,7 +19,7 @@ import yfinance as yf
 
 from . import config
 
-LOG = logging.getLogger("mdtoolkit.sources")
+LOG = logging.getLogger("pfpa.raw_data")
 
 
 # --------------------------------------------------------------------------- #
