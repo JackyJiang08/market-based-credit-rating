@@ -6,6 +6,15 @@ data_cleaning/data/*
 dashboard/output/*
 !dashboard/output/.gitkeep
 
+# Instructor intellectual property — LOCAL ONLY, never commit (see README IP notice)
+# The TiC paper, the market-based deck, and the TiC->TTC conversion workbook,
+# plus any lookup tables derived from them, stay out of version control.
+local/
+docs/*.pdf
+*.xlsx
+outputs/*
+!outputs/.gitkeep
+
 # macOS
 .DS_Store
 
@@ -16,3 +25,6 @@ __pycache__/
 venv/
 env/
 .ipynb_checkpoints/
+
+# Stray legacy output dir (branch uses dashboard/output/)
+/output/

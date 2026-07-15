@@ -34,6 +34,20 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-15 - Phase 0: gap analysis vs TiC methodology
+
+- **Scope:** documentation + IP handling; no code behavior change.
+- **Summary:** added `docs/GAP_ANALYSIS.md` mapping the TiC paper and the
+  Market-Based Credit Risk deck (KMV/EM/first-passage) to current branch code,
+  with a per-concept status table. Recorded resolved conventions: 1-year
+  risk-free (DGS1), η_A from EM for DD, ~252-day EM window, public repo with
+  instructor IP git-ignored.
+- **IP:** the TiC paper, the market-based deck, and `TiC_TTC_conversion.xlsx`
+  are kept under `local/` and git-ignored; lookup tables will be local-only.
+- **Validation:** confirmed IP artifacts are ignored (`git check-ignore`);
+  removed a stray legacy `output/` dir from staging.
+- **Follow-ups:** Phase 1 (data-layer completion + no-look-ahead canary test).
+
 ### 2026-07-09 - Repository architecture unification
 
 - **Scope:** repository structure, documentation, and dependency ownership.
