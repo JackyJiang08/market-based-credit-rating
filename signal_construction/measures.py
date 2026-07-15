@@ -1,0 +1,100 @@
+"""TiC / first-passage credit measures derived from the EM asset estimates.
+
+All formulas are the first-passage (KMV) results of the TiC paper. Inputs are
+the EM outputs ``(sigma_A, A, eta_A)`` and the default-point debt ``D`` on the
+last trading day, with horizon ``T = 1`` year.
+
+Paper references:
+  - mu, CCM (first-passage driving factors) ......... Eq. (11)
+  - TiC = CCM/mu = sigma_A^2 / ln^2(A/D), RiskScore=100*TiC ... Eq. (12), (5)
+  - Default peak lambda, CCM = lambda^(-2/3) - 1 .... Eq. (3), (6)
+  - DD, EDF = Phi(-DD) .............................. Eq. (14)
+  - PIT PD (inverse-Gaussian first-hitting) ......... Eq. (13)
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+
+from scipy.stats import norm
+
+
+@dataclass
+class CreditMeasures:
+    sigma_A: float
+    asset: float          # A on the last trading day
+    debt: float           # default-point debt D
+    eta_A: float          # asset return (drift)
+    ln_A_D: float         # ln(A/D)
+    drift: float          # eta_A - sigma_A^2/2  (signed)
+    mu: float             # Life Expectancy E[tau]        (Eq. 11)
+    ccm: float            # Credit Corrosion Measure       (Eq. 11)
+    tic: float            # Time-Consistent rating (Q=1)   (Eq. 12)
+    risk_score: float     # 100 * TiC                      (Eq. 5)
+    lam: float            # default peak lambda            (Eq. 3/6)
+    dd: float             # distance to default            (Eq. 14)
+    edf: float            # Phi(-DD)                        (Eq. 14)
+    pit_pd: float         # 1-year PIT PD                  (Eq. 13)
+
+
+def pit_pd_first_hitting(mu: float, ccm: float, horizon: float = 1.0) -> float:
+    """1-year Point-in-Time PD from the inverse-Gaussian first-hitting time.
+
+    Paper Eq. (13):
+        PD_T = Phi( a*(sqrt(T/mu) - sqrt(mu/T)) )
+             + exp(2/CCM) * Phi( -a*(sqrt(T/mu) + sqrt(mu/T)) ),  a = sqrt(1/CCM)
+
+    Verified against paper Table 13 (CCM=1.5: mu=1 -> 69.40%, mu=5 -> 12.60%)
+    and Table 14 (CCM=5: mu=1 -> 77.70%).
+    """
+    if mu <= 0 or ccm <= 0:
+        return float("nan")
+    a = math.sqrt(1.0 / ccm)
+    s_t_mu = math.sqrt(horizon / mu)
+    s_mu_t = math.sqrt(mu / horizon)
+    term1 = norm.cdf(a * (s_t_mu - s_mu_t))
+    # exp(2/CCM) can overflow for tiny CCM; the paired Phi underflows faster, so
+    # compute in log space and guard.
+    try:
+        term2 = math.exp(2.0 / ccm) * norm.cdf(-a * (s_t_mu + s_mu_t))
+    except OverflowError:
+        term2 = 0.0
+    pd = term1 + term2
+    return float(min(max(pd, 0.0), 1.0))
+
+
+def compute(sigma_A: float, asset: float, debt: float, eta_A: float,
+            horizon: float = 1.0) -> CreditMeasures:
+    """Compute all first-passage credit measures for one company."""
+    if not (asset > debt > 0):
+        raise ValueError(f"require A ({asset:.3g}) > D ({debt:.3g}) > 0")
+
+    ln_ad = math.log(asset / debt)
+    drift = eta_A - 0.5 * sigma_A ** 2          # signed (for DD)
+    abs_drift = abs(drift)                       # |eta - sigma^2/2| (for mu, CCM)
+
+    # Life expectancy and corrosion (Eq. 11). Guard the near-zero-drift corner.
+    if abs_drift < 1e-9:
+        mu = float("inf")
+        ccm = float("inf")
+    else:
+        mu = ln_ad / abs_drift
+        ccm = sigma_A ** 2 / (ln_ad * abs_drift)
+
+    # TiC rating is eta-independent (Q=1): sigma_A^2 / ln^2(A/D) (Eq. 12).
+    tic = sigma_A ** 2 / ln_ad ** 2
+    risk_score = 100.0 * tic
+    lam = (ccm + 1.0) ** (-1.5) if math.isfinite(ccm) else 0.0  # Eq. (6)
+
+    # Distance to default / EDF (Eq. 14), using the signed drift.
+    sqrtT = math.sqrt(horizon)
+    dd = (ln_ad + drift * horizon) / (sigma_A * sqrtT)
+    edf = float(norm.cdf(-dd))
+
+    pit = pit_pd_first_hitting(mu, ccm, horizon)
+
+    return CreditMeasures(
+        sigma_A=sigma_A, asset=asset, debt=debt, eta_A=eta_A, ln_A_D=ln_ad,
+        drift=drift, mu=mu, ccm=ccm, tic=tic, risk_score=risk_score, lam=lam,
+        dd=dd, edf=edf, pit_pd=pit)

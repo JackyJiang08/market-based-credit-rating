@@ -34,6 +34,25 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-15 - Phase 3: TiC / first-passage credit measures
+
+- **Scope:** Layer 3 (signal_construction); adds measures + tests.
+- **Summary:**
+  - `signal_construction/measures.py`: from EM outputs (sigma_A, A, eta_A) and
+    debt D, computes mu and CCM (Eq. 11), TiC = sigma_A^2/ln^2(A/D) and
+    RiskScore = 100*TiC (Eq. 12/5), default peak lambda (Eq. 3/6), DD and
+    EDF = Phi(-DD) (Eq. 14), and PIT PD via the inverse-Gaussian first-hitting
+    formula (Eq. 13).
+  - `workflow`: computes measures after EM; logs RiskScore/CCM/mu/DD/EDF/PIT.
+  - `CompanyData`: measure fields.
+  - `tests/test_measures.py`: PIT PD matched to paper Tables 13-14
+    (CCM=1.5 mu=1 -> 69.40%, CCM=5 mu=1 -> 77.70%, ...); DD/TiC/lambda hand
+    values; TiC verified eta-independent.
+- **Validation:** `pytest` 18/18 passing. Live 10-company RiskScores rank
+  sensibly vs the paper scale (ORCL 10.0 riskiest; COST/KO/WMT < 1). Confirmed
+  the eta instability shows up in mu/CCM/PIT but not in RiskScore.
+- **Follow-ups:** Phase 4 (PIT -> TTC -> S&P via local lookup tables + no-arb).
+
 ### 2026-07-15 - Phase 2: EM asset-value/volatility estimation
 
 - **Scope:** Layer 3 (signal_construction); adds EM estimator + tests.

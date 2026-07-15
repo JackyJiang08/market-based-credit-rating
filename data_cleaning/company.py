@@ -53,5 +53,15 @@ class CompanyData:
     em_converged: Optional[bool] = None
     em_warnings: list = field(default_factory=list)
 
+    # Derived first-passage credit measures (Layer 3)
+    mu: Optional[float] = None            # life expectancy E[tau]
+    ccm: Optional[float] = None           # credit corrosion measure
+    tic: Optional[float] = None           # time-consistent rating (Q=1)
+    risk_score: Optional[float] = None    # 100 * TiC
+    lam: Optional[float] = None           # default peak lambda
+    dd: Optional[float] = None            # distance to default
+    edf: Optional[float] = None           # Phi(-DD)
+    pit_pd: Optional[float] = None        # 1-year PIT PD
+
     # Credit assessment
     credit: Optional["CreditEstimate"] = None

@@ -113,7 +113,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     if cfg.run_credit_model and not data.panel.empty:
         # Import the modelling layer only when used, so Layer 1/2 tooling and
         # CLI help do not require SciPy.
-        from signal_construction import config as sig_config, em
+        from signal_construction import config as sig_config, em, measures
 
         window = data.panel.tail(sig_config.EM_WINDOW_DAYS)
         try:
@@ -127,8 +127,16 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             data.em_warnings = res.warnings
             LOG.info("  EM: sigma_A=%.1f%%  eta_A=%.1f%%  A=%.4g  iters=%d",
                      res.sigma_A * 100, res.eta_A * 100, res.asset_last, res.n_iter)
-        except em.EMError as exc:
-            LOG.warning("  EM failed: %s", exc)
+
+            # Derived first-passage credit measures (Eq. 11-14).
+            m = measures.compute(res.sigma_A, res.asset_last, res.debt_last, res.eta_A)
+            data.mu, data.ccm, data.tic, data.risk_score = m.mu, m.ccm, m.tic, m.risk_score
+            data.lam, data.dd, data.edf, data.pit_pd = m.lam, m.dd, m.edf, m.pit_pd
+            LOG.info("  measures: RiskScore=%.2f  CCM=%.3f  mu=%.1f  DD=%.2f  "
+                     "EDF=%.4f  PIT_PD=%.4f",
+                     m.risk_score, m.ccm, m.mu, m.dd, m.edf, m.pit_pd)
+        except (em.EMError, ValueError) as exc:
+            LOG.warning("  EM/measures failed: %s", exc)
 
     # Persist raw + cleaned datasets per company (git-ignored data trees).
     try:
