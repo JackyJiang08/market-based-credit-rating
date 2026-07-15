@@ -34,6 +34,27 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-15 - Phase 1: data-layer completion
+
+- **Scope:** Layers 1-2 data acquisition/cleaning; adds tests.
+- **Summary:**
+  - `sources.resolve_ticker`: name/symbol -> ticker via Yahoo search, preferring
+    exact/substring name match and primary listings; raises
+    `TickerResolutionError` on genuine ambiguity (e.g. Intuit vs Intuitive).
+  - `alignment.build_panel`: dividend add-back (deck slide 61) so equity is a
+    total-return series (`DivAddBackClose`, `MarketCap_E`, `RawMarketCap`);
+    restored `Horizon_T`.
+  - `data_cleaning/persistence.py`: per-company raw + aligned datasets written to
+    the git-ignored `raw_data_architecture/data/{TICKER}/` and
+    `data_cleaning/data/{TICKER}/` trees as CSV + XLSX.
+  - `workflow.run`: resolves inputs up front (skips unresolvable with a message)
+    and persists each company.
+  - `tests/test_no_lookahead.py`: offline canary suite proving no look-ahead in
+    debt/rate as-of joins and the dividend add-back.
+- **Validation:** `pytest` 4/4 passing; live KO run persists raw+clean data and
+  writes the workbook; resolver verified on tickers and names.
+- **Follow-ups:** Phase 2 (EM: joint sigma_A + eta_A via bisection g-inverse).
+
 ### 2026-07-15 - Phase 0: gap analysis vs TiC methodology
 
 - **Scope:** documentation + IP handling; no code behavior change.

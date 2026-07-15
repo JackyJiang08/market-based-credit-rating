@@ -49,6 +49,79 @@ def with_retry(label: str) -> Callable:
 # --------------------------------------------------------------------------- #
 # Yahoo Finance (equities)
 # --------------------------------------------------------------------------- #
+class TickerResolutionError(ValueError):
+    """Raised when a company name / query cannot be resolved to one ticker."""
+
+
+def resolve_ticker(query: str) -> str:
+    """Resolve a ticker symbol or company name to a single Yahoo ticker.
+
+    A plain symbol is validated and returned as-is. A company name is resolved
+    via Yahoo search, preferring an exact/space-insensitive name match and
+    otherwise the top equity quote. Ambiguity or no match raises
+    ``TickerResolutionError`` with an actionable message.
+    """
+    q = (query or "").strip()
+    if not q:
+        raise TickerResolutionError("Empty ticker/company query.")
+
+    # Treat a short ticker-like token (no spaces, <=5 chars, optional .-suffix)
+    # as a symbol. Keeping this tight avoids mis-firing on words like "Costco".
+    candidate = q.upper()
+    looks_like_symbol = (
+        " " not in q and len(candidate) <= 5
+        and all(c.isalnum() or c in ".-" for c in candidate)
+    )
+    if looks_like_symbol:
+        try:
+            info = yf.Ticker(candidate).info or {}
+            if info.get("symbol") or info.get("shortName") or info.get("regularMarketPrice"):
+                return str(info.get("symbol", candidate)).upper()
+        except Exception:  # noqa: BLE001 - fall through to search
+            pass
+
+    try:
+        quotes = getattr(yf.Search(q, max_results=10), "quotes", []) or []
+    except Exception as exc:  # noqa: BLE001
+        raise TickerResolutionError(f"Search failed for '{query}': {exc}") from exc
+
+    equities = [x for x in quotes if x.get("quoteType") == "EQUITY" and x.get("symbol")]
+    if not equities:
+        raise TickerResolutionError(
+            f"No equity match for '{query}'. Try the exact ticker symbol.")
+
+    def _norm(s: str) -> str:
+        return "".join(str(s).lower().split())
+
+    def _name(x: dict) -> str:
+        return _norm(x.get("shortname") or x.get("longname") or "")
+
+    nq = _norm(q)
+
+    # Prefer an exact normalized name match; otherwise every equity whose name
+    # contains the query. Resolve only when a single distinct symbol remains --
+    # never silently return a wrong ticker (e.g. "Intuit" vs "Intuitive Surgical").
+    exact = {str(x["symbol"]).upper() for x in equities if _name(x) == nq}
+    contains = {str(x["symbol"]).upper() for x in equities if nq in _name(x)}
+    hits = exact or contains
+
+    # Prefer primary listings (plain symbols) over foreign cross-listings /
+    # CEDEARs, which carry an exchange suffix like ".BA" / ".V" / ".F".
+    primary = {s for s in hits if "." not in s}
+    resolved_set = primary or hits
+
+    if len(resolved_set) == 1:
+        return next(iter(resolved_set))
+    if len(resolved_set) > 1:
+        listing = ", ".join(
+            f"{str(x['symbol']).upper()} ({x.get('shortname') or x.get('longname')})"
+            for x in equities if str(x["symbol"]).upper() in resolved_set)
+        raise TickerResolutionError(
+            f"'{query}' is ambiguous ({listing}). Use the exact ticker symbol.")
+    raise TickerResolutionError(
+        f"No confident equity match for '{query}'. Use the exact ticker symbol.")
+
+
 @with_retry("Ticker.info")
 def get_info(tk: yf.Ticker) -> dict:
     return tk.info or {}

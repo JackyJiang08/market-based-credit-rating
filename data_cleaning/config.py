@@ -35,5 +35,10 @@ BALANCE_SHEET_MAP: dict[str, tuple[str, ...]] = {
 SHORT_TERM_DEBT_WEIGHT = 1.0
 LONG_TERM_DEBT_WEIGHT = 0.5
 
+# Credit horizon in years, tied to the 1-year risk-free tenor (DGS1) used in
+# alignment. Owned by the cleaning layer that builds the daily panel.
+HORIZON_YEARS = 1.0
+
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLEAN_DATA_DIR = os.path.join(PROJECT_ROOT, "data_cleaning", "data")
+RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "raw_data_architecture", "data")

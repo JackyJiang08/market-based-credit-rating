@@ -16,7 +16,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from . import transforms
+from . import config, transforms
 
 
 def build_panel(prices: pd.DataFrame,
@@ -27,12 +27,21 @@ def build_panel(prices: pd.DataFrame,
 
     Columns
         Close, AdjClose          : raw and dividend/split-adjusted close
+        Dividends                : per-share cash dividend on ex-date (0 otherwise)
+        DivAddBackClose          : Close + cumulative dividends added back
+                                   (deck slide 61: "add back dividends to stock
+                                   prices" so equity reflects total return)
         Shares                   : constant reference share count
-        MarketCap_E              : equity value E = Shares x Close
-        EquityLogReturn          : ln(AdjClose_t / AdjClose_{t-1})
+        MarketCap_E              : equity value E = Shares x DivAddBackClose
+        RawMarketCap             : Shares x Close (actual market cap, reference)
+        EquityLogReturn          : ln(MarketCap_E_t / MarketCap_E_{t-1})
         ShortTermDebt, LongTermDebt
-        DefaultPointDebt_D       : 1.0*ST + 0.5*LT  (model strike)
+        DefaultPointDebt_D       : 1.0*ST + 0.5*LT  (model strike D)
         RiskFree_R               : 1Y Treasury as a decimal (e.g. 0.0498)
+        Horizon_T                : credit horizon in years (1.0)
+
+    All statement- and rate-derived columns use as-of (backward) joins so a row
+    on date t only ever sees data with observation date <= t (no look-ahead).
     """
     if prices is None or prices.empty:
         return pd.DataFrame()
@@ -42,13 +51,25 @@ def build_panel(prices: pd.DataFrame,
     panel["Close"] = prices["Close"]
     panel["AdjClose"] = prices.get("Adj Close", prices["Close"])
 
-    # Equity value E using the constant one-day share count.
-    panel["Shares"] = reference_shares
-    panel["MarketCap_E"] = (panel["Shares"] * panel["Close"]
-                            if reference_shares else np.nan)
+    # Dividend add-back (deck slide 61): add paid dividends back into the price
+    # so the equity value series is a total-return series with no artificial
+    # ex-dividend drops. Cumulative additive add-back over the window.
+    panel["Dividends"] = prices.get("Dividends", 0.0)
+    panel["Dividends"] = panel["Dividends"].fillna(0.0)
+    panel["DivAddBackClose"] = panel["Close"] + panel["Dividends"].cumsum()
 
-    # Equity returns from the adjusted close (captures total return).
-    panel["EquityLogReturn"] = np.log(panel["AdjClose"] / panel["AdjClose"].shift(1))
+    # Equity value E using the constant one-day share count. E feeds the KMV/EM
+    # option inversion, so it uses the dividend-added-back price per the deck.
+    panel["Shares"] = reference_shares
+    if reference_shares:
+        panel["MarketCap_E"] = panel["Shares"] * panel["DivAddBackClose"]
+        panel["RawMarketCap"] = panel["Shares"] * panel["Close"]
+    else:
+        panel["MarketCap_E"] = np.nan
+        panel["RawMarketCap"] = np.nan
+
+    # Total-return equity log return (used for asset-volatility estimation).
+    panel["EquityLogReturn"] = np.log(panel["MarketCap_E"] / panel["MarketCap_E"].shift(1))
 
     # --- as-of join the quarterly debt onto trading days ---
     term = transforms.split_term_debt(balance)
@@ -81,4 +102,5 @@ def build_panel(prices: pd.DataFrame,
     else:
         panel["RiskFree_R"] = np.nan
 
+    panel["Horizon_T"] = config.HORIZON_YEARS
     return panel

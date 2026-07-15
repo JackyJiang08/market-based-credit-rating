@@ -20,7 +20,7 @@ import yfinance as yf
 from raw_data_architecture import config as raw_config
 from raw_data_architecture import sources
 
-from . import alignment, transforms
+from . import alignment, persistence, transforms
 from .company import CompanyData
 
 LOG = logging.getLogger("pfpa.workflow")
@@ -124,6 +124,12 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
                          _fmt(data.credit.distance_to_default))
             except Exception as exc:  # noqa: BLE001
                 LOG.warning("  credit model failed: %s", exc)
+
+    # Persist raw + cleaned datasets per company (git-ignored data trees).
+    try:
+        persistence.save_company(data)
+    except Exception as exc:  # noqa: BLE001
+        LOG.warning("  persistence failed: %s", exc)
     return data
 
 
@@ -142,10 +148,22 @@ def run(cfg: RunConfig) -> list[CompanyData]:
     LOG.info("Universe: %s | window: %dy | rates: %s | credit-model: %s",
              ", ".join(cfg.tickers), cfg.years, cfg.include_rates, cfg.run_credit_model)
 
+    # Resolve any company-name inputs to tickers up front; skip unresolvable
+    # ones with an actionable message rather than aborting the whole run.
+    resolved: list[str] = []
+    for raw_query in cfg.tickers:
+        try:
+            resolved.append(sources.resolve_ticker(raw_query))
+        except sources.TickerResolutionError as exc:
+            LOG.error("Skipping '%s': %s", raw_query, exc)
+    if not resolved:
+        LOG.error("No resolvable tickers/companies in %s", list(cfg.tickers))
+        return []
+
     rates = sources.fetch_rates(cfg.years) if cfg.include_rates else pd.DataFrame()
 
     companies: list[CompanyData] = []
-    for i, ticker in enumerate(cfg.tickers):
+    for i, ticker in enumerate(resolved):
         try:
             data = fetch_company(ticker, cfg, rates)
             if data is not None:
@@ -153,7 +171,7 @@ def run(cfg: RunConfig) -> list[CompanyData]:
                 companies.append(data)
         except Exception as exc:  # noqa: BLE001
             LOG.error("Ticker %s aborted: %s", ticker, exc)
-        if i < len(cfg.tickers) - 1:
+        if i < len(resolved) - 1:
             time.sleep(raw_config.INTER_TICKER_DELAY_SECONDS)
 
     if companies:
@@ -161,5 +179,5 @@ def run(cfg: RunConfig) -> list[CompanyData]:
         longtable.write_long_table(longtable.build_long_table(companies, rates))
 
     LOG.info("Done. %d/%d companies succeeded. Output: %s",
-             len(companies), len(cfg.tickers), dashboard_config.OUTPUT_DIR)
+             len(companies), len(resolved), dashboard_config.OUTPUT_DIR)
     return companies
