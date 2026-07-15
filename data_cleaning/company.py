@@ -44,5 +44,14 @@ class CompanyData:
     a_balance: pd.DataFrame = field(default_factory=pd.DataFrame)
     a_cashflow: pd.DataFrame = field(default_factory=pd.DataFrame)
 
+    # EM asset-value estimation (Layer 3 outputs; plain floats to keep this
+    # cleaning-layer container free of a modelling-package dependency).
+    sigma_A: Optional[float] = None       # annualized asset volatility
+    eta_A: Optional[float] = None         # annualized asset return (drift)
+    asset_value: Optional[float] = None   # A on the last trading day
+    em_iters: Optional[int] = None
+    em_converged: Optional[bool] = None
+    em_warnings: list = field(default_factory=list)
+
     # Credit assessment
     credit: Optional["CreditEstimate"] = None

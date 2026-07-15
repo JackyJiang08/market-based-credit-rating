@@ -109,21 +109,26 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     data.panel = alignment.build_panel(
         data.prices, data.reference_shares, balance_for_debt, rf_series)
 
-    # --- credit model ---
+    # --- EM asset-value estimation (Layer 3) ---
     if cfg.run_credit_model and not data.panel.empty:
-        # Layer 3 is a retained prototype. Import it only when explicitly used
-        # so Layer 1/2 tooling and CLI help do not require modelling packages.
-        from signal_construction import credit
+        # Import the modelling layer only when used, so Layer 1/2 tooling and
+        # CLI help do not require SciPy.
+        from signal_construction import config as sig_config, em
 
-        inputs = credit.build_inputs(ticker, data.panel)
-        if inputs is not None:
-            try:
-                data.credit = credit.MertonKMVModel().estimate(inputs)
-                LOG.info("  credit: PD=%s, DD=%s",
-                         _fmt(data.credit.default_probability),
-                         _fmt(data.credit.distance_to_default))
-            except Exception as exc:  # noqa: BLE001
-                LOG.warning("  credit model failed: %s", exc)
+        window = data.panel.tail(sig_config.EM_WINDOW_DAYS)
+        try:
+            res = em.estimate(window["MarketCap_E"], window["DefaultPointDebt_D"],
+                              window["RiskFree_R"])
+            data.sigma_A = res.sigma_A
+            data.eta_A = res.eta_A
+            data.asset_value = res.asset_last
+            data.em_iters = res.n_iter
+            data.em_converged = res.converged
+            data.em_warnings = res.warnings
+            LOG.info("  EM: sigma_A=%.1f%%  eta_A=%.1f%%  A=%.4g  iters=%d",
+                     res.sigma_A * 100, res.eta_A * 100, res.asset_last, res.n_iter)
+        except em.EMError as exc:
+            LOG.warning("  EM failed: %s", exc)
 
     # Persist raw + cleaned datasets per company (git-ignored data trees).
     try:
@@ -135,6 +140,19 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
 
 def _fmt(x: Optional[float]) -> str:
     return f"{x:.4f}" if x is not None and pd.notna(x) else "n/a"
+
+
+def _log_vol_comparison(companies: list[CompanyData]) -> None:
+    """Log asset volatility by sector -- a cross-check that riskier/tech names
+    carry higher sigma_A than defensive/financial names (deck intuition)."""
+    rows = [(c.ticker, c.sector or "?", c.sigma_A)
+            for c in companies if c.sigma_A is not None]
+    if not rows:
+        return
+    rows.sort(key=lambda x: x[2], reverse=True)
+    LOG.info("Asset-volatility cross-check (high -> low):")
+    for ticker, sector, sigma in rows:
+        LOG.info("    %-6s %-22s sigma_A=%5.1f%%", ticker, sector[:22], sigma * 100)
 
 
 def run(cfg: RunConfig) -> list[CompanyData]:
@@ -175,6 +193,7 @@ def run(cfg: RunConfig) -> list[CompanyData]:
             time.sleep(raw_config.INTER_TICKER_DELAY_SECONDS)
 
     if companies:
+        _log_vol_comparison(companies)
         excel.write_master_workbook(companies, rates)
         longtable.write_long_table(longtable.build_long_table(companies, rates))
 

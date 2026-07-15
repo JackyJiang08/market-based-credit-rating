@@ -34,6 +34,26 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-15 - Phase 2: EM asset-value/volatility estimation
+
+- **Scope:** Layer 3 (signal_construction); adds EM estimator + tests.
+- **Summary:**
+  - `signal_construction/em.py`: Duan-style EM. E-step inverts the Black-Scholes
+    equity/option relation by vectorized bisection to get the daily asset path
+    `A_t` given `sigma_A`; M-step recomputes `sigma_A` from asset log-returns and
+    estimates the real-world drift `eta_A` simultaneously. Hard invariants
+    (`A > D`, `A > E`) raise; soft checks (sigma range, slow convergence) warn.
+  - `config`: trading days 252 -> 250 (deck), EM window 252d, max-iter 20, tol.
+  - `CompanyData`: EM outputs (`sigma_A`, `eta_A`, `asset_value`, iters).
+  - `workflow`: runs EM on the trailing window (replaces the old Merton-baseline
+    call) and logs a sector asset-volatility cross-check.
+  - `tests/test_em.py`: recovers a known sigma_A from a synthetic GBM path;
+    enforces `A>D`/`A>E`; short-input guard.
+- **Validation:** `pytest` 8/8 passing. Live 10-company batch: all converge in
+  2-3 iters; sigma_A ranks Technology (DELL 56%, ORCL 55%, INTU 45%) above
+  defensives/financials (KO 15.5%, T 15.6%, PNC 16.8%) -- the expected ordering.
+- **Follow-ups:** Phase 3 (RiskScore/CCM/mu/lambda/DD/EDF/PIT-PD from EM outputs).
+
 ### 2026-07-15 - Phase 1: data-layer completion
 
 - **Scope:** Layers 1-2 data acquisition/cleaning; adds tests.
