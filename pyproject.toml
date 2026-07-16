@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "market-data-toolkit"
-version = "0.2.0"
-description = "Four-layer PFPA market-data workflow for acquisition, cleaning, signals, and reporting."
+version = "0.3.0"
+description = "Market-based KMV/TiC credit-rating pipeline for public companies (EM asset estimation, PIT/TTC PD, S&P-equivalent rating)."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { file = "docs/LICENSE" }
+license = { file = "LICENSE" }
 authors = [{ name = "JackyJiang08" }]
 dependencies = [
     "yfinance>=0.2.40",

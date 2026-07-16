@@ -86,35 +86,30 @@ def write_company_workbook(data: CompanyData, years: int) -> str:
         ],
     })
 
-    credit_df = pd.DataFrame()
-    if data.credit is not None:
-        c = data.credit
-        credit_df = pd.DataFrame({
+    rating_df = pd.DataFrame()
+    if data.sigma_A is not None:
+        rating_df = pd.DataFrame({
             "Field": [
-                "Model", "Equity E (latest)", "Default-point Debt D",
-                "Risk-free r (1Y Treasury)", "Horizon T (years)",
-                "Equity Volatility (annual)",
-                "Asset Value V0", "Asset Volatility (annual)",
-                "Distance to Default", "Default Probability (PD)", "Note",
+                "Equity E (latest)", "Default-point Debt D", "Risk-free r (1Y)",
+                "Horizon T (years)", "Asset Volatility sigma_A", "Asset Value A",
+                "Asset Return eta_A", "CCM", "mu (life expectancy)", "TiC",
+                "RiskScore", "Distance to Default", "EDF", "PIT PD", "TTC PD",
+                "S&P Rating", "Outlook (PIT - TTC)", "EM iters / converged",
             ],
             "Value": [
-                c.model,
-                data.panel["MarketCap_E"].dropna().iloc[-1] if not data.panel.empty else None,
-                data.panel["DefaultPointDebt_D"].dropna().iloc[-1]
-                if not data.panel.empty and data.panel["DefaultPointDebt_D"].notna().any() else None,
-                _pct(data.panel["RiskFree_R"].dropna().iloc[-1])
-                if not data.panel.empty and data.panel["RiskFree_R"].notna().any() else "N/A",
-                signal_config.HORIZON_YEARS,
-                _pct(_equity_vol(data)),
-                c.asset_value, _pct(c.asset_vol),
-                round(c.distance_to_default, 4) if c.distance_to_default is not None else None,
-                _pct(c.default_probability), c.note,
+                _panel_last(data, "MarketCap_E"), _panel_last(data, "DefaultPointDebt_D"),
+                _pct(_panel_last(data, "RiskFree_R")), signal_config.HORIZON_YEARS,
+                _pct(data.sigma_A), data.asset_value, _pct(data.eta_A),
+                _round(data.ccm), _round(data.mu, 2), _round(data.tic),
+                _round(data.risk_score, 2), _round(data.dd, 2), _pct(data.edf),
+                _pct(data.pit_pd), _pct(data.ttc_pd), data.sp_rating or "N/A",
+                _pct(data.outlook), f"{data.em_iters} / {data.em_converged}",
             ],
         })
 
     sheets: list[tuple[str, pd.DataFrame, bool]] = [
         ("Summary", summary, False),
-        ("Credit Inputs & Estimate", credit_df, False),
+        ("Credit Rating", rating_df, False),
         ("Aligned Panel", data.panel, True),
         ("Debt & Liabilities", data.debt_schedule, True),
         ("Price History", data.prices, True),
@@ -140,14 +135,15 @@ def write_company_workbook(data: CompanyData, years: int) -> str:
     return path
 
 
-def _equity_vol(data: CompanyData) -> Optional[float]:
-    if data.panel.empty or "EquityLogReturn" not in data.panel:
+def _panel_last(data: CompanyData, col: str) -> Optional[float]:
+    if data.panel is None or data.panel.empty or col not in data.panel:
         return None
-    import numpy as np
-    rets = data.panel["EquityLogReturn"].dropna()
-    if len(rets) < 6:
-        return None
-    return float(rets.std() * np.sqrt(signal_config.TRADING_DAYS_PER_YEAR))
+    s = data.panel[col].dropna()
+    return None if s.empty else float(s.iloc[-1])
+
+
+def _round(x: Optional[float], nd: int = 4) -> Optional[float]:
+    return round(x, nd) if x is not None and pd.notna(x) else None
 
 
 # --------------------------------------------------------------------------- #
@@ -178,28 +174,27 @@ def write_master_workbook(companies: list[CompanyData], rates: pd.DataFrame) -> 
         debt_rows.append(row)
     debt_latest = pd.DataFrame(debt_rows)
 
-    credit_rows = []
+    rating_rows = []
     for c in companies:
-        if c.credit is None:
+        if c.sigma_A is None:
             continue
-        E = c.panel["MarketCap_E"].dropna().iloc[-1] if not c.panel.empty else None
-        D = (c.panel["DefaultPointDebt_D"].dropna().iloc[-1]
-             if not c.panel.empty and c.panel["DefaultPointDebt_D"].notna().any() else None)
-        r = (c.panel["RiskFree_R"].dropna().iloc[-1]
-             if not c.panel.empty and c.panel["RiskFree_R"].notna().any() else None)
-        credit_rows.append({
+        rating_rows.append({
             "Ticker": c.ticker,
-            "Model": c.credit.model,
-            "Equity_E": E,
-            "DefaultPointDebt_D": D,
-            "RiskFree_r": r,
-            "EquityVol": _equity_vol(c),
-            "AssetValue_V0": c.credit.asset_value,
-            "AssetVol_sigmaV": c.credit.asset_vol,
-            "DistanceToDefault": c.credit.distance_to_default,
-            "DefaultProbability_PD": c.credit.default_probability,
+            "sigma_A": c.sigma_A,
+            "eta_A": c.eta_A,
+            "AssetValue_A": c.asset_value,
+            "DefaultPointDebt_D": _panel_last(c, "DefaultPointDebt_D"),
+            "CCM": c.ccm,
+            "mu": c.mu,
+            "RiskScore": c.risk_score,
+            "DD": c.dd,
+            "EDF": c.edf,
+            "PIT_PD": c.pit_pd,
+            "TTC_PD": c.ttc_pd,
+            "SP_Rating": c.sp_rating,
+            "Outlook": c.outlook,
         })
-    credit_df = pd.DataFrame(credit_rows)
+    ratings_df = pd.DataFrame(rating_rows)
 
     rates_display = pd.DataFrame()
     if rates is not None and not rates.empty:
@@ -208,9 +203,9 @@ def write_master_workbook(companies: list[CompanyData], rates: pd.DataFrame) -> 
     with pd.ExcelWriter(path, engine="openpyxl") as writer:
         summary.to_excel(writer, sheet_name="Company Summary", index=False)
         _format_sheet(writer.book["Company Summary"])
-        if not credit_df.empty:
-            credit_df.to_excel(writer, sheet_name="Credit Summary", index=False)
-            _format_sheet(writer.book["Credit Summary"])
+        if not ratings_df.empty:
+            ratings_df.to_excel(writer, sheet_name="Ratings", index=False)
+            _format_sheet(writer.book["Ratings"])
         if not debt_latest.empty:
             debt_latest.to_excel(writer, sheet_name="Debt & Liab (latest)", index=False)
             _format_sheet(writer.book["Debt & Liab (latest)"])
