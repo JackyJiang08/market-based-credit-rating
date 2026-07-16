@@ -67,6 +67,7 @@ class CompanyData:
     ttc_pd: Optional[float] = None        # no-arbitrage through-the-cycle PD
     sp_rating: Optional[str] = None       # S&P-equivalent letter grade
     outlook: Optional[float] = None       # PIT PD - TTC PD (Prop. 5.3)
+    rating_off_grid: Optional[bool] = None  # (CCM, mu) outside the lookup grid
 
     # Credit assessment
     credit: Optional["CreditEstimate"] = None
