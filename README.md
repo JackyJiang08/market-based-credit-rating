@@ -1,9 +1,11 @@
-# PFPA Market-Based Credit-Rating Pipeline
+# Market-Based Credit-Rating Pipeline
 
-A market-data pipeline that estimates a **KMV/Merton** structural credit model
-for public companies and produces **Time-Consistent (TiC)** credit ratings,
-including PIT PD, a no-regulatory-arbitrage TTC PD, and an S&P-equivalent letter
-grade. Built for the PFPA credit-risk course.
+A market-based credit-rating pipeline for public companies. It downloads equity
+and rate data, estimates a **KMV/Merton** structural model by **EM** (recovering
+asset value, asset volatility, and asset return), and produces **Time-Consistent
+(TiC)** credit measures — RiskScore, Distance-to-Default, a Point-in-Time PD, a
+no-regulatory-arbitrage Through-The-Cycle PD, and an **S&P-equivalent** letter
+rating. Built for the PFPA credit-risk course.
 
 > **Attribution & IP notice.** The TiC methodology, the *Universal
 > Time-Consistent (TiC) Credit Rating* paper, the *Market-Based Credit Risk
