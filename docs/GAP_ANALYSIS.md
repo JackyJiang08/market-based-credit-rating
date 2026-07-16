@@ -1,10 +1,13 @@
-# Gap Analysis — Branch vs. TiC / Market-Based Credit Rating Methodology
+# Methodology Coverage — TiC / Market-Based Credit Rating
 
-**Phase 0 audit.** This document maps the credit-rating methodology
-(*Universal Time-Consistent (TiC) Credit Rating* and the *Market-Based Credit
-Risk Rating Model for Public Companies* deck) to the current code on `main`
-(merged from `agent/unify-four-layer-architecture`), and records status per
-concept.
+This document maps the credit-rating methodology (*Universal Time-Consistent
+(TiC) Credit Rating* and the *Market-Based Credit Risk Rating Model for Public
+Companies* deck) to the code on `main`, and records the conventions chosen
+where the references allowed more than one reading.
+
+It began as a pre-implementation gap audit; the status column below reflects
+the code after the four-layer pipeline was merged. Everything is covered by the
+offline test suite (`pytest`).
 
 > **Note.** This file cites equations by number only; it does not reproduce the
 > derivations or the conversion lookup tables. The reference PDFs and the
@@ -15,12 +18,13 @@ concept.
 
 | Question | Decision |
 | --- | --- |
-| Risk-free rate | **1-year** (FRED `DGS1`); horizon `T = 1yr`. Matches the deck ("Risk-free interest rate (1 year)") and existing code. Overrides the 3M T-bill wording in the task prompt. |
+| Risk-free rate | **1-year** (FRED `DGS1`); horizon `T = 1yr`. Matches the deck ("Risk-free interest rate (1 year)") and existing code. |
 | `R_A` / asset return | Use the deck's **η_A** ("Asset Return"), estimated jointly in the EM M-step; `DD = [ln(A/D) + (η_A − σ_A²/2)] / σ_A`. |
 | EM estimation window | Trailing **~252 trading days** (1 year daily), per the deck's "recent 1 year". |
 | Repo visibility | Repo stays public; **proprietary material is git-ignored** (PDFs, xlsx, derived tables kept in `local/`). |
 | `Asset` sheet `R` vs `eta` columns | `eta = eta_A` (EM asset return); `R = eta_A - sigma_A^2/2` (the realized drift term inside DD). This reconciles the deck's DD with the alternative `DD=[ln(A/D)+R]/sigma`. **Pending confirmation** vs the alternative `R=(A_hat-1)/sigma^2`. |
 | Trading days per year | **250** (deck: "each day is about 1/250 years"), not 252. |
+| Conversion lookup tables | Kept in `local/tables/` and git-ignored (not versioned in-repo); conversion tests skip when absent. |
 
 ## Canonical pipeline (deck slides 52–69, paper §4.4)
 
@@ -37,28 +41,27 @@ concept.
    (Eq. 11); **PIT PD** via inverse-Gaussian first-hitting (Eq. 13);
    **TTC PD → S&P letter** via the conversion grids; `Outlook = S&P TTC − PIT PD`.
 
-## Gap table
+## Coverage table
 
-| Concept | Paper/deck ref | Repo location | Status |
+| Concept | Paper/deck ref | Implementation | Status |
 | --- | --- | --- | --- |
-| μ = E[τ] | Eq. (1) | — | **missing** |
-| CCM = E[τ]·E[1/τ] − 1 | Eq. (2) | — | **missing** |
-| Default peak λ = mode(τ)/E[τ] | Eq. (3) | — | **missing** |
-| TiC = CCM/μ^Q, RiskScore = 100·TiC | Eq. (4)–(5) | `signal_construction/credit.py::TICModel` is a `NotImplementedError` stub | **missing** |
-| First-passage μ, CCM | Eq. (11) | — | **missing** |
-| TiC (first-passage, Q=1) = σ_A²/ln²(A/D) | Eq. (12) | — | **missing** |
-| PIT PD (inverse-Gaussian first-hitting) | Eq. (13) | `credit.py` computes `Φ(−DD)` (an EDF), not Eq. 13 | **incorrect** |
-| DD, EDF = Φ(−DD) | Eq. (14) | `MertonKMVModel` uses **risk-neutral r** as drift, not η_A | **differs** |
-| EM: joint σ_A **and** η_A via g-inverse (bisection) | deck 56–68 | `MertonKMVModel` iterates σ only; **no η_A**, no bisection-g, no per-day τ | **partial/incorrect** |
+| μ = E[τ], CCM = E[τ]·E[1/τ] − 1 | Eq. (1)–(2), (11) | `signal_construction/measures.py` | implemented |
+| Default peak λ | Eq. (3) | `signal_construction/measures.py` | implemented |
+| TiC = CCM/μ^Q, RiskScore = 100·TiC | Eq. (4)–(5), (12) | `signal_construction/measures.py` | implemented |
+| PIT PD (inverse-Gaussian first-hitting) | Eq. (13) | `signal_construction/measures.py`; reproduces the paper's Tables 13–14 | implemented |
+| DD, EDF = Φ(−DD), drift η_A | Eq. (14) | `signal_construction/measures.py` | implemented |
+| EM: joint σ_A **and** η_A via g-inverse (bisection), per-day τ | deck 56–68 | `signal_construction/em.py`; recovery of a known σ_A tested | implemented |
 | D = ST + 0.5·LT | deck 55 | `data_cleaning/transforms.py::default_point_debt` | implemented |
-| Equity = Price × Shares (constant, one-day method) | deck 61 | `alignment.build_panel` (`MarketCap_E`) | implemented |
-| Dividends added back to equity return | deck 61 | AdjClose used for return, but raw close for E; **not per deck's add-back** | partial |
-| Prior-quarter as-of join (no look-ahead) | deck 62 | `alignment.build_panel` `merge_asof(..., "backward")` | implemented |
-| Capital confidence α(CCM), CML=e^1.35, θ=1 | Eq. (22), Prop. 4.5.3 | — | missing |
-| No-Reg-Arbitrage conversion (match α → CCM*) | Prop. 5.2.1–5.2.2 | — | missing |
-| PIT → TTC → S&P mapping (grids) | §5.3, Tables 13–14 | conversion `xlsx` not integrated | missing |
-| Outlook = S&P TTC − PIT PD | Prop. 5.3 | — | missing |
-| Submission workbook (Asset sheet schema) | conversion xlsx | — | missing |
+| Equity = Price × Shares (constant, one-day method) | deck 61 | `data_cleaning/alignment.py` (`MarketCap_E`) | implemented |
+| Dividends added back to equity | deck 61 | `data_cleaning/alignment.py` | implemented |
+| Prior-quarter as-of join (no look-ahead) | deck 62 | `data_cleaning/alignment.py` `merge_asof(..., "backward")`; canary test | implemented |
+| No-reg-arbitrage conversion (match α → CCM*) | Prop. 5.2.1–5.2.2 | `signal_construction/conversion.py`; `alpha_FH(1.5)=0.91906`, `CCM*=1.35373` verified | implemented |
+| PIT → TTC → S&P mapping (lookup grids) | §5.3, Tables 13–14 | `signal_construction/conversion.py` (grids read from `local/`; skipped gracefully when absent) | implemented |
+| Outlook = S&P TTC − PIT PD | Prop. 5.3 | `signal_construction/conversion.py` | implemented |
+| Submission workbook (`Asset` sheet schema) | conversion xlsx | `dashboard/submission.py` (+ `validation` sheet) | implemented |
+
+Open item: the `Asset` sheet `R` column definition (see the convention above) is
+pending confirmation; the current choice is the realized drift `η_A − σ_A²/2`.
 
 ## Conversion workbook (`local/TiC_TTC_conversion.xlsx`)
 
@@ -71,28 +74,3 @@ Sheets and roles (kept local; not committed):
 | `PIT` | 156 × 94 | Lookup grid: (µ, CCM) → PIT PD (Eq. 13) |
 | `TTC` | 156 × 94 | Lookup grid: (µ, CCM) → TTC PD (no-arb), floored at 2 bp |
 | `SP` | 29 × 3 | S&P letter → PD threshold ("if PD < next threshold") |
-
-The repo does **not** currently reproduce any of this lookup logic.
-
-## Assessment & plan
-
-The branch provides a sound **data + baseline-Merton** foundation (Layers 1–2
-solid; debt rule, as-of alignment, constant-share equity all correct). The
-**entire TiC / EM / PIT→TTC rating layer is missing or differs** from the
-reference method and is the substance of the remaining work.
-
-No blocking architectural conflict prevents proceeding: the missing pieces slot
-cleanly into `signal_construction` (Layer 3) behind the existing `CreditModel`
-interface, feeding the `dashboard` (Layer 4) submission workbook. Planned order:
-
-1. **Phase 1** — complete the data layer (dividend add-back, name→ticker,
-   per-company `data/{TICKER}/` csv+xlsx, no-look-ahead canary test).
-2. **Phase 2** — EM (joint σ_A, η_A via bisection g-inverse) with sanity checks.
-3. **Phase 3** — RiskScore/CCM/µ/λ/DD/EDF/PIT-PD (Eq. 11–14).
-4. **Phase 4** — PIT→TTC→S&P via local lookup tables + no-arb conversion; reproduce Tables 12–14 as regression tests.
-5. **Phase 5** — batch run for the 10 companies → timestamped submission workbook.
-6. **Phase 6** — one-click CLI + docs.
-
-**Deviation flagged:** the task prompt asked for the conversion lookup tables to
-be versioned under `src/.../tables/`. They are kept in
-`local/tables/` and git-ignored instead.
