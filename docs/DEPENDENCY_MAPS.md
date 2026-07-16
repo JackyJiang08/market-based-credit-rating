@@ -11,8 +11,8 @@ flowchart LR
     CLI["run.py<br/>CLI entry point"]
     L1["Layer 1<br/>raw_data_architecture<br/>ACTIVE"]
     L2["Layer 2<br/>data_cleaning<br/>ACTIVE"]
-    L3["Layer 3<br/>signal_construction<br/>PROTOTYPE"]
-    L4["Layer 4<br/>dashboard<br/>PROTOTYPE"]
+    L3["Layer 3<br/>signal_construction<br/>ACTIVE"]
+    L4["Layer 4<br/>dashboard<br/>ACTIVE"]
 
     CLI -->|configuration| L1
     CLI -->|starts workflow| L2
@@ -127,7 +127,7 @@ architecture milestone and are intentionally shown as missing dependencies.
 | --- | --- | --- |
 | Raw Data Architecture | `yfinance`, `requests`, `pandas` | Yahoo/FRED acquisition and source frames |
 | Data Cleaning | `pandas`, `numpy`; currently also `yfinance` in `workflow.py` | Transformation, alignment, compatibility orchestration |
-| Signal Construction | `pandas`, `numpy`, `scipy` | Merton/KMV numerical model prototype |
+| Signal Construction | `pandas`, `numpy`, `scipy` | EM asset estimation, TiC measures, PIT/TTC/S&P conversion |
 | Dashboard | `pandas`, `openpyxl`, `pyarrow` | Excel, CSV, and Parquet publishing |
 
 ## Known dependency cleanup

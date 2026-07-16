@@ -23,16 +23,38 @@ single push when they represent the same unit of work.
 
 ## Current project status
 
-- Repository root: `PFPA_Intern_Project/`.
-- Active implementation scope: Layer 1 Raw Data Architecture and Layer 2 Data
-  Cleaning.
-- Retained prototypes: Layer 3 Signal Construction and Layer 4 Dashboard.
-- Current data path is still in memory; immutable raw and clean Parquet
-  boundaries have not yet been implemented.
-- Current timing gap: statement period-end is still used in alignment instead
-  of a true publication-time `available_at` field.
+- All four layers are implemented end to end: raw acquisition (Layer 1),
+  cleaning/alignment (Layer 2), EM + TiC measures + PIT/TTC/S&P conversion
+  (Layer 3), and Excel/long-table/submission reporting (Layer 4).
+- The credit chain is verified against the TiC paper (PIT PD Tables 13-14,
+  alpha_FH(1.5)=0.91906, CCM*=1.35373) with a 24-test offline suite.
+- Data path is still in memory; immutable raw/clean Parquet boundaries are a
+  future milestone.
+- Timing: alignment uses statement period-end as the as-of key rather than a
+  true publication-time `available_at` field (documented limitation).
 
 ## Recent changes
+
+### 2026-07-15 - Review pass: remove dead code, surface ratings, polish
+
+- **Scope:** enterprise cleanup after the phased build; no formula changes.
+- **Summary:**
+  - Removed the unused `signal_construction/credit.py` (old Merton baseline /
+    CreditModel / TICModel stub) and the never-populated `CompanyData.credit`
+    field; the pipeline uses `em` + `measures` + `conversion` directly.
+  - `dashboard/excel.py` and `longtable.py` now emit the real credit results
+    (sigma_A, CCM, mu, RiskScore, DD, EDF, PIT/TTC PD, S&P, Outlook): a
+    per-company "Credit Rating" sheet, a master "Ratings" sheet, and a
+    `credit_measures` long-table category. Previously these read the dead
+    `credit` object and were empty.
+  - Moved `LICENSE` to the repo root (GitHub license detection); pyproject
+    description updated to the credit-rating pipeline; version 0.3.0.
+  - Refreshed `signal_construction/__init__`, DEVLOG status, and DEPENDENCY_MAPS
+    (Layers 3-4 marked ACTIVE).
+- **Verified DD** against the paper: `DD = [ln(A/D) + (eta - sigma^2/2)T]/(sigma*sqrt(T))`
+  matches `measures.py` exactly.
+- **Validation:** `pytest` 24/24; all four layers import cleanly; live run shows
+  ratings in the dashboard workbooks.
 
 ### 2026-07-15 - Phase 6: one-click CLI + docs
 

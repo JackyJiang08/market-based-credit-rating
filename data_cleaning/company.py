@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 import pandas as pd
 
 from raw_data_architecture import lineage
-
-if TYPE_CHECKING:
-    from signal_construction.credit import CreditEstimate
 
 
 @dataclass
@@ -68,6 +65,3 @@ class CompanyData:
     sp_rating: Optional[str] = None       # S&P-equivalent letter grade
     outlook: Optional[float] = None       # PIT PD - TTC PD (Prop. 5.3)
     rating_off_grid: Optional[bool] = None  # (CCM, mu) outside the lookup grid
-
-    # Credit assessment
-    credit: Optional["CreditEstimate"] = None

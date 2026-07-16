@@ -107,5 +107,5 @@ workbook skip automatically when `local/` is absent, so a fresh clone is green.
 
 ## License
 
-Project code: [MIT](docs/LICENSE). Instructor methodology and materials remain
+Project code: [MIT](LICENSE). Instructor methodology and materials remain
 the instructor's IP (see the notice above).
