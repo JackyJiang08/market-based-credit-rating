@@ -65,7 +65,7 @@ BALANCE_SHEET_MAP: dict[str, tuple[str, ...]] = {
 # Credit-model assumptions
 # --------------------------------------------------------------------------- #
 # "Default point" debt = the liability a firm must service to avoid default
-# within the horizon. The instructor's rule: a firm defaulting within a year
+# within the horizon. The rule: a firm defaulting within a year
 # is unlikely to repay all long-term debt, so weight it at 50%.
 SHORT_TERM_DEBT_WEIGHT = 1.0
 LONG_TERM_DEBT_WEIGHT = 0.5

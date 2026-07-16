@@ -30,8 +30,8 @@ V's returns, and repeat until it stops moving. Then:
     Distance to Default  DD = [ln(V/D) + (r - 0.5 sigma_V^2) T] / (sigma_V sqrt(T))
     Probability of Default PD = N(-DD)
 
-This baseline is the structural model the instructor's **TIC** method generalises.
-`TICModel` below is a deliberate placeholder: the instructor's universal formula
+This baseline is the structural model that the **TiC** method generalises.
+`TICModel` below is a deliberate placeholder: the universal TiC formula
 is taught in later weeks and plugs into the same interface.
 """
 
@@ -206,7 +206,7 @@ class MertonKMVModel(CreditModel):
 
 
 class TICModel(CreditModel):
-    """Placeholder for the instructor's Time-Consistent Credit (TIC) model.
+    """Placeholder for the Time-Consistent Credit (TiC) model.
 
     The TIC method is a single universal formula (taught in later weeks) that
     reproduces Moody's, S&P, bank-internal, and KMV ratings as special cases,
@@ -215,10 +215,10 @@ class TICModel(CreditModel):
     covered in class.
     """
 
-    name = "TIC (instructor model)"
+    name = "TiC model"
 
     def estimate(self, inputs: CreditModelInputs) -> CreditEstimate:  # pragma: no cover
         raise NotImplementedError(
-            "TICModel is a stub. The instructor's universal TIC formula will be "
+            "TICModel is a stub. The universal TiC formula will be "
             "implemented here in a later week and reuse the CreditModel interface."
         )

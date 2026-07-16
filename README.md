@@ -3,23 +3,18 @@
 A market-based credit-rating project for public companies: download equity and
 interest-rate data, estimate a **KMV/Merton** structural model, and derive
 credit measures (distance to default, probability of default) that feed a
-**Time-Consistent (TiC)** credit rating.
+**Time-Consistent (TiC)** credit rating. A PFPA intern project.
 
 > **Status.** The complete four-layer pipeline — EM asset estimation, the full
 > TiC measures (RiskScore / CCM / µ / DD / EDF / PIT PD), the
-> no-regulatory-arbitrage **PIT → TTC → S&P** conversion, and the instructor's
-> submission workbook — lives on the branch
+> no-regulatory-arbitrage **PIT → TTC → S&P** conversion, and the submission
+> workbook — lives on the branch
 > [`agent/unify-four-layer-architecture`](https://github.com/JackyJiang08/market-based-credit-rating/tree/agent/unify-four-layer-architecture)
 > and is pending merge into `main`. This `main` branch currently holds the
 > earlier equity/rates data pipeline with a Merton/KMV baseline, described below.
-
-> **Attribution & IP notice.** The TiC methodology, the *Universal
-> Time-Consistent (TiC) Credit Rating* paper, the *Market-Based Credit Risk
-> Rating Model* deck, and the conversion workbook are the intellectual property
-> of the course instructor (Yimin Yang). Those source artifacts and any lookup
-> tables derived from them are kept out of version control. This repository is
-> for coursework and portfolio demonstration only; the methodology must **not**
-> be presented to third parties (e.g., banks) as our own work.
+>
+> Reference PDFs and the conversion workbook are proprietary PFPA material kept
+> out of the repository.
 
 ---
 
@@ -77,5 +72,5 @@ macOS users can double-click **`Download Stocks.command`**.
 
 ## License
 
-Project code: [MIT](LICENSE). Instructor methodology and materials remain the
-instructor's IP (see the notice above).
+Project code: [MIT](LICENSE). Reference PDFs and the conversion workbook are
+proprietary PFPA material and are kept out of the repository.

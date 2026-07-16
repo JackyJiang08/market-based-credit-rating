@@ -1,7 +1,16 @@
 # Generated data artifacts (regenerate by running the pipeline)
-output/*.xlsx
-output/*.csv
-output/*.parquet
+output/
+outputs/
+dashboard/output/
+data_cleaning/data/
+raw_data_architecture/data/
+*.xlsx
+*.csv
+*.parquet
+
+# Proprietary / local material — never committed
+local/
+*.pdf
 
 # macOS
 .DS_Store
