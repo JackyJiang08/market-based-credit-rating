@@ -2,8 +2,9 @@
 
 **Phase 0 audit.** This document maps the credit-rating methodology
 (*Universal Time-Consistent (TiC) Credit Rating* and the *Market-Based Credit
-Risk Rating Model for Public Companies* deck) to the current code on branch
-`agent/unify-four-layer-architecture`, and records status per concept.
+Risk Rating Model for Public Companies* deck) to the current code on `main`
+(merged from `agent/unify-four-layer-architecture`), and records status per
+concept.
 
 > **Note.** This file cites equations by number only; it does not reproduce the
 > derivations or the conversion lookup tables. The reference PDFs and the
