@@ -1,16 +1,21 @@
 # Generated data artifacts (regenerate by running the pipeline)
-output/
-outputs/
-dashboard/output/
-data_cleaning/data/
-raw_data_architecture/data/
-*.xlsx
+raw_data_architecture/data/*
+!raw_data_architecture/data/.gitkeep
+data_cleaning/data/*
+!data_cleaning/data/.gitkeep
+dashboard/output/*
+!dashboard/output/.gitkeep
+outputs/*
+!outputs/.gitkeep
 *.csv
 *.parquet
 
-# Proprietary / local material — never committed
+# Proprietary / local material and large source artifacts — kept out of the repo.
+# Reference PDFs, the conversion workbook, and any lookup tables derived from
+# them live under local/ and are never committed.
 local/
 *.pdf
+*.xlsx
 
 # macOS
 .DS_Store
@@ -22,3 +27,6 @@ __pycache__/
 venv/
 env/
 .ipynb_checkpoints/
+
+# Stray legacy output dir (branch uses dashboard/output/)
+/output/

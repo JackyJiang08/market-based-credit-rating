@@ -1,74 +1,106 @@
 # Market-Based Credit-Rating Pipeline
 
-A market-based credit-rating project for public companies: download equity and
-interest-rate data, estimate a **KMV/Merton** structural model, and derive
-credit measures (distance to default, probability of default) that feed a
-**Time-Consistent (TiC)** credit rating. A PFPA intern project.
+A market-based credit-rating pipeline for public companies. It downloads equity
+and rate data, estimates a **KMV/Merton** structural model by **EM** (recovering
+asset value, asset volatility, and asset return), and produces **Time-Consistent
+(TiC)** credit measures — RiskScore, Distance-to-Default, a Point-in-Time PD, a
+no-regulatory-arbitrage Through-The-Cycle PD, and an **S&P-equivalent** letter
+rating. A PFPA intern project.
 
-> **Status.** The complete four-layer pipeline — EM asset estimation, the full
-> TiC measures (RiskScore / CCM / µ / DD / EDF / PIT PD), the
-> no-regulatory-arbitrage **PIT → TTC → S&P** conversion, and the submission
-> workbook — lives on the branch
-> [`agent/unify-four-layer-architecture`](https://github.com/JackyJiang08/market-based-credit-rating/tree/agent/unify-four-layer-architecture)
-> and is pending merge into `main`. This `main` branch currently holds the
-> earlier equity/rates data pipeline with a Merton/KMV baseline, described below.
->
-> Reference PDFs and the conversion workbook are proprietary PFPA material kept
-> out of the repository.
+Reference PDFs and the `TiC_TTC_conversion.xlsx` workbook live in a git-ignored
+`local/` directory and are not committed; code comments cite the paper by
+equation number.
 
----
+## Pipeline at a glance
 
-## What `main` produces today
-
-For any set of tickers (default: `COST KO DELL ORCL PNC WMT INTU AMZN T KHC`)
-over a trailing window (default 2 years):
-
-- **Per-company workbook** `output/<TICKER>_data.xlsx` — summary, the
-  date-aligned daily panel (price + debt + rate, no look-ahead), the debt &
-  liabilities schedule, price history with adjusted close, dividends, and
-  quarterly/annual statements.
-- **Master workbook** `output/_MASTER_summary.xlsx` — company summary, a ranked
-  credit summary, latest debt snapshot, and macro rates.
-- **Tidy long table** `output/all_companies_long.{csv,parquet}` for databases/BI.
-
-Key conventions (shared with the full pipeline on the branch):
-
-| Requirement | Implementation |
-| --- | --- |
-| Shares outstanding — one-day `mktcap / price`, held constant | `mdtoolkit/transforms.py` |
-| Adjusted close (dividends & splits) | Yahoo `Adj Close` |
-| Default-point debt `D = 100% short-term + 50% long-term` | `mdtoolkit/transforms.py` |
-| Risk-free = **1-Year Treasury** (`DGS1`), 1-year horizon | FRED |
-| Date alignment (as-of, no look-ahead) | `mdtoolkit/alignment.py` |
-
-## Installation & usage
-
-```bash
-pip3 install -r requirements.txt      # Python 3.8+
-
-python3 run.py                        # default universe, 2y
-python3 run.py AAPL MSFT --years 3    # custom tickers / window
-python3 run.py --no-credit-model      # data only
+```text
+raw_data_architecture   ->   data_cleaning        ->   signal_construction     ->   dashboard
+(Yahoo prices/financials,    (dividend add-back,       (EM: sigma_A, A, eta_A;      (submission workbook,
+ FRED 1Y rate; provenance)    debt D = ST+0.5*LT,       measures: CCM/mu/TiC/DD;     Excel + long table)
+                              as-of daily panel)        PIT->TTC->S&P conversion)
 ```
 
-macOS users can double-click **`Download Stocks.command`**.
+Four layers, each owning one responsibility and passing pandas frames forward.
+See [`docs/DEPENDENCY_MAPS.md`](docs/DEPENDENCY_MAPS.md) and
+[`docs/GAP_ANALYSIS.md`](docs/GAP_ANALYSIS.md).
+
+## Method (formula -> code -> paper equation)
+
+| Step | Where | Paper ref |
+| --- | --- | --- |
+| Equity `E = shares x price` (dividends added back) | `data_cleaning/alignment.py` | deck slide 61 |
+| Default-point debt `D = 100% ST + 50% LT` | `data_cleaning/transforms.py` | deck slide 55 |
+| As-of alignment of price / statement / 1Y rate (no look-ahead) | `data_cleaning/alignment.py` | deck slide 62 |
+| **EM**: invert `E = g(A)` by bisection; recover `sigma_A`, `A`, `eta_A` | `signal_construction/em.py` | Eq. (10); deck 52-68 |
+| `mu`, `CCM` (first-passage factors) | `signal_construction/measures.py` | Eq. (11) |
+| `TiC = sigma_A^2/ln^2(A/D)`, `RiskScore = 100*TiC` | `measures.py` | Eq. (12), (5) |
+| `DD`, `EDF = Phi(-DD)` | `measures.py` | Eq. (14) |
+| `PIT PD` (inverse-Gaussian first-hitting) | `measures.py` | Eq. (13) |
+| No-arbitrage `alpha` match, `CCM*`; TTC PD; S&P letter | `signal_construction/conversion.py` | Prop. 5.2, Sec. 5.3 |
+| `Outlook = PIT PD - TTC PD` | `conversion.py` | Prop. 5.3 |
+
+Verified against the paper: PIT PD reproduces Tables 13-14; `alpha_FH(1.5)=0.91906`,
+`CCM*=1.35373`.
 
 ## Data sources
 
 | Data | Source |
 | --- | --- |
-| Prices, financials, market cap, dividends | Yahoo Finance (`yfinance`) |
-| 1-Year Treasury (`DGS1`), SOFR | FRED (Federal Reserve H.15) |
+| Prices, shares, dividends, balance sheets | Yahoo Finance (`yfinance`) |
+| Risk-free rate: **1-Year Treasury** (`DGS1`) | FRED (Federal Reserve H.15) |
+
+The 1-year tenor matches the 1-year credit horizon used throughout (deck:
+"Risk-free interest rate (1 year)").
+
+## Quickstart
+
+```bash
+pip install -r requirements.txt              # Python 3.11+ recommended
+
+# One company (ticker or name) -> prints the rating table + writes a report
+python -m mdt rate AAPL
+
+# The batch run -> outputs/submission_<timestamp>.xlsx
+python -m mdt batch config/companies.yaml
+
+# Backward-compatible workflow entry
+python run.py COST KO --years 2
+```
+
+To enable the TTC/S&P conversion, place the
+`TiC_TTC_conversion.xlsx` workbook at `local/TiC_TTC_conversion.xlsx` (git-ignored).
+Without it the pipeline still runs and reports σ_A / DD / PIT PD; the TTC/S&P
+columns are simply skipped.
+
+Outputs (all git-ignored, regenerated by running):
+- `outputs/submission_<timestamp>.xlsx` — the submission `Asset` sheet + a `validation` sheet.
+- `dashboard/output/` — per-company workbooks, master summary, tidy long table.
+- `raw_data_architecture/data/` & `data_cleaning/data/` — per-company raw + cleaned CSV/XLSX.
+
+## Tests
+
+```bash
+pytest
+```
+
+Offline suite: no-look-ahead canary, EM recovery of a known σ_A, measures vs the
+paper's tables, and conversion checks. Grid/lookup tests that need the
+proprietary workbook skip automatically when `local/` is absent, so a fresh
+clone is green.
 
 ## Known limitations
 
-- Non-dividend payers (e.g. **AMZN**) have blank dividend fields.
-- Banks (e.g. **PNC**) omit a clean current/non-current split (debt fallback used).
-- Yahoo's free tier returns ~5–7 quarters of quarterly statements.
-- Dual-class names (e.g. **DELL**): the one-day reference-share method recovers
-  the total share count so market cap reconciles.
-- For large investment-grade firms, market-based PD is legitimately ~0; compare
-  by **distance to default** and **RiskScore** instead.
+- **Market-based PIT PD is liquidity-sensitive.** For large, liquid,
+  investment-grade names PIT PD is legitimately ~0; compare firms by **DD** and
+  **RiskScore** rather than PIT PD. Typical asset volatilities land in ~10-60%.
+- **η_A is noisy** over a 1-year window (the deck notes it "makes both
+  unstable"); this shows up in µ/CCM/PIT but *not* in the η-independent RiskScore.
+- **Off-grid conversions** (CCM or µ outside the lookup grid) are edge-clamped
+  and flagged in the `validation` sheet.
+- **Yahoo free tier** returns ~5-7 quarters of statements; banks (e.g. PNC)
+  omit a clean current/non-current split (handled by a debt fallback).
+- The `Asset` sheet `R` column is the realized drift `η_A - σ_A^2/2` (the DD
+  term); pending confirmation of the intended definition.
 
 ## License
 

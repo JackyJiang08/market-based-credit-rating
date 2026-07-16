@@ -11,10 +11,12 @@ import os
 
 import pandas as pd
 
-from . import config, lineage
-from .company import CompanyData
+from data_cleaning.company import CompanyData
+from raw_data_architecture import lineage
 
-LOG = logging.getLogger("mdtoolkit.longtable")
+from . import config
+
+LOG = logging.getLogger("pfpa.dashboard.longtable")
 
 LONG_COLUMNS = ["Ticker", "AsOf", "Category", "Period", "Metric", "Value"]
 
@@ -69,16 +71,16 @@ def build_long_table(companies: list[CompanyData], rates: pd.DataFrame) -> pd.Da
         parts.append(_melt_statement(c.a_income, c.ticker, c.as_of, "income_statement (A)"))
         parts.append(_melt_statement(c.a_balance, c.ticker, c.as_of, "balance_sheet (A)"))
         parts.append(_melt_statement(c.a_cashflow, c.ticker, c.as_of, "cash_flow (A)"))
-        if c.credit is not None:
-            est = {
-                "AssetValue_V0": c.credit.asset_value,
-                "AssetVol_sigmaV": c.credit.asset_vol,
-                "DistanceToDefault": c.credit.distance_to_default,
-                "DefaultProbability": c.credit.default_probability,
+        if c.sigma_A is not None:
+            measures = {
+                "sigma_A": c.sigma_A, "eta_A": c.eta_A, "AssetValue_A": c.asset_value,
+                "CCM": c.ccm, "mu": c.mu, "TiC": c.tic, "RiskScore": c.risk_score,
+                "DD": c.dd, "EDF": c.edf, "PIT_PD": c.pit_pd, "TTC_PD": c.ttc_pd,
+                "Outlook": c.outlook,
             }
             parts.append(pd.DataFrame(
-                [(c.ticker, c.as_of, "credit_estimate", c.as_of[:10], k, v)
-                 for k, v in est.items() if v is not None],
+                [(c.ticker, c.as_of, "credit_measures", c.as_of[:10], k, v)
+                 for k, v in measures.items() if v is not None],
                 columns=LONG_COLUMNS,
             ))
 

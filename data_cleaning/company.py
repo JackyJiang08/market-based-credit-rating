@@ -7,8 +7,7 @@ from typing import Optional
 
 import pandas as pd
 
-from . import lineage
-from .credit import CreditEstimate
+from raw_data_architecture import lineage
 
 
 @dataclass
@@ -42,5 +41,27 @@ class CompanyData:
     a_balance: pd.DataFrame = field(default_factory=pd.DataFrame)
     a_cashflow: pd.DataFrame = field(default_factory=pd.DataFrame)
 
-    # Credit assessment
-    credit: Optional[CreditEstimate] = None
+    # EM asset-value estimation (Layer 3 outputs; plain floats to keep this
+    # cleaning-layer container free of a modelling-package dependency).
+    sigma_A: Optional[float] = None       # annualized asset volatility
+    eta_A: Optional[float] = None         # annualized asset return (drift)
+    asset_value: Optional[float] = None   # A on the last trading day
+    em_iters: Optional[int] = None
+    em_converged: Optional[bool] = None
+    em_warnings: list = field(default_factory=list)
+
+    # Derived first-passage credit measures (Layer 3)
+    mu: Optional[float] = None            # life expectancy E[tau]
+    ccm: Optional[float] = None           # credit corrosion measure
+    tic: Optional[float] = None           # time-consistent rating (Q=1)
+    risk_score: Optional[float] = None    # 100 * TiC
+    lam: Optional[float] = None           # default peak lambda
+    dd: Optional[float] = None            # distance to default
+    edf: Optional[float] = None           # Phi(-DD)
+    pit_pd: Optional[float] = None        # 1-year PIT PD
+
+    # PIT -> TTC -> S&P conversion (Layer 3)
+    ttc_pd: Optional[float] = None        # no-arbitrage through-the-cycle PD
+    sp_rating: Optional[str] = None       # S&P-equivalent letter grade
+    outlook: Optional[float] = None       # PIT PD - TTC PD (Prop. 5.3)
+    rating_off_grid: Optional[bool] = None  # (CCM, mu) outside the lookup grid

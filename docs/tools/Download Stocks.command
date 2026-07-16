@@ -2,7 +2,7 @@
 # ===========================================================================
 #  Market Data Toolkit  --  double-click launcher
 # ===========================================================================
-#  Produces, into the "output" folder:
+#  Produces compatibility artifacts into "dashboard/output":
 #    - per-company workbooks: prices, dividends, market cap, debt &
 #      liabilities, the date-aligned model panel, quarterly + annual
 #      financials, and a Merton/KMV credit estimate
@@ -10,7 +10,7 @@
 #    - a tidy long table (CSV/Parquet) for analysis
 # ===========================================================================
 
-cd "$(dirname "$0")" || exit 1
+cd "$(dirname "$0")/../.." || exit 1
 
 # --- locate a Python interpreter -------------------------------------------
 PY="/Users/jackyjiang/opt/anaconda3/bin/python3"
@@ -41,7 +41,7 @@ STATUS=$?
 echo "------------------------------------------------------------"
 if [ $STATUS -eq 0 ]; then
     echo "Finished. Opening the output folder..."
-    open output
+    open dashboard/output
 else
     echo "Finished with errors (exit $STATUS). See messages above."
 fi

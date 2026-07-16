@@ -3,12 +3,12 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "market-data-toolkit"
-version = "0.2.0"
-description = "Equity & macro-rate data pipeline with a structural credit-risk model (Merton/KMV)."
+name = "market-based-credit-rating"
+version = "0.3.0"
+description = "Market-based KMV/TiC credit-rating pipeline for public companies (EM asset estimation, PIT/TTC PD, S&P-equivalent rating)."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 authors = [{ name = "JackyJiang08" }]
 dependencies = [
     "yfinance>=0.2.40",
@@ -21,7 +21,14 @@ dependencies = [
 ]
 
 [project.scripts]
-market-data-toolkit = "run:main"
+mdt = "mdt.__main__:main"
 
 [tool.setuptools]
-packages = ["mdtoolkit"]
+packages = [
+    "raw_data_architecture",
+    "data_cleaning",
+    "signal_construction",
+    "dashboard",
+    "mdt",
+]
+py-modules = ["run"]
