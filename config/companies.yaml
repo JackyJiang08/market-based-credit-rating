@@ -1,4 +1,4 @@
-# Assigned companies for the credit-rating batch run.
+# Companies for the credit-rating batch run.
 #
 # Entries may be ticker symbols (e.g. COST) or company names (e.g. Costco);
 # names are resolved via Yahoo search, and ambiguous names raise a clear error.

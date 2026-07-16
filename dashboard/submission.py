@@ -1,13 +1,13 @@
-"""Submission workbook matching the instructor's `Asset` sheet schema.
+"""Submission workbook matching the submission `Asset` sheet schema.
 
 Writes one timestamped workbook per run (never overwriting a prior submission)
 with two sheets:
-  - `Asset`      : one row per company, the instructor's column layout.
+  - `Asset`      : one row per company, the submission column layout.
   - `validation` : sanity-check flags per company (EM convergence, sigma range,
                    off-grid conversion, missing data).
 
-Outputs are generated artifacts derived from the instructor's conversion tables
-and are git-ignored (see .gitignore); they are for coursework use only.
+Outputs are generated artifacts derived from the conversion tables
+and are git-ignored (see .gitignore); they are for internal PFPA use only.
 """
 
 from __future__ import annotations
@@ -53,7 +53,7 @@ def _total_debt(c: CompanyData):
 
 
 def _asset_row(c: CompanyData) -> dict:
-    """One company as the instructor's Asset-sheet columns."""
+    """One company as the submission Asset-sheet columns."""
     last_date = c.panel.index[-1].date() if not c.panel.empty else None
     last_stmt = c.debt_schedule.columns[0] if not c.debt_schedule.empty else None
     # R = realized asset log-return over the horizon = eta_A - sigma_A^2/2,

@@ -65,22 +65,22 @@ single push when they represent the same unit of work.
     config/companies.yaml`. Console script `mdt` registered in pyproject.
   - `submission.write_submission` accepts an optional filename (per-ticker report).
   - README rewritten: pipeline diagram, formula->equation map, data sources,
-    quickstart, IP/attribution notice, known limitations.
+    quickstart, notice, known limitations.
   - GAP_ANALYSIS updated with the R vs eta and 250-trading-day conventions.
 - **Validation:** `pytest` 24/24; `python -m mdt --help` and `rate KO` run
   clean (no double-import warning); fresh-clone quickstart documented.
-- **Follow-ups:** confirm instructor's intended `R` column definition; optional
+- **Follow-ups:** confirm the intended `R` column definition; optional
   Layer-1/2 Parquet persistence for the staged-workflow milestone.
 
 ### 2026-07-15 - Phase 5: batch run + submission workbook
 
 - **Scope:** Layer 4 (dashboard) + CLI; adds submission output.
 - **Summary:**
-  - `config/companies.yaml`: the 10 assigned tickers (editable; accepts names).
+  - `config/companies.yaml`: the 10 batch tickers (editable; accepts names).
   - `run.py`: `--companies YAML` loads the universe from config.
   - `dashboard/submission.py`: `write_submission` writes a timestamped
     `outputs/submission_{date}.xlsx` (never overwriting) with an `Asset` sheet in
-    the instructor's column layout (Symbol, shares, debts, rate, statement date,
+    the submission column layout (Symbol, shares, debts, rate, statement date,
     sigma_A, R=eta-sigma^2/2, eta, CCM, mu, TiC, RiskScore, DD, EDF, PIT PD,
     TTC PD, S&P, Outlook) and a `validation` sheet flagging EM convergence,
     sigma range, and off-grid conversions.
@@ -88,7 +88,7 @@ single push when they represent the same unit of work.
   - `tests/test_submission.py`: schema + R=eta-sigma^2/2 check.
 - **R vs eta:** the `R` column is the realized drift `eta - sigma_A^2/2` (the
   term in DD), and `eta` is `eta_A`; this reconciles the two DD formulations.
-  Flagged as the working interpretation pending instructor confirmation.
+  Flagged as the working interpretation pending confirmation.
 - **Validation:** `pytest` 24/24. Live batch writes submission for all 10;
   off-grid flags on KO/PNC/INTU/KHC; outputs git-ignored.
 - **Follow-ups:** Phase 6 (one-click CLI `python -m mdt` + README/docs).
@@ -97,7 +97,7 @@ single push when they represent the same unit of work.
 
 - **Scope:** Layer 3 (signal_construction); adds conversion + tests.
 - **Summary:**
-  - `signal_construction/conversion.py`: loads the instructor's conversion
+  - `signal_construction/conversion.py`: loads the conversion
     workbook from the git-ignored `local/` tree (TTC grid = no-arbitrage S&P TTC
     PD by CCM x mu; SP sheet = PD -> letter thresholds), with bilinear
     interpolation + edge-clamp flagging for off-grid inputs. Also implements the
@@ -107,8 +107,8 @@ single push when they represent the same unit of work.
     company; `CompanyData` gains those fields.
   - `tests/test_conversion.py`: reproduces paper alpha_FH(1.5)=0.91906 and
     CCM*=1.35373; TTC grid reproduces paper S&P TTC (Tables 13-14); SP threshold
-    mapping; off-grid flagging. Grid tests skip when the IP workbook is absent.
-- **IP:** conversion tables read from `local/` and cached to
+    mapping; off-grid flagging. Grid tests skip when the proprietary workbook is absent.
+- **Proprietary:** conversion tables read from `local/` and cached to
   `local/tables/*.csv` (git-ignored); no proprietary numbers are committed.
 - **Validation:** `pytest` 23/23 (grid tests active locally). Live 10-company
   ratings: ORCL BB+ (riskiest) ... AAA- for COST/KO/WMT/AMZN; off-grid flags on
@@ -177,15 +177,15 @@ single push when they represent the same unit of work.
 
 ### 2026-07-15 - Phase 0: gap analysis vs TiC methodology
 
-- **Scope:** documentation + IP handling; no code behavior change.
+- **Scope:** documentation + proprietary-data handling; no code behavior change.
 - **Summary:** added `docs/GAP_ANALYSIS.md` mapping the TiC paper and the
   Market-Based Credit Risk deck (KMV/EM/first-passage) to current branch code,
   with a per-concept status table. Recorded resolved conventions: 1-year
   risk-free (DGS1), η_A from EM for DD, ~252-day EM window, public repo with
-  instructor IP git-ignored.
-- **IP:** the TiC paper, the market-based deck, and `TiC_TTC_conversion.xlsx`
+  proprietary material git-ignored.
+- **Proprietary:** the TiC paper, the market-based deck, and `TiC_TTC_conversion.xlsx`
   are kept under `local/` and git-ignored; lookup tables will be local-only.
-- **Validation:** confirmed IP artifacts are ignored (`git check-ignore`);
+- **Validation:** confirmed proprietary artifacts are ignored (`git check-ignore`);
   removed a stray legacy `output/` dir from staging.
 - **Follow-ups:** Phase 1 (data-layer completion + no-look-ahead canary test).
 
@@ -196,7 +196,7 @@ single push when they represent the same unit of work.
   - Moved the Git repository contents to the `PFPA_Intern_Project` root.
   - Reorganized code into the four workflow layer directories.
   - Split configuration ownership across the four layers.
-  - Archived the original assignment and glossary documents.
+  - Archived the earlier supporting documents.
   - Added code, runtime, data-artifact, and package dependency maps.
   - Added this push-update development log under `docs/`.
   - Added the mandatory point-in-time timing protocol and no-look-ahead rules.

@@ -138,7 +138,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
         except (em.EMError, ValueError) as exc:
             LOG.warning("  EM/measures failed: %s", exc)
 
-    # --- PIT -> TTC -> S&P conversion (local tables; skipped if IP absent) ---
+    # --- PIT -> TTC -> S&P conversion (local tables; skipped if tables absent) ---
     if data.ccm is not None and data.mu is not None:
         from signal_construction import conversion
 
