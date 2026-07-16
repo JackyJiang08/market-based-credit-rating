@@ -22,6 +22,7 @@ dependencies = [
 
 [project.scripts]
 market-data-toolkit = "run:main"
+mdt = "mdt.__main__:main"
 
 [tool.setuptools]
 packages = [
@@ -29,5 +30,6 @@ packages = [
     "data_cleaning",
     "signal_construction",
     "dashboard",
+    "mdt",
 ]
 py-modules = ["run"]

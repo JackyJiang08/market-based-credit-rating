@@ -34,6 +34,22 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-15 - Phase 6: one-click CLI + docs
+
+- **Scope:** `mdt` CLI package, README, packaging; final checks.
+- **Summary:**
+  - `mdt` package: `python -m mdt rate AAPL` (prints the full rating table and
+    writes `outputs/<TICKER>_report.xlsx`) and `python -m mdt batch
+    config/companies.yaml`. Console script `mdt` registered in pyproject.
+  - `submission.write_submission` accepts an optional filename (per-ticker report).
+  - README rewritten: pipeline diagram, formula->equation map, data sources,
+    quickstart, IP/attribution notice, known limitations.
+  - GAP_ANALYSIS updated with the R vs eta and 250-trading-day conventions.
+- **Validation:** `pytest` 24/24; `python -m mdt --help` and `rate KO` run
+  clean (no double-import warning); fresh-clone quickstart documented.
+- **Follow-ups:** confirm instructor's intended `R` column definition; optional
+  Layer-1/2 Parquet persistence for the staged-workflow milestone.
+
 ### 2026-07-15 - Phase 5: batch run + submission workbook
 
 - **Scope:** Layer 4 (dashboard) + CLI; adds submission output.
