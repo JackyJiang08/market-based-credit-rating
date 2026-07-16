@@ -2,10 +2,10 @@
 
 Two consistent routes are provided:
 
-1. **Lookup** against the instructor's conversion workbook (``TiC_TTC_conversion
+1. **Lookup** against the conversion workbook (``TiC_TTC_conversion
    .xlsx``): the ``TTC`` grid gives the no-regulatory-arbitrage Through-The-Cycle
    PD by ``(CCM, mu)`` and the ``SP`` sheet maps a PD to an S&P letter. These
-   grids are the instructor's IP and are read from the git-ignored ``local/``
+   grids are proprietary and are read from the git-ignored ``local/``
    tree at runtime; nothing proprietary is committed.
 
 2. **Analytical no-arbitrage conversion** (Prop. 5.2.1-5.2.2): match the capital
@@ -71,7 +71,7 @@ def load_tables(xlsx_path: str = DEFAULT_XLSX) -> ConversionTables:
     """Parse the conversion workbook and cache CSV copies under local/tables."""
     if not os.path.exists(xlsx_path):
         raise FileNotFoundError(
-            f"Conversion workbook not found at {xlsx_path}. It is instructor IP "
+            f"Conversion workbook not found at {xlsx_path}. It is proprietary PFPA data "
             "kept out of git; place it under local/ to enable TTC/S&P mapping.")
     xl = pd.ExcelFile(xlsx_path)
 

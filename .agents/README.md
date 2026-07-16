@@ -11,8 +11,7 @@ details, editing files, running project commands, or proposing changes:
    - [`docs/DEVLOG.md`](../docs/DEVLOG.md)
    - [`docs/TIMING_PROTOCOL.md`](../docs/TIMING_PROTOCOL.md)
    - [`docs/DEPENDENCY_MAPS.md`](../docs/DEPENDENCY_MAPS.md)
-4. Read files under `docs/archived/` when the task depends on historical
-   requirements, terminology, or prior assignment context.
+   - [`docs/GAP_ANALYSIS.md`](../docs/GAP_ANALYSIS.md)
 
 This is a hard prerequisite, not an optional orientation step. If any required
 document changes during the task, the agent must re-read the changed sections

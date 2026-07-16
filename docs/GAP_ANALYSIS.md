@@ -1,27 +1,24 @@
 # Gap Analysis — Branch vs. TiC / Market-Based Credit Rating Methodology
 
-**Phase 0 audit.** This document maps the credit-rating methodology (Yimin Yang,
-*Universal Time-Consistent (TiC) Credit Rating*, and the PFPA *Market-Based
-Credit Risk Rating Model for Public Companies* deck) to the current code on
-branch `agent/unify-four-layer-architecture`, and records status per concept.
+**Phase 0 audit.** This document maps the credit-rating methodology
+(*Universal Time-Consistent (TiC) Credit Rating* and the *Market-Based Credit
+Risk Rating Model for Public Companies* deck) to the current code on branch
+`agent/unify-four-layer-architecture`, and records status per concept.
 
-> **IP notice.** The TiC / market-based methodology is the instructor's
-> intellectual property. This file cites equations by number only; it does not
-> reproduce the proprietary derivations or the conversion lookup tables. The
-> source PDFs and the `TiC_TTC_conversion.xlsx` workbook are kept local (see
-> `.gitignore`) and are **not** committed. This code is for coursework and
-> portfolio demonstration only and must not be presented to third parties
-> (e.g., banks) as our own work.
+> **Note.** This file cites equations by number only; it does not reproduce the
+> derivations or the conversion lookup tables. The reference PDFs and the
+> `TiC_TTC_conversion.xlsx` workbook are kept under `local/` (see `.gitignore`)
+> and are **not** committed.
 
-## Resolved conventions (confirmed with project owner)
+## Resolved conventions
 
 | Question | Decision |
 | --- | --- |
 | Risk-free rate | **1-year** (FRED `DGS1`); horizon `T = 1yr`. Matches the deck ("Risk-free interest rate (1 year)") and existing code. Overrides the 3M T-bill wording in the task prompt. |
 | `R_A` / asset return | Use the deck's **η_A** ("Asset Return"), estimated jointly in the EM M-step; `DD = [ln(A/D) + (η_A − σ_A²/2)] / σ_A`. |
 | EM estimation window | Trailing **~252 trading days** (1 year daily), per the deck's "recent 1 year". |
-| Repo visibility / IP | Repo stays public; **instructor IP is git-ignored** (PDFs, xlsx, derived tables kept in `local/`). |
-| `Asset` sheet `R` vs `eta` columns | `eta = eta_A` (EM asset return); `R = eta_A - sigma_A^2/2` (the realized drift term inside DD). This reconciles the deck's DD with the prompt's `DD=[ln(A/D)+R]/sigma`. **Pending instructor confirmation** vs the prompt's alternative `R=(A_hat-1)/sigma^2`. |
+| Repo visibility | Repo stays public; **proprietary material is git-ignored** (PDFs, xlsx, derived tables kept in `local/`). |
+| `Asset` sheet `R` vs `eta` columns | `eta = eta_A` (EM asset return); `R = eta_A - sigma_A^2/2` (the realized drift term inside DD). This reconciles the deck's DD with the alternative `DD=[ln(A/D)+R]/sigma`. **Pending confirmation** vs the alternative `R=(A_hat-1)/sigma^2`. |
 | Trading days per year | **250** (deck: "each day is about 1/250 years"), not 252. |
 
 ## Canonical pipeline (deck slides 52–69, paper §4.4)
@@ -81,7 +78,7 @@ The repo does **not** currently reproduce any of this lookup logic.
 The branch provides a sound **data + baseline-Merton** foundation (Layers 1–2
 solid; debt rule, as-of alignment, constant-share equity all correct). The
 **entire TiC / EM / PIT→TTC rating layer is missing or differs** from the
-instructor's method and is the substance of the remaining work.
+reference method and is the substance of the remaining work.
 
 No blocking architectural conflict prevents proceeding: the missing pieces slot
 cleanly into `signal_construction` (Layer 3) behind the existing `CreditModel`
@@ -96,5 +93,5 @@ interface, feeding the `dashboard` (Layer 4) submission workbook. Planned order:
 6. **Phase 6** — one-click CLI + docs.
 
 **Deviation flagged:** the task prompt asked for the conversion lookup tables to
-be versioned under `src/.../tables/`. Per the IP decision they are kept in
+be versioned under `src/.../tables/`. They are kept in
 `local/tables/` and git-ignored instead.

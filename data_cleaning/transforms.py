@@ -69,7 +69,7 @@ def build_debt_schedule(balance: pd.DataFrame) -> pd.DataFrame:
 
 def reference_shares(market_cap: Optional[float], last_close: Optional[float],
                      fallback: Optional[float]) -> Optional[float]:
-    """Shares outstanding via the instructor's one-day method.
+    """Shares outstanding via the one-day method (market cap / price).
 
     Pick one day (the latest), shares = market cap / price, then hold this
     constant when computing daily market cap = shares x price. For dual-class

@@ -1,7 +1,7 @@
 """PIT -> TTC -> S&P conversion tests.
 
 Analytical no-arbitrage checks run everywhere. Grid/lookup checks need the
-instructor's conversion workbook (IP, kept under local/) and are skipped when
+conversion workbook (proprietary, kept under local/) and are skipped when
 it is absent, so a fresh clone still runs green.
 """
 
@@ -15,7 +15,7 @@ from signal_construction import conversion
 
 HAS_TABLES = os.path.exists(conversion.DEFAULT_XLSX)
 needs_tables = pytest.mark.skipif(not HAS_TABLES,
-                                  reason="conversion workbook (IP) not present")
+                                  reason="conversion workbook (proprietary) not present")
 
 
 # --- Analytical no-regulatory-arbitrage (Section 5.3) -----------------------

@@ -5,6 +5,7 @@
   no-look-ahead rules for data, features, models, and evaluation.
 - [`DEPENDENCY_MAPS.md`](DEPENDENCY_MAPS.md): current code, runtime, data, and
   external-package dependency maps.
-- [`LICENSE`](LICENSE): project MIT license.
-- [`archived/`](archived/): historical assignment and glossary documents.
+- [`GAP_ANALYSIS.md`](GAP_ANALYSIS.md): methodology-to-code mapping and the
+  resolved modelling conventions.
+- [`../LICENSE`](../LICENSE): project MIT license.
 - [`tools/`](tools/): local helper launchers.

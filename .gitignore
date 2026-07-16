@@ -6,9 +6,9 @@ data_cleaning/data/*
 dashboard/output/*
 !dashboard/output/.gitkeep
 
-# Instructor intellectual property — LOCAL ONLY, never commit (see README IP notice)
-# The TiC paper, the market-based deck, and the TiC->TTC conversion workbook,
-# plus any lookup tables derived from them, stay out of version control.
+# Proprietary / local material and large source artifacts — kept out of the repo.
+# Reference PDFs, the conversion workbook, and any lookup tables derived from
+# them live under local/ and are never committed.
 local/
 docs/*.pdf
 *.xlsx

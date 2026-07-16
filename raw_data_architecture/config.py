@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 
 # --------------------------------------------------------------------------- #
-# Company universe (the 10 assigned tickers)
+# Company universe (the 10-company batch)
 # --------------------------------------------------------------------------- #
 DEFAULT_TICKERS: tuple[str, ...] = (
     "COST", "KO", "DELL", "ORCL", "PNC",
