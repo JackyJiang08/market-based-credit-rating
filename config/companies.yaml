@@ -1,0 +1,16 @@
+# Assigned companies for the credit-rating batch run.
+#
+# Entries may be ticker symbols (e.g. COST) or company names (e.g. Costco);
+# names are resolved via Yahoo search, and ambiguous names raise a clear error.
+# Edit this list to change the batch universe.
+companies:
+  - COST
+  - KO
+  - DELL
+  - ORCL
+  - PNC
+  - WMT
+  - INTU
+  - AMZN
+  - T
+  - KHC

@@ -19,17 +19,33 @@ from data_cleaning.workflow import RunConfig, run
 from raw_data_architecture.config import DEFAULT_TICKERS, DEFAULT_YEARS
 
 
+def _load_companies_yaml(path: str) -> list[str]:
+    """Read a `companies:` list (tickers or names) from a YAML config file."""
+    import yaml
+    with open(path) as fh:
+        data = yaml.safe_load(fh) or {}
+    entries = data.get("companies") or []
+    if not entries:
+        raise SystemExit(f"No 'companies:' list found in {path}")
+    return [str(x).strip() for x in entries]
+
+
 def parse_args(argv: Optional[Sequence[str]] = None) -> RunConfig:
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("tickers", nargs="*", help="Ticker symbols (default: built-in universe)")
+    p.add_argument("tickers", nargs="*", help="Ticker symbols or company names")
+    p.add_argument("--companies", metavar="YAML",
+                   help="YAML file with a 'companies:' list (overrides positional args)")
     p.add_argument("--years", type=int, default=DEFAULT_YEARS,
                    help=f"History/financials window in years (default {DEFAULT_YEARS})")
     p.add_argument("--no-rates", action="store_true", help="Skip FRED macro-rate download")
     p.add_argument("--no-credit-model", action="store_true",
-                   help="Skip the Merton/KMV credit model")
+                   help="Skip the EM credit model")
     args = p.parse_args(argv)
-    tickers = [t.upper() for t in args.tickers] or list(DEFAULT_TICKERS)
+    if args.companies:
+        tickers = _load_companies_yaml(args.companies)
+    else:
+        tickers = [t.upper() for t in args.tickers] or list(DEFAULT_TICKERS)
     return RunConfig(tickers=tickers, years=args.years,
                      include_rates=not args.no_rates,
                      run_credit_model=not args.no_credit_model)

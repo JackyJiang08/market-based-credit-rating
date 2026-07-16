@@ -34,6 +34,27 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-15 - Phase 5: batch run + submission workbook
+
+- **Scope:** Layer 4 (dashboard) + CLI; adds submission output.
+- **Summary:**
+  - `config/companies.yaml`: the 10 assigned tickers (editable; accepts names).
+  - `run.py`: `--companies YAML` loads the universe from config.
+  - `dashboard/submission.py`: `write_submission` writes a timestamped
+    `outputs/submission_{date}.xlsx` (never overwriting) with an `Asset` sheet in
+    the instructor's column layout (Symbol, shares, debts, rate, statement date,
+    sigma_A, R=eta-sigma^2/2, eta, CCM, mu, TiC, RiskScore, DD, EDF, PIT PD,
+    TTC PD, S&P, Outlook) and a `validation` sheet flagging EM convergence,
+    sigma range, and off-grid conversions.
+  - `workflow.run` writes the submission after the batch.
+  - `tests/test_submission.py`: schema + R=eta-sigma^2/2 check.
+- **R vs eta:** the `R` column is the realized drift `eta - sigma_A^2/2` (the
+  term in DD), and `eta` is `eta_A`; this reconciles the two DD formulations.
+  Flagged as the working interpretation pending instructor confirmation.
+- **Validation:** `pytest` 24/24. Live batch writes submission for all 10;
+  off-grid flags on KO/PNC/INTU/KHC; outputs git-ignored.
+- **Follow-ups:** Phase 6 (one-click CLI `python -m mdt` + README/docs).
+
 ### 2026-07-15 - Phase 4: PIT -> TTC -> S&P conversion
 
 - **Scope:** Layer 3 (signal_construction); adds conversion + tests.

@@ -148,6 +148,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             data.ttc_pd = ttc.value
             data.sp_rating = conversion.sp_rating(tables, ttc.value)
             data.outlook = conversion.outlook(data.pit_pd, ttc.value)
+            data.rating_off_grid = ttc.off_grid
             LOG.info("  rating: TTC_PD=%.4f  S&P=%-4s Outlook=%+.4f%s",
                      data.ttc_pd, data.sp_rating, data.outlook,
                      "  (off-grid)" if ttc.off_grid else "")
@@ -220,6 +221,8 @@ def run(cfg: RunConfig) -> list[CompanyData]:
         _log_vol_comparison(companies)
         excel.write_master_workbook(companies, rates)
         longtable.write_long_table(longtable.build_long_table(companies, rates))
+        from dashboard import submission
+        submission.write_submission(companies)
 
     LOG.info("Done. %d/%d companies succeeded. Output: %s",
              len(companies), len(resolved), dashboard_config.OUTPUT_DIR)
