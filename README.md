@@ -1,74 +1,111 @@
-# PFPA Market Data Workflow
+# PFPA Market-Based Credit-Rating Pipeline
 
-The project is organized around four explicit workflow layers. Each layer owns
-one kind of responsibility and communicates with the next layer through pandas
-DataFrames today and versioned Parquet contracts in the target architecture.
+A market-data pipeline that estimates a **KMV/Merton** structural credit model
+for public companies and produces **Time-Consistent (TiC)** credit ratings,
+including PIT PD, a no-regulatory-arbitrage TTC PD, and an S&P-equivalent letter
+grade. Built for the PFPA credit-risk course.
 
-## Project structure
+> **Attribution & IP notice.** The TiC methodology, the *Universal
+> Time-Consistent (TiC) Credit Rating* paper, the *Market-Based Credit Risk
+> Rating Model* deck, and the `TiC_TTC_conversion.xlsx` workbook are the
+> intellectual property of the course instructor (Yimin Yang). Those source
+> artifacts and any lookup tables derived from them are kept in a git-ignored
+> `local/` directory and are **not** committed. This repository is for
+> coursework and portfolio demonstration only; the methodology must **not** be
+> presented to third parties (e.g., banks) as our own work. Code comments cite
+> the paper by equation number.
 
-```text
-PFPA_Intern_Project/
-|-- raw_data_architecture/  # Layer 1: Yahoo/FRED acquisition and lineage
-|-- data_cleaning/          # Layer 2: normalization and time alignment
-|-- signal_construction/    # Layer 3: model prototype
-|-- dashboard/              # Layer 4: publishing prototype
-|-- docs/                   # Project metadata and supporting documentation
-|   |-- DEVLOG.md           # Required update for every push
-|   |-- TIMING_PROTOCOL.md  # Mandatory no-look-ahead contract
-|   |-- DEPENDENCY_MAPS.md
-|   `-- LICENSE
-|-- .agents/                # Repository guidance for coding agents
-|-- run.py                  # Backward-compatible CLI entry point
-|-- pyproject.toml          # Python build and package metadata
-`-- requirements.txt
-```
-
-## Current status
-
-Only the first two layers are considered active project scope:
-
-1. **Raw Data Architecture** downloads company data from Yahoo Finance and
-   rates from FRED, with retry/backoff and run-level provenance.
-2. **Data Cleaning** normalizes statements, constructs the debt schedule, and
-   aligns prices, debt, and rates into a daily panel.
-
-The existing Merton/KMV code and Excel/long-table exporters are retained inside
-Layers 3 and 4 as prototypes. They are not evidence that signal construction or
-the dashboard is complete.
-
-## Workflow and dependency rule
+## Pipeline at a glance
 
 ```text
-raw_data_architecture -> data_cleaning -> signal_construction -> dashboard
+raw_data_architecture   ->   data_cleaning        ->   signal_construction     ->   dashboard
+(Yahoo prices/financials,    (dividend add-back,       (EM: sigma_A, A, eta_A;      (submission workbook,
+ FRED 1Y rate; provenance)    debt D = ST+0.5*LT,       measures: CCM/mu/TiC/DD;     Excel + long table)
+                              as-of daily panel)        PIT->TTC->S&P conversion)
 ```
 
-A layer may consume contracts from a preceding layer. Raw acquisition and
-cleaning must never import dashboard code. The temporary compatibility workflow
-in `data_cleaning/workflow.py` still invokes the two prototypes and should be
-split into stage commands when raw/clean Parquet persistence is implemented.
+Four layers, each owning one responsibility and passing pandas frames forward.
+See [`docs/DEPENDENCY_MAPS.md`](docs/DEPENDENCY_MAPS.md) and
+[`docs/GAP_ANALYSIS.md`](docs/GAP_ANALYSIS.md).
 
-## Development workflow
+## Method (formula -> code -> paper equation)
 
-Update [`docs/DEVLOG.md`](docs/DEVLOG.md) as part of every push. The newest entry must
-summarize the pushed scope, breaking changes, validation, and follow-up work.
+| Step | Where | Paper ref |
+| --- | --- | --- |
+| Equity `E = shares x price` (dividends added back) | `data_cleaning/alignment.py` | deck slide 61 |
+| Default-point debt `D = 100% ST + 50% LT` | `data_cleaning/transforms.py` | deck slide 55 |
+| As-of alignment of price / statement / 1Y rate (no look-ahead) | `data_cleaning/alignment.py` | deck slide 62 |
+| **EM**: invert `E = g(A)` by bisection; recover `sigma_A`, `A`, `eta_A` | `signal_construction/em.py` | Eq. (10); deck 52-68 |
+| `mu`, `CCM` (first-passage factors) | `signal_construction/measures.py` | Eq. (11) |
+| `TiC = sigma_A^2/ln^2(A/D)`, `RiskScore = 100*TiC` | `measures.py` | Eq. (12), (5) |
+| `DD`, `EDF = Phi(-DD)` | `measures.py` | Eq. (14) |
+| `PIT PD` (inverse-Gaussian first-hitting) | `measures.py` | Eq. (13) |
+| No-arbitrage `alpha` match, `CCM*`; TTC PD; S&P letter | `signal_construction/conversion.py` | Prop. 5.2, Sec. 5.3 |
+| `Outlook = PIT PD - TTC PD` | `conversion.py` | Prop. 5.3 |
 
-## Run the compatibility workflow
+Verified against the paper: PIT PD reproduces Tables 13-14; `alpha_FH(1.5)=0.91906`,
+`CCM*=1.35373`.
+
+## Data sources
+
+| Data | Source |
+| --- | --- |
+| Prices, shares, dividends, balance sheets | Yahoo Finance (`yfinance`) |
+| Risk-free rate: **1-Year Treasury** (`DGS1`) | FRED (Federal Reserve H.15) |
+
+The 1-year tenor matches the 1-year credit horizon used throughout (deck:
+"Risk-free interest rate (1 year)").
+
+## Quickstart
 
 ```bash
-pip install -r requirements.txt
-python run.py AAPL --years 2
+pip install -r requirements.txt              # Python 3.11+ recommended
+
+# One company (ticker or name) -> prints the rating table + writes a report
+python -m mdt rate AAPL
+
+# The assignment batch -> outputs/submission_<timestamp>.xlsx
+python -m mdt batch config/companies.yaml
+
+# Backward-compatible workflow entry
+python run.py COST KO --years 2
 ```
 
-Generated compatibility outputs are written to `dashboard/output/`.
+To enable the TTC/S&P conversion, place the instructor's
+`TiC_TTC_conversion.xlsx` at `local/TiC_TTC_conversion.xlsx` (git-ignored).
+Without it the pipeline still runs and reports σ_A / DD / PIT PD; the TTC/S&P
+columns are simply skipped.
 
-## Next architecture milestone
+Outputs (all git-ignored, regenerated by running):
+- `outputs/submission_<timestamp>.xlsx` — the instructor's `Asset` sheet + a `validation` sheet.
+- `dashboard/output/` — per-company workbooks, master summary, tidy long table.
+- `raw_data_architecture/data/` & `data_cleaning/data/` — per-company raw + cleaned CSV/XLSX.
 
-- Persist immutable source snapshots under `raw_data_architecture/data/`.
-- Publish validated model panels under `data_cleaning/data/`.
-- Add `event_date`, `available_at`, `ingested_at`, and `decision_at` contracts.
-- Add offline fixtures and tests before building Layer 3.
+## Tests
 
-See each layer README for its boundary and maturity. Current code, runtime, and
-data dependencies are documented in
-[`docs/DEPENDENCY_MAPS.md`](docs/DEPENDENCY_MAPS.md). All time-dependent work
-must follow [`docs/TIMING_PROTOCOL.md`](docs/TIMING_PROTOCOL.md).
+```bash
+pytest
+```
+
+Offline suite: no-look-ahead canary, EM recovery of a known σ_A, measures vs the
+paper's tables, and conversion checks. Grid/lookup tests that need the IP
+workbook skip automatically when `local/` is absent, so a fresh clone is green.
+
+## Known limitations
+
+- **Market-based PIT PD is liquidity-sensitive.** For large, liquid,
+  investment-grade names PIT PD is legitimately ~0; compare firms by **DD** and
+  **RiskScore** rather than PIT PD. Typical asset volatilities land in ~10-60%.
+- **η_A is noisy** over a 1-year window (the deck notes it "makes both
+  unstable"); this shows up in µ/CCM/PIT but *not* in the η-independent RiskScore.
+- **Off-grid conversions** (CCM or µ outside the lookup grid) are edge-clamped
+  and flagged in the `validation` sheet.
+- **Yahoo free tier** returns ~5-7 quarters of statements; banks (e.g. PNC)
+  omit a clean current/non-current split (handled by a debt fallback).
+- The `Asset` sheet `R` column is the realized drift `η_A - σ_A^2/2` (the DD
+  term); pending instructor confirmation of the intended definition.
+
+## License
+
+Project code: [MIT](docs/LICENSE). Instructor methodology and materials remain
+the instructor's IP (see the notice above).

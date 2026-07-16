@@ -21,6 +21,8 @@ branch `agent/unify-four-layer-architecture`, and records status per concept.
 | `R_A` / asset return | Use the deck's **η_A** ("Asset Return"), estimated jointly in the EM M-step; `DD = [ln(A/D) + (η_A − σ_A²/2)] / σ_A`. |
 | EM estimation window | Trailing **~252 trading days** (1 year daily), per the deck's "recent 1 year". |
 | Repo visibility / IP | Repo stays public; **instructor IP is git-ignored** (PDFs, xlsx, derived tables kept in `local/`). |
+| `Asset` sheet `R` vs `eta` columns | `eta = eta_A` (EM asset return); `R = eta_A - sigma_A^2/2` (the realized drift term inside DD). This reconciles the deck's DD with the prompt's `DD=[ln(A/D)+R]/sigma`. **Pending instructor confirmation** vs the prompt's alternative `R=(A_hat-1)/sigma^2`. |
+| Trading days per year | **250** (deck: "each day is about 1/250 years"), not 252. |
 
 ## Canonical pipeline (deck slides 52–69, paper §4.4)
 

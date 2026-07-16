@@ -124,10 +124,13 @@ def _format(ws) -> None:
         ws.column_dimensions[letter].width = min(max(longest + 2, 12), 40)
 
 
-def write_submission(companies: list[CompanyData]) -> str:
+def write_submission(companies: list[CompanyData],
+                     filename: str | None = None) -> str:
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    path = os.path.join(OUTPUT_DIR, f"submission_{stamp}.xlsx")
+    if filename is None:
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"submission_{stamp}.xlsx"
+    path = os.path.join(OUTPUT_DIR, filename)
 
     asset = pd.DataFrame([_asset_row(c) for c in companies])
     validation = pd.DataFrame([_validation_row(c) for c in companies])
