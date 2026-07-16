@@ -34,6 +34,28 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-15 - Phase 4: PIT -> TTC -> S&P conversion
+
+- **Scope:** Layer 3 (signal_construction); adds conversion + tests.
+- **Summary:**
+  - `signal_construction/conversion.py`: loads the instructor's conversion
+    workbook from the git-ignored `local/` tree (TTC grid = no-arbitrage S&P TTC
+    PD by CCM x mu; SP sheet = PD -> letter thresholds), with bilinear
+    interpolation + edge-clamp flagging for off-grid inputs. Also implements the
+    analytical no-arbitrage conversion (Prop. 5.2): confidence levels
+    `alpha_first_hitting` / `alpha_sp` (Eq. 22) and `no_arb_ccm_star`.
+  - `workflow`: computes TTC PD, S&P letter, and Outlook (PIT PD - TTC PD) per
+    company; `CompanyData` gains those fields.
+  - `tests/test_conversion.py`: reproduces paper alpha_FH(1.5)=0.91906 and
+    CCM*=1.35373; TTC grid reproduces paper S&P TTC (Tables 13-14); SP threshold
+    mapping; off-grid flagging. Grid tests skip when the IP workbook is absent.
+- **IP:** conversion tables read from `local/` and cached to
+  `local/tables/*.csv` (git-ignored); no proprietary numbers are committed.
+- **Validation:** `pytest` 23/23 (grid tests active locally). Live 10-company
+  ratings: ORCL BB+ (riskiest) ... AAA- for COST/KO/WMT/AMZN; off-grid flags on
+  KO/PNC/INTU (CCM<0.1) and KHC (mu>160).
+- **Follow-ups:** Phase 5 (companies.yaml + timestamped submission workbook).
+
 ### 2026-07-15 - Phase 3: TiC / first-passage credit measures
 
 - **Scope:** Layer 3 (signal_construction); adds measures + tests.

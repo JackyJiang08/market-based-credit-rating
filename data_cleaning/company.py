@@ -63,5 +63,10 @@ class CompanyData:
     edf: Optional[float] = None           # Phi(-DD)
     pit_pd: Optional[float] = None        # 1-year PIT PD
 
+    # PIT -> TTC -> S&P conversion (Layer 3)
+    ttc_pd: Optional[float] = None        # no-arbitrage through-the-cycle PD
+    sp_rating: Optional[str] = None       # S&P-equivalent letter grade
+    outlook: Optional[float] = None       # PIT PD - TTC PD (Prop. 5.3)
+
     # Credit assessment
     credit: Optional["CreditEstimate"] = None
