@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "market-data-toolkit"
+name = "market-based-credit-rating"
 version = "0.3.0"
 description = "Market-based KMV/TiC credit-rating pipeline for public companies (EM asset estimation, PIT/TTC PD, S&P-equivalent rating)."
 readme = "README.md"
@@ -21,7 +21,6 @@ dependencies = [
 ]
 
 [project.scripts]
-market-data-toolkit = "run:main"
 mdt = "mdt.__main__:main"
 
 [tool.setuptools]
