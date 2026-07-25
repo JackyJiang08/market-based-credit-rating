@@ -1,6 +1,6 @@
 # Development Log
 
-Last updated: 2026-07-09
+Last updated: 2026-07-25
 
 This file under `docs/` is the shared, human-readable status record for the repository. It
 must be updated as part of every push so contributors can understand what
@@ -34,6 +34,39 @@ single push when they represent the same unit of work.
   true publication-time `available_at` field (documented limitation).
 
 ## Recent changes
+
+### 2026-07-25 - Add CLAUDE.md agent context file
+
+- **Scope:** documentation and repository configuration; no code or formula changes.
+- **Summary:**
+  - Added root `CLAUDE.md`: project context, protocol pointers, git rules,
+    engineering rules, resolved conventions, known limitations, repo map, and
+    commands, for agent sessions working in this repository.
+  - Its TIME PROTOCOL and AGENT PROTOCOL sections summarize
+    `docs/TIMING_PROTOCOL.md` and `.agents/README.md` and point at those files
+    as the source of truth, rather than restating them as independent rules.
+  - Recorded explicitly that no canonical team timezone or timestamp format is
+    defined anywhere in the repository, and listed the de-facto formats
+    currently produced by the code (`docs/DEVLOG.md` headings `YYYY-MM-DD`,
+    `submission_%Y%m%d_%H%M%S.xlsx`, `lineage.RUN_TIMESTAMP`
+    `%Y-%m-%d %H:%M:%S`), all naive local time.
+  - Ignored `CLAUDE.local.md` so contributors can keep personal overrides
+    untracked; `CLAUDE.md` itself is committed.
+- **Breaking changes:** None.
+- **Validation:** verified every path, module, command, constant, and file:line
+  reference in `CLAUDE.md` against the working tree (`git ls-files`, targeted
+  greps, and reads of `signal_construction/{config,measures,conversion}.py`,
+  `dashboard/submission.py`, `raw_data_architecture/lineage.py`,
+  `mdt/__main__.py`, `pyproject.toml`). Confirmed `git check-ignore` covers
+  `CLAUDE.local.md` and that no proprietary extension is in the index. No test
+  run was required or performed; no source files were modified.
+- **Follow-ups:**
+  - `signal_construction/measures.py:75` takes `abs(drift)` for `mu`/`CCM`
+    with no provenance flag on the output — decide whether to flag or gate it.
+  - No canonical timestamp standard exists; if one is wanted, it belongs in
+    `docs/TIMING_PROTOCOL.md` before any stamping code changes.
+  - `README.md` still carries organization-specific wording in its project
+    description and license note; confirm whether that should be genericized.
 
 ### 2026-07-15 - Review pass: remove dead code, surface ratings, polish
 

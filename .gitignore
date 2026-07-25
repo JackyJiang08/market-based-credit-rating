@@ -17,6 +17,9 @@ local/
 *.pdf
 *.xlsx
 
+# Personal agent-context overrides (CLAUDE.md itself is committed)
+CLAUDE.local.md
+
 # macOS
 .DS_Store
 
