@@ -35,6 +35,50 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-25 - Three-way reconciliation of submission workbooks
+
+- **Scope:** documentation and analysis under `docs/reconciliation/`; no change
+  to any of the four workflow layers.
+- **Summary:**
+  - Added `docs/reconciliation/REPORT.md`, a per-company and aggregate
+    comparison of our submission, a peer implementation of the same spec, and a
+    third set of screenshot figures, with an input-provenance table and a
+    classification of every disagreement.
+  - Added `docs/reconciliation/crossover.py`, a reproducible 2x2 crossover:
+    our model on our inputs, our model on their inputs, their debt-field
+    convention on our inputs, and their reported results. Their cell is read
+    rather than recomputed because the peer published a workbook, not code, so
+    the residual term bounds implementation difference from above.
+  - Added `docs/reconciliation/screenshot_figures.md`, the hand transcription
+    of the third source with its transcription caveats.
+- **Findings of record:**
+  - Both workbooks take `abs()` of a negative drift when forming `mu`/`CCM`,
+    violating the stated assumption of Prop. 4.4.1 (ours 4/10 companies,
+    theirs 5/10). Treated as the headline finding.
+  - The reported "Outlook sign is inverted" finding is **refuted**: Eq. (28)
+    defines `Outlook = PD_FH - S&P TTC`, which is what the repo computes. No
+    change was made; a change here would have inverted correct behavior.
+  - Long-term debt divergence traced per name to field selection
+    (`Long Term Debt And Capital Lease Obligation` vs `Long Term Debt`),
+    with the ORCL and AMZN gaps equal to the capital-lease row exactly.
+  - Off-grid coverage is wider than reported: 5 of 10 companies clamp on our
+    side, not 2 - KO, PNC and INTU fall off the CCM floor in addition to COST
+    and AMZN falling off the mu ceiling.
+- **Breaking changes:** None.
+- **Validation:** `python -m pytest -q` -> 24 passed, run before this push.
+  Equation (28) and Prop. 4.4.1 checked against `local/TiC_paper.pdf` directly.
+  Field-level claims checked against the cached raw balance sheets. Confirmed
+  `git ls-files --cached` holds no `.pdf`, `.xlsx`, `.csv` or `.parquet`.
+- **Follow-ups:**
+  - The study's inputs and its results CSV are git-ignored by the repo-wide
+    `*.xlsx` / `*.csv` rules, so `REPORT.md` carries the numbers inline. The
+    peer workbook embeds proprietary grid sheets; the ignore rule must stay.
+  - The reconciliation reads the cached run of 2026-07-25 and is not
+    re-derivable at a fixed date, per `docs/TIMING_PROTOCOL.md` §9.
+  - Four decisions are open for the project owner: negative-drift handling,
+    off-grid handling, `Total Debt` column semantics, and the long-term debt
+    field definition.
+
 ### 2026-07-25 - Trunk-based workflow; CLAUDE.md accuracy pass
 
 - **Scope:** repository workflow policy and documentation; no code changes.
