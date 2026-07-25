@@ -67,8 +67,19 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
         prices = pd.DataFrame()
     if not prices.empty:
         prices.index = prices.index.tz_localize(None)
+        # The vendor sometimes appends a placeholder row for the current session
+        # with a missing Close. Left in, it makes last_close NaN, which
+        # propagates through reference_shares into an all-NaN equity series and
+        # starves the EM step. Keep only days that actually priced.
+        dropped = int(prices["Close"].isna().sum())
+        if dropped:
+            prices = prices[prices["Close"].notna()]
+            LOG.info("  dropped %d price row(s) with no Close", dropped)
+        if prices.empty:
+            LOG.warning("  no priced days in window; skipping price-derived fields")
         if "Adj Close" in prices and "Close" in prices:
             prices["Div/Split Adj Factor"] = (prices["Adj Close"] / prices["Close"]).round(6)
+    if not prices.empty:
         data.prices = prices
         data.last_close = float(prices["Close"].iloc[-1])
         LOG.info("  prices: %d rows (%s -> %s)", len(prices),
