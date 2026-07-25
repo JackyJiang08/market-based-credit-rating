@@ -30,8 +30,9 @@ live in a git-ignored `local/` tree that each contributor supplies:
 - `local/tables/` — CSV caches derived from the workbook (e.g. `sp_thresholds.csv`)
 
 **Red line:** this repository is PUBLIC. Never commit, push, stage, or copy anything from
-`local/` into a tracked path, and never paste its contents into code, docs, commit messages,
-or a PR description. `.gitignore` blocks `local/`, `*.pdf`, `*.xlsx`, `*.csv`, `*.parquet` —
+`local/` into a tracked path, and never paste its contents into code, docs, or commit
+messages. With trunk-based pushes going straight to a public `main`, there is no review step
+to catch this — check before you push, not after. `.gitignore` blocks `local/`, `*.pdf`, `*.xlsx`, `*.csv`, `*.parquet` —
 check `git ls-files --cached` for those extensions before every push.
 
 **Attribution / IP:** the TiC methodology is not ours. It may be implemented and
@@ -40,7 +41,7 @@ third parties as original methodology. Keep the attribution/IP notice in `README
 cite the paper by equation number in the docstring of every module implementing a TiC
 formula (`signal_construction/em.py`, `measures.py`, `conversion.py` already do this).
 
-**Positioning:** all public-facing material (README, docs, demo, commit messages) reads as
+**Positioning:** all public-facing material (README, docs, commit messages) reads as
 professional engineering work. Do not frame it as a class assignment.
 
 ---
@@ -86,10 +87,13 @@ Rules that bind every time-dependent change:
   construction **must add or update a no-look-ahead test** (`tests/test_no_lookahead.py`).
   Also required by `.agents/README.md`: "Any date alignment change must include a
   no-look-ahead test."
-- Panels/signals should expose the audit fields listed in §8 (`run_id`,
+- **(planned)** Panels/signals should expose the audit fields listed in §8 (`run_id`,
   `source_snapshot_id`, `decision_time`, `max_input_available_at`, `feature_window_start/end`,
   `target_start/end`, `availability_method`, `lookahead_allowed`,
-  `timing_validation_status`).
+  `timing_validation_status`). None of these fields exist in the pipeline today —
+  `decision_time` and `available_at` appear only in `tests/test_no_lookahead.py`, and run
+  provenance is limited to `raw_data_architecture/lineage.py` (`RUN_TIMESTAMP`,
+  `EQUITY_SOURCE`, `RATES_SOURCE`). Treat §8 as the target, not a description of the output.
 - Known non-compliance, per §9 — existing aligned panels are **research prototypes, not
   backtest-safe datasets**: `data_cleaning/alignment.py` aligns statements on period end
   rather than `available_at`; the reference-share method can apply a latest-date estimate
@@ -152,29 +156,45 @@ changes**, using the template at the bottom of `docs/DEVLOG.md`.
 - Put new code in the layer that owns its output contract.
 - No backward imports from an earlier layer to a later layer.
 - Layer 1 and Layer 2 are the **only active implementation scope** until the project owner
-  explicitly activates signal-construction or dashboard work.
+  explicitly activates signal-construction or dashboard work. **Conflict — do not resolve
+  silently:** Layers 3 and 4 are fully implemented, and `docs/DEPENDENCY_MAPS.md:12-15`
+  marks all four layers `ACTIVE`. Read this as already activated in practice, but confirm
+  with the owner before starting new Layer 3/4 work, and get `.agents/README.md` updated.
 - Any date alignment change must include a no-look-ahead test.
 - Follow `docs/TIMING_PROTOCOL.md` for every time-dependent task.
+- Known deviation: `docs/DEPENDENCY_MAPS.md:27-28` records two temporary Layer 2 → Layer 3/4
+  compatibility edges that violate the no-backward-import rule. Don't add more.
 
 ---
 
-## Git rules (non-negotiable)
+## Git rules (non-negotiable) — trunk-based
 
-- **Never commit or push to `main`.** One feature branch per task: `feat/<slug>`,
-  `fix/<slug>`, `docs/<slug>`. Push explicitly: `git push -u origin <branch>`.
-- Open a PR against `main` with a filled-out description (what changed, why, how verified,
-  which numbers moved). A human merges. You never merge.
-- Confirm the current branch before the first commit of any task. System git here is 2.15 —
-  `git branch --show-current` and `git restore` do not exist; use
-  `git rev-parse --abbrev-ref HEAD` and `git checkout --`.
-- No force-push. No changes to remotes, git config, or branch protection.
-- **Never delete a branch** — local or remote — unless explicitly told to.
+This repository is trunk-based as of 2026-07-25. There are no feature branches and no
+review gate, so the discipline that a PR used to provide now lives in the commit itself.
+
+- **Work directly on `main`.** Never create a feature branch. Never open a PR. Push with
+  `git push origin main` after each sub-task, not just at the end of a session.
+- Confirm `git branch --show-current` is `main` before the first commit of any task.
+  (This machine's system git is 2.15, which predates that flag — use
+  `git rev-parse --abbrev-ref HEAD` here. Likewise `git restore` does not exist; use
+  `git checkout --`.)
+- **`main` must be green at every commit.** Run the full test suite *before* every push.
+  Never push a commit you have not run. If the suite is red, fix it or revert before
+  pushing — do not push and follow up.
 - Atomic conventional commits: `feat(model):`, `fix(data):`, `test:`, `docs:`, `refactor:`,
   `chore:`, `ci:`. Never mix a refactor with a behaviour change in one commit.
-- Commit and push after each numbered sub-task, not just at the end of a session. Every push
-  carries its `docs/DEVLOG.md` update (see AGENT PROTOCOL).
-- Commit messages and PR text stay generic and professional: no organization name, no
-  instructor, no coursework framing.
+- **The commit message body replaces the PR description.** It states what changed, why, how
+  it was verified (the commands actually run), and which output numbers moved. Write `None`
+  rather than omitting a section.
+- **Never rewrite published history.** No force-push. No rebase or amend of any commit that
+  has been pushed. Undo with `git revert`, which is itself a normal commit and needs the
+  same message discipline.
+- No changes to remotes, git config, or branch protection.
+- **Never delete a branch** — local or remote — unless explicitly told to.
+- Every push still carries its `docs/DEVLOG.md` update (see AGENT PROTOCOL). With no PR to
+  read, DEVLOG plus the commit body are the only record of a change.
+- Commit messages stay generic and professional: no organization name, no instructor, no
+  coursework framing.
 
 ---
 
@@ -190,17 +210,19 @@ changes**, using the template at the bottom of `docs/DEVLOG.md`.
    violation.)
 
 3. **No silent fallbacks.** Every clamp, default, `abs()`, or estimator substitution should
-   set a provenance flag that reaches the output workbook and the UI. If the reader can't
-   tell the model did something unusual, it's a bug. Today only grid clamping carries such a
-   flag (`rating_off_grid` → `validation` sheet); the `abs(drift)` substitution in
-   `signal_construction/measures.py:75` does not. Adding flags is welcome work; removing one
-   is not.
+   set a provenance flag that reaches the output workbook. If the reader can't tell the
+   model did something unusual, it's a bug. Today only grid clamping carries such a flag
+   (`rating_off_grid` → `validation` sheet in `dashboard/submission.py`); **(planned)** full
+   coverage of the remaining substitutions, starting with the `abs(drift)` in
+   `signal_construction/measures.py:75`, which has no flag. Adding flags is welcome work;
+   removing one is not. There is no UI in this repo — the `validation` sheet and the CLI
+   output are where a flag has to surface.
 
 4. **Invariants.** `A > D > 0` is asserted in `signal_construction/measures.py:71` (raises).
    `EM_MAX_ITER = 20` is enforced in `signal_construction/config.py`. PD is clamped to
-   `[0, 1]`. σ_A currently only warns outside `[0.10, 0.60]`
-   (`SIGMA_A_WARN_LOW/HIGH`). No `NaN` should reach an output file — that one is a goal, not
-   yet a hard gate.
+   `[0, 1]` in `pit_pd_first_hitting()`. σ_A currently only warns outside `[0.10, 0.60]`
+   (`SIGMA_A_WARN_LOW/HIGH`). **(planned)** a hard assert that no `NaN` reaches an output
+   file, and **(planned)** promoting the σ_A range from a warning to an asserted bound.
 
 5. **No bare `.iloc[-1]`** on a price/financial series without first dropping missing rows —
    this class of bug produced the KHC NaN cascade (fixed in `6eb9826`). There is no shared
@@ -210,19 +232,21 @@ changes**, using the template at the bottom of `docs/DEVLOG.md`.
 
 6. **Small-probability arithmetic must not silently overflow.** `exp(2/CCM)` in
    `pit_pd_first_hitting()` overflows for tiny CCM and is currently guarded by
-   `try/except OverflowError`. Preferred direction is log space
-   (`scipy.special.log_ndtr` / `logsumexp`) with a finiteness assert; do not remove the
-   existing guard without replacing it.
+   `try/except OverflowError` (`signal_construction/measures.py`). **(planned)** move this
+   to log space (`scipy.special.log_ndtr` / `logsumexp`) with a finiteness assert — neither
+   is imported anywhere today. Do not remove the existing guard without replacing it.
 
 7. **One writer per artifact.** Exactly one module writes the deliverable workbook
    (`dashboard/submission.py`), driven by a declared schema constant. No hand-written sheets,
    ever.
 
-8. **Reproducibility.** `raw_data_architecture/lineage.py` records run provenance. A full
-   manifest (git SHA, package version, input hashes, data vintage, config, timestamp) is a
-   known gap — extend `lineage.py` rather than starting a parallel mechanism. There are no
-   committed offline fixtures; tests that need the proprietary workbook skip automatically so
-   a fresh clone stays green. Keep that skip behaviour working.
+8. **Reproducibility.** `raw_data_architecture/lineage.py` records run provenance today:
+   `RUN_TIMESTAMP`, `EQUITY_SOURCE`, `RATES_SOURCE`. **(planned)** a full run manifest (git
+   SHA, package version, input hashes, data vintage, config) — extend `lineage.py` rather
+   than starting a parallel mechanism. There are no committed offline fixtures and no
+   `data/fixtures/` directory; instead, tests needing the proprietary workbook skip via
+   `needs_tables` (`tests/test_conversion.py:17`) so a fresh clone stays green. Keep that
+   skip behaviour working.
 
 9. **Ask, don't assume.** Ambiguity in a convention (drift definition, debt fields, EM
    window, rate series) → stop and ask. Assumptions get written into `docs/GAP_ANALYSIS.md`
@@ -273,7 +297,8 @@ you need it, add it with its proposition reference rather than assuming it exist
 - **Market-implied PIT PDs are liquidity-sensitive.** For large, liquid, investment-grade
   names PIT PD is legitimately ~0 — compare firms by DD and RiskScore instead. Typical asset
   volatilities land in ~10–60%.
-- **Data path is in memory.** Immutable raw/clean Parquet boundaries are a future milestone
+- **Data path is in memory.** **(planned)** immutable raw/clean Parquet point-in-time
+  boundaries; `data_cleaning/persistence.py` exists but does not yet provide them
   (`docs/DEVLOG.md`, `docs/TIMING_PROTOCOL.md` §9).
 
 ---
@@ -313,17 +338,25 @@ pytest                                    # offline suite, 24 tests
 TTC/S&P conversion requires `local/TiC_TTC_conversion.xlsx`; without it the pipeline still
 runs and reports σ_A / DD / PIT PD, and the grid tests skip.
 
-## Acceptance gates
+## Acceptance gates (run these yourself, before every push)
 
 There is **no CI in this repo** (no `.github/`, no pre-commit, no ruff/black/mypy config or
-dependency). These are the standards a change is held to — enforce them by running them, and
-record in `docs/DEVLOG.md` what you actually ran:
+dependency) and, since going trunk-based, no review gate either. Nothing runs these for you.
+Run them, and record in the commit body and `docs/DEVLOG.md` what you actually ran:
 
+- `pytest` is fully green — currently 24 tests. This is the hard gate: never push a commit
+  whose suite you have not run.
 - Paper Tables 13/14 and the `alpha_FH(1.5) = 0.91906` / `CCM* = 1.35373` anchors still
   reproduce (`tests/test_measures.py`, `tests/test_conversion.py`).
 - `tests/test_no_lookahead.py` passes, and any alignment change adds to it.
-- Full `pytest` run is green from a fresh clone **without** `local/` present.
-- Invariants above hold across the 10-company batch.
 - `git ls-files --cached` contains no `.pdf`, `.xlsx`, `.csv`, or `.parquet`, and nothing
   under `local/`.
 - `docs/DEVLOG.md` is updated in the same push.
+- Invariants above hold across the 10-company batch — this needs a live network run
+  (`python -m mdt batch config/companies.yaml`), so it is a release check rather than a
+  per-commit one. Say so in the commit body when you have not run it.
+- **(planned)** the suite is verified green from a fresh clone with `local/` absent. Locally
+  `local/` is usually present, so the grid tests run rather than skip; the skip path is only
+  exercised on a clean checkout.
+- **(planned)** CI, lint, and type checking. Until they exist, do not describe a change as
+  "CI-verified" or cite `ruff`/`mypy` results.

@@ -35,6 +35,43 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-25 - Trunk-based workflow; CLAUDE.md accuracy pass
+
+- **Scope:** repository workflow policy and documentation; no code changes.
+- **Summary:**
+  - Landed `docs/claude-md-project-context` into `main` by fast-forward (no
+    history rewritten) and deleted that branch locally and on the remote.
+  - Repository is now trunk-based: work happens directly on `main`, no feature
+    branches, no pull requests. `CLAUDE.md` "Git rules" rewritten accordingly:
+    run the full test suite before every push and never push an unrun commit;
+    the commit body now carries what changed, why, how verified, and which
+    output numbers moved, replacing the PR description; never rewrite published
+    history (no force-push, no rebase or amend of pushed commits — undo with
+    `git revert`); no changes to remotes, git config, or branch protection.
+  - Marked every forward-looking statement in `CLAUDE.md` `(planned)`: the
+    TIMING_PROTOCOL §8 audit fields, full provenance flagging, the NaN and
+    sigma_A hard asserts, log-space small-probability arithmetic, the full run
+    manifest, immutable Parquet vintages, fresh-clone verification, and CI.
+  - Recorded the `.agents/README.md` vs `docs/DEPENDENCY_MAPS.md` conflict over
+    whether Layers 3-4 are active, and the two known Layer 2 -> Layer 3/4
+    compatibility edges, rather than silently picking a side.
+  - Corrected remaining inaccuracies: removed references to a UI and to a demo
+    (neither exists), pointed the fixture note at the real `needs_tables` skip
+    in `tests/test_conversion.py:17`, and noted that `git branch --show-current`
+    is unavailable on this machine's git 2.15.
+- **Breaking changes:** workflow policy only. Feature branches and pull
+  requests are no longer used; `main` is the working branch.
+- **Validation:** `python -m pytest -q` -> 24 passed (run before this push).
+  Re-verified every path, module, command, and `file:line` reference in
+  `CLAUDE.md` against the working tree. Confirmed `git ls-files --cached` holds
+  no `.pdf`, `.xlsx`, `.csv`, or `.parquet` and nothing under `local/`.
+- **Follow-ups:**
+  - One stray remote branch remains, `agent/unify-four-layer-architecture`
+    (fully merged into `main`); awaiting the owner's decision before deletion.
+  - Organization-specific wording persists in 13 places across `README.md`,
+    module docstrings, an error message in `signal_construction/conversion.py`,
+    and the `pfpa.*` logger namespaces, in a public repository.
+
 ### 2026-07-25 - Add CLAUDE.md agent context file
 
 - **Scope:** documentation and repository configuration; no code or formula changes.
