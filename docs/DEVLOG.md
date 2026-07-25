@@ -35,6 +35,40 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-25 - Repository audit and issue backlog
+
+- **Scope:** documentation only; `docs/GAP_ANALYSIS.md` rewritten and twelve
+  GitHub issues opened. No source file was modified and no behavior changed.
+- **Summary:**
+  - Rewrote `docs/GAP_ANALYSIS.md` as a concept -> equation -> file:function ->
+    status map over the fourteen paper results requested, using an explicit
+    correct/partial/missing/wrong vocabulary, after reading every file in the
+    repository and re-checking each equation against the paper.
+  - Corrected two statements of `Outlook = S&P TTC - PIT PD` in that file:
+    Eq. (28) is `PD_FH - S&P TTC`, which is what the code computes.
+  - Corrected the Eq. (1)-(2) row, previously marked "implemented". Only the
+    first-passage closed form of Eq. (11) exists; the definitional
+    `CCM = E[tau]*E[1/tau] - 1` is not implemented anywhere.
+  - Opened issues #3-#14 covering the negative-drift violation, the Eq. (13)
+    overflow branch, linear-space CDF evaluation, the unreachable analytical
+    conversion route, the Asset-sheet schema mismatch, three disagreeing
+    credit-measure writers, silent broad excepts, magic numbers, unimplemented
+    paper results, off-grid clamping, test-coverage gaps, and the outlook-sign
+    documentation error. Added `modelling` and `infra` labels.
+- **Breaking changes:** None.
+- **Validation:** `python -m pytest -q` -> 24 passed, run before this push. The
+  Eq. (13) overflow claim was verified numerically: `exp(2/CCM)` raises above
+  CCM ~= 0.00276 and the fallback discards up to 8.9e-3 of absolute PD.
+  `norm.cdf(-x)` was confirmed to return exactly 0.0 from x ~= 38 while
+  `log_ndtr` still resolves past 39. Equations 1-5, 11-14, 22, 24, 26-28 and
+  Prop. 4.2/4.4.1/4.4.2/4.5.2-4.5.4/5.2.1/5.3 were read from the paper text.
+- **Follow-ups:**
+  - Four owner decisions remain open and block #3, #12, and the two debt
+    conventions recorded in `docs/reconciliation/REPORT.md`.
+  - `alpha_sp` is correct but visually invites a wrong "fix": the paper's
+    stacked fraction reads as `0.625913 * ln CCM` where the coefficient is
+    `1/0.625913`. Noted in both `GAP_ANALYSIS.md` and #11.
+
 ### 2026-07-25 - Three-way reconciliation of submission workbooks
 
 - **Scope:** documentation and analysis under `docs/reconciliation/`; no change
