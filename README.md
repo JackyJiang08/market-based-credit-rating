@@ -40,7 +40,7 @@ packages/core/creditrating/
   io/           records (one schema), workbook writer, excel, csv export
   diagnostics/  bootstrap uncertainty, domain-invariant checks
   cli.py        typer CLI (`mdt` / `creditrating`)
-services/api/   phase 11 (placeholder)   apps/terminal/  phase 12 (placeholder)
+services/api/   FastAPI service (offline-first; make serve)   apps/terminal/  phase 12 (placeholder)
 ```
 
 One package, four responsibilities, pandas frames flowing forward. See

@@ -35,6 +35,40 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Phase 11: the FastAPI service (offline-first, caveats mandatory)
+
+- **Scope:** services/api (creditrating_api package, Dockerfile, compose),
+  tests/api, Makefile serve targets, dev-deps additions, READMEs.
+- **Design:** the pydantic domain models ARE the response models; the
+  RatingEnvelope composes them with basis, determination, drift regime,
+  applicability (code + prose), flags, reason codes and provenance, so the
+  API makes it impossible to render a number without its caveat.
+  Offline-first: cached tickers only unless the request sets live=true;
+  as_of explicitly rejected (vintage snapshots do not exist yet -- refusing
+  is honest, serving today's data as history would not be). Async batch on
+  a daemon thread with per-company SSE events carrying EM convergence;
+  error envelope {code, message, correlation_id} with the structlog run-id,
+  no stack traces. Proprietary-absent contract: TTC fields null WITH
+  CONVERSION_TABLES_ABSENT, letter withheld -- contract-tested, and
+  verified inside the container where local/ genuinely does not exist.
+- **Endpoints:** health, companies/search, rate, batch (+status, +SSE
+  events), companies/{t}/diagnostics (EM asset path, bootstrap CIs),
+  universe (150-name run + filters), validation (phase-9 study), workbook
+  export. OpenAPI contract pinned by tests (all ten paths + domain models
+  in components).
+- **Container:** multi-stage build (wheels then python:3.12-slim), non-root
+  uid 10001, fixtures and study data baked in, .dockerignore excludes
+  local/ as a red line. Verified live: image builds, boots as 'app',
+  /health OK, rate + error envelope correct, workbook flagged absent
+  in-container. make serve = compose; make serve-local = uvicorn.
+- **Validation:** full suite 368 passed (12 new API tests, offline);
+  ruff/black/mypy clean with services/ in scope; container smoke test as
+  above; CI watched to green after this push per the CI-green rule.
+- **Follow-ups:** SSE per-iteration EM streaming would need a callback in
+  em.estimate (today it streams per-company convergence results); job
+  registry is in-memory (fine for the demo deployment, a real deployment
+  wants a store); phase 12 terminal app.
+
 ### 2026-07-26 - CI made green for real: deps declared, golden made local-aware, gate hardened
 
 - **Scope:** requirements split + constraints regen, CI installs from
