@@ -52,3 +52,10 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   root, which returned a confident wrong asset value with no error. Named the
   estimator's magic numbers: `BRACKET_MAX_DOUBLINGS`, `BISECTION_STEPS`,
   `MIN_OBSERVATIONS`.
+- **#7, #8** Declared the deliverable's contract as `dashboard.records.ASSET_SCHEMA`
+  and consolidated all three writers onto one `credit_record()`. The Asset sheet now
+  carries `A` (previously absent), a single `TiC Risk Score` column (previously split
+  into `TiC` + `Risk Score`), and `lambda` (Eq. 3/6, previously computed and reaching
+  no output). `EM iters` moved to the validation sheet. Added `Rating Basis` so a
+  blank rating is interpretable on the sheet that shows it. Golden-file tests pin
+  both schemas exactly.

@@ -14,7 +14,7 @@ import pandas as pd
 from data_cleaning.company import CompanyData
 from raw_data_architecture import lineage
 
-from . import config
+from . import config, records
 
 LOG = logging.getLogger("pfpa.dashboard.longtable")
 
@@ -72,11 +72,17 @@ def build_long_table(companies: list[CompanyData], rates: pd.DataFrame) -> pd.Da
         parts.append(_melt_statement(c.a_balance, c.ticker, c.as_of, "balance_sheet (A)"))
         parts.append(_melt_statement(c.a_cashflow, c.ticker, c.as_of, "cash_flow (A)"))
         if c.sigma_A is not None:
+            # Projected from the shared record so this table cannot drift from
+            # the Asset sheet. Numeric fields only -- the long table coerces
+            # Value to numeric and drops what does not convert.
+            r = records.credit_record(c)
             measures = {
-                "sigma_A": c.sigma_A, "eta_A": c.eta_A, "AssetValue_A": c.asset_value,
-                "CCM": c.ccm, "mu": c.mu, "TiC": c.tic, "RiskScore": c.risk_score,
-                "DD": c.dd, "EDF": c.edf, "PIT_PD": c.pit_pd, "TTC_PD": c.ttc_pd,
-                "Outlook": c.outlook,
+                "sigma_A": r["sigma_A"], "eta_A": r["eta_A"],
+                "AssetValue_A": r["asset_value"], "R": r["drift"],
+                "CCM": r["ccm"], "mu": r["mu"], "TiC": r["tic"],
+                "RiskScore": r["risk_score"], "lambda": r["lam"],
+                "DD": r["dd"], "EDF": r["edf"], "PIT_PD": r["pit_pd"],
+                "TTC_PD": r["ttc_pd"], "Outlook": r["outlook"],
             }
             parts.append(pd.DataFrame(
                 [(c.ticker, c.as_of, "credit_measures", c.as_of[:10], k, v)

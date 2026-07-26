@@ -60,6 +60,10 @@ class CompanyData:
     edf: Optional[float] = None           # Phi(-DD)
     pit_pd: Optional[float] = None        # 1-year PIT PD
 
+    # How data acquisition went: "OK", or a typed reason the company has no
+    # (or partial) data. Populated by Layer 1/2; see #9.
+    data_status: Optional[str] = None
+
     # Drift provenance (Prop. 4.4.1). `drift_regime` is "VALID" or "DEFECTIVE";
     # DEFECTIVE means eta - sigma^2/2 <= 0, so mu/CCM/PIT/TTC/rating are
     # NOT_APPLICABLE rather than merely missing.

@@ -21,7 +21,7 @@ from raw_data_architecture import config as raw_config
 from raw_data_architecture import lineage
 from signal_construction import config as signal_config
 
-from . import config
+from . import config, records
 
 LOG = logging.getLogger("pfpa.dashboard.excel")
 
@@ -88,22 +88,31 @@ def write_company_workbook(data: CompanyData, years: int) -> str:
 
     rating_df = pd.DataFrame()
     if data.sigma_A is not None:
+        # Projected from the shared record (dashboard.records) so this sheet
+        # cannot disagree with the deliverable Asset sheet.
+        r = records.credit_record(data)
         rating_df = pd.DataFrame({
             "Field": [
                 "Equity E (latest)", "Default-point Debt D", "Risk-free r (1Y)",
                 "Horizon T (years)", "Asset Volatility sigma_A", "Asset Value A",
-                "Asset Return eta_A", "CCM", "mu (life expectancy)", "TiC",
-                "RiskScore", "Distance to Default", "EDF", "PIT PD", "TTC PD",
-                "S&P Rating", "Outlook (PIT - TTC)", "EM iters / converged",
+                "Asset Return eta_A", "R (eta - sigma^2/2)", "CCM",
+                "mu (life expectancy)", "lambda (default peak)", "TiC",
+                "TiC Risk Score", "Distance to Default", "EDF", "PIT PD",
+                "TTC PD", "S&P Rating", "Rating Basis", "Outlook (PIT - TTC)",
+                "Drift regime", "Drift SE", "Drift span (years)",
+                "EM iters / converged",
             ],
             "Value": [
-                _panel_last(data, "MarketCap_E"), _panel_last(data, "DefaultPointDebt_D"),
-                _pct(_panel_last(data, "RiskFree_R")), signal_config.HORIZON_YEARS,
-                _pct(data.sigma_A), data.asset_value, _pct(data.eta_A),
-                _round(data.ccm), _round(data.mu, 2), _round(data.tic),
-                _round(data.risk_score, 2), _round(data.dd, 2), _pct(data.edf),
-                _pct(data.pit_pd), _pct(data.ttc_pd), data.sp_rating or "N/A",
-                _pct(data.outlook), f"{data.em_iters} / {data.em_converged}",
+                r["equity"], r["default_point_debt"], _pct(r["interest_rate"]),
+                signal_config.HORIZON_YEARS, _pct(r["sigma_A"]), r["asset_value"],
+                _pct(r["eta_A"]), _pct(r["drift"]), _round(r["ccm"]),
+                _round(r["mu"], 2), _round(r["lam"], 4), _round(r["tic"]),
+                _round(r["risk_score"], 2), _round(r["dd"], 2), _pct(r["edf"]),
+                _pct(r["pit_pd"]), _pct(r["ttc_pd"]), r["sp_rating"] or "N/A",
+                r["rating_basis"] or "N/A", _pct(r["outlook"]),
+                r["drift_regime"] or "N/A", _pct(r["drift_se"]),
+                _round(r["drift_span_years"], 2),
+                f"{r['em_iters']} / {r['em_converged']}",
             ],
         })
 
@@ -178,21 +187,25 @@ def write_master_workbook(companies: list[CompanyData], rates: pd.DataFrame) -> 
     for c in companies:
         if c.sigma_A is None:
             continue
+        r = records.credit_record(c)
         rating_rows.append({
-            "Ticker": c.ticker,
-            "sigma_A": c.sigma_A,
-            "eta_A": c.eta_A,
-            "AssetValue_A": c.asset_value,
-            "DefaultPointDebt_D": _panel_last(c, "DefaultPointDebt_D"),
-            "CCM": c.ccm,
-            "mu": c.mu,
-            "RiskScore": c.risk_score,
-            "DD": c.dd,
-            "EDF": c.edf,
-            "PIT_PD": c.pit_pd,
-            "TTC_PD": c.ttc_pd,
-            "SP_Rating": c.sp_rating,
-            "Outlook": c.outlook,
+            "Ticker": r["symbol"],
+            "sigma_A": r["sigma_A"],
+            "eta_A": r["eta_A"],
+            "AssetValue_A": r["asset_value"],
+            "DefaultPointDebt_D": r["default_point_debt"],
+            "CCM": r["ccm"],
+            "mu": r["mu"],
+            "lambda": r["lam"],
+            "TiC_Risk_Score": r["risk_score"],
+            "DD": r["dd"],
+            "EDF": r["edf"],
+            "PIT_PD": r["pit_pd"],
+            "TTC_PD": r["ttc_pd"],
+            "SP_Rating": r["sp_rating"],
+            "Rating_Basis": r["rating_basis"],
+            "Outlook": r["outlook"],
+            "Drift_Regime": r["drift_regime"],
         })
     ratings_df = pd.DataFrame(rating_rows)
 
