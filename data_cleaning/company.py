@@ -60,6 +60,13 @@ class CompanyData:
     edf: Optional[float] = None           # Phi(-DD)
     pit_pd: Optional[float] = None        # 1-year PIT PD
 
+    # Drift provenance (Prop. 4.4.1). `drift_regime` is "VALID" or "DEFECTIVE";
+    # DEFECTIVE means eta - sigma^2/2 <= 0, so mu/CCM/PIT/TTC/rating are
+    # NOT_APPLICABLE rather than merely missing.
+    drift_regime: Optional[str] = None
+    drift_se: Optional[float] = None          # sigma_A / sqrt(drift span years)
+    drift_span_years: Optional[float] = None  # calendar span used for eta
+
     # PIT -> TTC -> S&P conversion (Layer 3)
     ttc_pd: Optional[float] = None        # no-arbitrage through-the-cycle PD
     sp_rating: Optional[str] = None       # S&P-equivalent letter grade

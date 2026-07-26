@@ -20,6 +20,7 @@ References: asset GBM ``A_t = A_0 exp((eta_A - sigma_A^2/2) t + sigma_A W_t)``
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -37,9 +38,11 @@ class EMError(RuntimeError):
 
 @dataclass
 class EMResult:
-    sigma_A: float                 # annualized asset volatility
-    eta_A: float                   # annualized real-world asset return (drift)
+    sigma_A: float                 # annualized asset volatility (vol window)
+    eta_A: float                   # annualized real-world asset return (drift window)
     drift: float                   # eta_A - sigma_A^2/2  (= mean annual log-return)
+    drift_se: float                # SE of the drift estimate = sigma_A/sqrt(years)
+    drift_span_years: float        # calendar span the drift was estimated over
     asset_last: float              # A on the last trading day (A_0 for the model)
     debt_last: float               # default-point debt D on the last trading day
     equity_last: float             # equity E on the last trading day
@@ -95,20 +98,41 @@ def estimate(equity: pd.Series, debt: pd.Series, rate: pd.Series,
              *, horizon: float = config.HORIZON_YEARS,
              trading_days: int = config.TRADING_DAYS_PER_YEAR,
              max_iter: int = config.EM_MAX_ITER,
-             tol: float = config.EM_TOL) -> EMResult:
-    """Estimate (sigma_A, eta_A, asset path) from a daily equity/debt/rate window.
+             tol: float = config.EM_TOL,
+             vol_window: int = config.EM_WINDOW_DAYS) -> EMResult:
+    """Estimate (sigma_A, eta_A, asset path) from a daily equity/debt/rate series.
 
-    Inputs are aligned daily series (typically the trailing EM window). Rows with
-    a non-positive or missing equity/debt/rate are dropped before estimation.
+    Inputs are aligned daily series. Pass the **full drift window** (see
+    ``config.DRIFT_WINDOW_DAYS``); the volatility is estimated on its trailing
+    ``vol_window`` rows and the drift on the whole span:
+
+      - ``sigma_A``  EM over the trailing ``vol_window`` days. Volatility is a
+        high-frequency quantity; a longer span would blend distinct volatility
+        regimes into one number.
+      - ``eta_A``    mean asset log-return over the **entire** input span,
+        inverted with the converged ``sigma_A``. The standard error of a drift
+        estimate scales with the calendar span, not the sampling frequency, so
+        this is the only term that benefits from more history.
+
+    Passing a series no longer than ``vol_window`` reproduces the previous
+    single-window behaviour exactly. Rows with a non-positive or missing
+    equity/debt/rate are dropped before estimation.
     """
     df = pd.DataFrame({"E": equity, "D": debt, "r": rate}).dropna()
     df = df[(df["E"] > 0) & (df["D"] > 0)]
     if len(df) < 30:
         raise EMError(f"insufficient clean observations ({len(df)}) for EM.")
 
-    E = df["E"].to_numpy(float)
-    D = df["D"].to_numpy(float)
-    r = df["r"].to_numpy(float)
+    # Volatility is estimated on the trailing window; the drift on everything.
+    vol_df = df.tail(vol_window)
+    if len(vol_df) < 30:
+        raise EMError(
+            f"insufficient clean observations ({len(vol_df)}) in the volatility "
+            f"window for EM.")
+
+    E = vol_df["E"].to_numpy(float)
+    D = vol_df["D"].to_numpy(float)
+    r = vol_df["r"].to_numpy(float)
 
     # Initialize sigma_A from the equity return volatility, delevered roughly.
     eq_ret = np.diff(np.log(E))
@@ -135,15 +159,25 @@ def estimate(equity: pd.Series, debt: pd.Series, rate: pd.Series,
             f"EM did not converge within {max_iter} iterations "
             f"(last sigma={sigma:.4f}). Data may be too short/illiquid.")
 
-    # Final asset path and drift with the converged sigma.
-    A = _invert_assets(E, D, r, sigma, horizon)
+    # Final asset path over the FULL span, inverted with the converged sigma.
+    # The drift is the mean log-return of that longer path; sigma stays the
+    # trailing-window estimate.
+    A = _invert_assets(df["E"].to_numpy(float), df["D"].to_numpy(float),
+                       df["r"].to_numpy(float), sigma, horizon)
     u = np.diff(np.log(A))
     drift = float(np.mean(u) * trading_days)        # = eta_A - sigma^2/2
     eta_A = drift + 0.5 * sigma ** 2
 
+    # Standard error of the drift estimate: sigma_A / sqrt(span in years).
+    # Reported so a caller can see when eta is indistinguishable from zero.
+    span_years = max(len(u), 1) / float(trading_days)
+    drift_se = float(sigma / math.sqrt(span_years)) if span_years > 0 else float("inf")
+
     result = EMResult(
-        sigma_A=sigma, eta_A=eta_A, drift=drift,
-        asset_last=float(A[-1]), debt_last=float(D[-1]), equity_last=float(E[-1]),
+        sigma_A=sigma, eta_A=eta_A, drift=drift, drift_se=drift_se,
+        drift_span_years=span_years,
+        asset_last=float(A[-1]), debt_last=float(df["D"].to_numpy(float)[-1]),
+        equity_last=float(df["E"].to_numpy(float)[-1]),
         asset_values=pd.Series(A, index=df.index, name="AssetValue"),
         n_iter=n_iter, converged=True,
     )

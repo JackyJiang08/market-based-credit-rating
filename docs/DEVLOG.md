@@ -35,6 +35,43 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-25 - Drift estimation: remove abs(), split the estimation windows
+
+- **Scope:** Layers 1-3 and the CLI; changes model output. Closes #3 (a, b, c).
+- **Summary:**
+  - Removed every `abs()` on `eta - sigma_A^2/2`. Eq. (11) uses the signed
+    drift; Prop. 4.4.1 assumes it is positive.
+  - `em.estimate` now takes sigma_A from the trailing `EM_WINDOW_DAYS` (252)
+    and eta from the full `DRIFT_WINDOW_DAYS` (1260, ~5y) span, and reports
+    `drift_se` and `drift_span_years`.
+  - Added `DriftRegime` (VALID / DEFECTIVE). A defective regime emits NaN for
+    mu / CCM / PIT / TTC / rating with a `drift_regime` flag on `CompanyData`,
+    instead of substituting a magnitude. DD, EDF, TiC and RiskScore survive.
+  - Root cause of the short drift span, found while measuring:
+    `default_point_debt()` filled missing debt with `0` rather than `NaN`, so
+    every day before the earliest statement asserted zero debt; EM filters on
+    `D > 0` and dropped them, capping the span at ~1.2y. Fixed.
+  - `mdt --years` no longer hard-codes `2` over `DEFAULT_YEARS`; `DEFAULT_YEARS`
+    raised 2 -> 6; the debt schedule now unions quarterly and annual balance
+    sheets rather than choosing one.
+  - Added `docs/adr/0001-drift-estimation.md` with the before/after table and
+    the evaluation of the risk-neutral variant (documented, not adopted).
+  - Added `docs/reconciliation/history/` with per-fix Asset-sheet snapshots, and
+    a narrow `.gitignore` exception so those snapshots are tracked. Everything
+    else under `docs/reconciliation/` stays ignored.
+- **Breaking changes:** INTU and KHC no longer receive a rating; they report
+  NOT_APPLICABLE. Missing debt is now NaN, so a company with no statement
+  history produces no panel rows rather than a zero-debt panel.
+- **Validation:** `python -m pytest -q` -> 27 passed, run before this push.
+  Live 10-company batch run twice (before and after the debt fix) and both
+  Asset sheets captured under `docs/reconciliation/history/`. Drift spans
+  confirmed at 2.7-4.9y after the fix, against 1.1-1.3y before.
+- **Follow-ups:**
+  - 2 of the 4 negative-drift names turned positive (ORCL, T). INTU and KHC
+    remain negative but within one standard error of zero.
+  - `drift_se` is computed and reported but nothing consumes it; widening
+    DEFECTIVE to "not significantly positive" is an owner decision.
+
 ### 2026-07-25 - Repository audit and issue backlog
 
 - **Scope:** documentation only; `docs/GAP_ANALYSIS.md` rewritten and twelve

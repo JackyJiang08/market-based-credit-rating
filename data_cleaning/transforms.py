@@ -110,7 +110,44 @@ def split_term_debt(balance: pd.DataFrame) -> pd.DataFrame:
     return out.sort_index()
 
 
+def union_balance_sheets(quarterly: pd.DataFrame,
+                         annual: pd.DataFrame) -> pd.DataFrame:
+    """Union two balance sheets on their period-end columns, quarterly winning.
+
+    Both frames are line items x period-end columns. Where a period end appears
+    in both, the quarterly figure is kept (it is the finer observation of the
+    same date). Where it appears only in the annual sheet -- typically further
+    back than the free-tier quarterly history reaches -- the annual column is
+    carried in. No value is invented and no date is shifted, so the as-of join
+    downstream still only ever sees real statements at their own period end.
+    """
+    q = quarterly if quarterly is not None else pd.DataFrame()
+    a = annual if annual is not None else pd.DataFrame()
+    if q.empty:
+        return a
+    if a.empty:
+        return q
+    extra = [c for c in a.columns if c not in set(q.columns)]
+    if not extra:
+        return q
+    merged = q.join(a[extra], how="outer")
+    # Columns are period-end dates; keep them newest-first as the rest of the
+    # code assumes (e.g. `debt_schedule.columns[0]` is the latest period).
+    return merged[sorted(merged.columns, reverse=True)]
+
+
 def default_point_debt(short_term: pd.Series, long_term: pd.Series) -> pd.Series:
-    """D = 100% short-term debt + 50% long-term debt (the model's strike)."""
-    return (config.SHORT_TERM_DEBT_WEIGHT * short_term.fillna(0)
-            + config.LONG_TERM_DEBT_WEIGHT * long_term.fillna(0))
+    """D = 100% short-term debt + 50% long-term debt (the model's strike).
+
+    A row with **neither** figure known -- typically a trading day before the
+    earliest statement we hold -- yields `NaN`, not `0`. Filling it with zero
+    would assert the firm had no debt on that date, which is a fabricated value
+    (engineering rule 2) and, because the EM step filters on `D > 0`, silently
+    truncated the estimation window instead of reporting a missing input.
+    Backfilling it from the earliest statement is not an option either: that is
+    a later observation, forbidden by docs/TIMING_PROTOCOL.md §2.
+    """
+    both_missing = short_term.isna() & long_term.isna()
+    d = (config.SHORT_TERM_DEBT_WEIGHT * short_term.fillna(0)
+         + config.LONG_TERM_DEBT_WEIGHT * long_term.fillna(0))
+    return d.where(~both_missing)

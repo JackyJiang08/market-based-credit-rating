@@ -20,6 +20,16 @@ local/
 # Personal agent-context overrides (CLAUDE.md itself is committed)
 CLAUDE.local.md
 
+# Narrow exception to the blanket *.csv rule above: the per-fix Asset-sheet
+# snapshots that let a reviewer see which fix moved which number. These are our
+# own model outputs (10 rows), not source material -- no grid, no lookup table,
+# nothing derived from local/ beyond a single TTC PD per company, which the
+# paper itself publishes in Tables 13-14. Everything else under
+# docs/reconciliation/ stays ignored: the peer workbook embeds the proprietary
+# TTC/PIT/RS/SP sheets and must never be committed.
+!docs/reconciliation/history/
+!docs/reconciliation/history/*.csv
+
 # macOS
 .DS_Store
 

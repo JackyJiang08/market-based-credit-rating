@@ -12,3 +12,17 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
 - **#14** Pinned the `Outlook` direction with regression tests. Eq. (28) is
   `PD_FH − S&P TTC` (PIT − TTC), which is what the code already computed; the
   delivered Asset sheet was correct. Three tests now fail loudly on an inversion.
+
+- **#3** Removed every `abs()` on the drift `η − σ_A²/2`; Eq. (11) uses the signed
+  value. Split the estimation windows: σ_A on the trailing 252 days, η on the full
+  ~5-year span. Added a `DriftRegime` (VALID/DEFECTIVE) classification so a
+  defective first-passage regime reports NOT_APPLICABLE instead of a substituted
+  magnitude. ORCL and T move from defective to valid; INTU and KHC remain defective
+  and are no longer rated. See `docs/adr/0001-drift-estimation.md`.
+- **#3** (root cause) `default_point_debt()` filled missing debt with `0` rather than
+  `NaN`, asserting "no debt" on every day before the earliest statement. Because EM
+  filters on `D > 0` this silently truncated the drift span to ~1.2 years. Fixed;
+  spans are now 2.7–4.9 years and `SE(η)` falls from 15–52% to 7.8–33%.
+- **#3** `mdt --years` no longer hard-codes a default of 2, which shadowed
+  `DEFAULT_YEARS`. Balance-sheet history now unions quarterly and annual statements
+  instead of using one or the other.

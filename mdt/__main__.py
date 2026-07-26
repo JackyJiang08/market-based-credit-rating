@@ -8,6 +8,7 @@ from typing import Optional, Sequence
 
 from data_cleaning.company import CompanyData
 from data_cleaning.workflow import RunConfig, run
+from raw_data_architecture import config as raw_config
 
 
 def _fmt(x, pct: bool = False, nd: int = 4) -> str:
@@ -85,7 +86,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                         datefmt="%H:%M:%S")
     p = argparse.ArgumentParser(prog="python -m mdt", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--years", type=int, default=2, help="History window in years (default 2)")
+    p.add_argument("--years", type=int, default=raw_config.DEFAULT_YEARS,
+                   help=f"History window in years (default {raw_config.DEFAULT_YEARS})")
     sub = p.add_subparsers(dest="command", required=True)
 
     pr = sub.add_parser("rate", help="rate one company (ticker or name)")

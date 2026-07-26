@@ -41,4 +41,8 @@ REQUEST_TIMEOUT = 20
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "raw_data_architecture", "data")
 
-DEFAULT_YEARS = 2  # trailing window for prices and financials
+# Trailing window for prices and financials. Must cover
+# signal_construction.config.DRIFT_WINDOW_DAYS (~5y) so the drift estimate has
+# its full span; the volatility window is a 1y tail of the same series. A
+# shorter window silently shortens the drift span and widens its standard error.
+DEFAULT_YEARS = 6  # 5y drift window + headroom for holidays and short listings

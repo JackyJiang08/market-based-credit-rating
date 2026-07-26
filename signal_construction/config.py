@@ -9,6 +9,17 @@ EM_WINDOW_DAYS = 252          # trailing ~1 year of daily observations
 EM_MAX_ITER = 20              # hard-fail beyond this (deck expects ~10)
 EM_TOL = 1e-5                 # convergence tolerance on sigma_A
 
+# Drift (eta_A) estimation window, deliberately longer than the volatility
+# window. Volatility is a high-frequency quantity: it is estimated from the
+# quadratic variation of the path, so 252 daily observations already give a
+# tight estimate. The drift is not. The standard error of a mean log-return
+# estimated over a span of `y` years is sigma_A / sqrt(y), independent of the
+# sampling frequency -- sampling the same year more finely does not help.
+# At y = 1 that makes SE(eta) ~ sigma_A, i.e. the estimate is the same size as
+# its own error. Five years cuts it to sigma_A / sqrt(5), ~55% lower.
+# See docs/adr/0001-drift-estimation.md.
+DRIFT_WINDOW_DAYS = 1260      # trailing ~5 years of daily observations
+
 # Sanity-check bounds for annualized asset volatility.
 SIGMA_A_WARN_LOW = 0.10
 SIGMA_A_WARN_HIGH = 0.60
