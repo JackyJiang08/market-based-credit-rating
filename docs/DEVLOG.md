@@ -35,6 +35,56 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-25 - Data-layer fixes, rating-determination accounting, issue reconciliation
+
+Covers commits `9447d81`, `03a0bf8`, `75b0373`, `f9deb33`. These were pushed
+before this entry was written, which is a breach of the push gate in
+`.agents/README.md`; recording it here rather than quietly backfilling.
+
+- **Scope:** Layer 2 (equity series, statement alignment) and Layer 4
+  (determination reporting). Changes model output. Closes #15 and #19.
+- **Summary:**
+  - #15: replaced `Close + Dividends.cumsum()` with a reinvested total-return
+    index anchored at the valuation date. The old level depended on how far
+    back the download reached, so `DEFAULT_YEARS` was silently setting the
+    level of the series every EM fit runs on. Removed `.fillna(0.0)` on
+    dividends; missing is not zero.
+  - #19: statements are aligned on `available_at` (period end + 45d for a 10-Q,
+    90d for a 10-K) rather than period end, with
+    `availability_method="estimated_lag"`. Added the `StatementPeriodEnd` and
+    `StatementAvailableAt` audit fields (TIMING_PROTOCOL §8) and five canary
+    tests, including a red-first pin that a period-end join leaks.
+  - Part B: added `RatingDetermination` (MODEL_DETERMINED / PINNED_AT_FLOOR /
+    PINNED_AT_SCALE_TOP / NOT_RATED) to the Asset and validation sheets, the
+    README, and `docs/RATING_DETERMINATION.md`.
+  - Measured the ADR 0002 k*SE rule against the run and recorded the coverage
+    cost. Not switched on.
+  - Closed GitHub issues #3-#14, which had been left open although all twelve
+    fixes had landed. Verified each against its commit before closing.
+- **Breaking changes:** `build_panel` takes a new `available_at` argument
+  (defaults to None, which preserves the old period-end join for callers that
+  do not pass it -- the tests rely on that to pin the defect). The Asset sheet
+  gained `Rating Determination`; the validation sheet gained four columns.
+- **Validation:** `python -m pytest -q` -> 260 passed, run before every push.
+  Test count 217 -> 260. Live batch re-run after each fix and captured to
+  `docs/reconciliation/history/07`, `08` and `09`.
+- **Findings of record:**
+  - sigma_A and A are now bit-identical across 2/4/6-year download windows.
+    AMZN, which pays no dividend, is unchanged to every digit by #15 -- the
+    control that shows the fix does what it claims.
+  - The rating is NOT unconditionally window-invariant, and should not be: the
+    drift is deliberately estimated over the whole available span. The
+    acceptance test therefore compares windows of equal drift span.
+  - #19 moves the valuation-date default point for exactly one company (T,
+    -4.69%), because only T has a statement inside its filing window today.
+  - The analytical route took rated coverage 5 -> 8 and added zero
+    model-determined names. All three additions are pinned at the scale top.
+- **Follow-ups:**
+  - Part C's bootstrap (block-resampled uncertainty propagation) is NOT built;
+    only the k*SE table was produced.
+  - Part D (#16, #17, #18, #20) is untouched.
+  - The workbook README sheet and the canonical-column reordering are not done.
+
 ### 2026-07-25 - Rating basis: stop publishing clamped values as ratings
 
 - **Scope:** Layer 3 conversion, Layer 4 validation sheet; changes which
