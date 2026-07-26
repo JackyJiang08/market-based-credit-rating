@@ -97,9 +97,15 @@ def _validation_row(c: CompanyData) -> dict:
     if c.sigma_A is not None and not (
             sig_config.SIGMA_A_WARN_LOW <= c.sigma_A <= sig_config.SIGMA_A_WARN_HIGH):
         flags.append(f"sigma_A={c.sigma_A:.0%} outside typical band")
-    if c.rating_off_grid:
-        flags.append("(CCM, mu) off conversion grid -> edge-clamped")
-    if c.sp_rating in (None, "n/a"):
+    if c.drift_regime == "DEFECTIVE":
+        flags.append("drift regime DEFECTIVE (Prop. 4.4.1 fails) -> mu/CCM/PIT/"
+                     "TTC/rating NOT_APPLICABLE")
+    if c.rating_basis == "OFF_GRID":
+        flags.append("(CCM, mu) outside the conversion grid -> no rating reported")
+    if c.ttc_at_floor:
+        flags.append("TTC PD sits on the grid's 2bp floor -> rating is "
+                     "floor-determined, not model-determined")
+    if c.sp_rating in (None, "n/a") and c.rating_basis == "GRID_INTERIOR":
         flags.append("no S&P rating (conversion tables missing?)")
     flags.extend(c.em_warnings or [])
     return {
@@ -107,6 +113,11 @@ def _validation_row(c: CompanyData) -> dict:
         "EM converged": c.em_converged,
         "EM iters": c.em_iters,
         "sigma_A": c.sigma_A,
+        "Drift regime": c.drift_regime,
+        "Drift SE": c.drift_se,
+        "Drift span (y)": c.drift_span_years,
+        "Rating basis": c.rating_basis,
+        "TTC at floor": bool(c.ttc_at_floor),
         "Off-grid": bool(c.rating_off_grid),
         "Warnings": "; ".join(flags) if flags else "OK",
     }

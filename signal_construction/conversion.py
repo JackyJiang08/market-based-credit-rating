@@ -19,6 +19,7 @@ validates it and extends past the grid edges.
 
 from __future__ import annotations
 
+import enum
 import functools
 import math
 import os
@@ -52,10 +53,37 @@ class ConversionTables:
     sp_thresholds: np.ndarray     # ascending lower-bound PD per label
 
 
+class RatingBasis(enum.Enum):
+    """How a reported rating was arrived at. Every rating carries one.
+
+    GRID_INTERIOR   (CCM, mu) fell inside the lookup grid; the TTC PD is an
+                    interpolation between real grid cells and the letter is
+                    model-determined.
+    ANALYTICAL      the lookup grid did not cover the point and the analytical
+                    no-arbitrage route (Prop. 5.2.1) supplied the rating.
+                    Requires Eq. (27), which is not implemented -- see #11.
+                    No result currently carries this basis.
+    OFF_GRID        (CCM, mu) fell outside the grid and no analytical route was
+                    available. **No letter is reported.** The previous behaviour
+                    clamped to the nearest edge and published the resulting
+                    letter, which made the grid boundary, not the model, decide
+                    the rating.
+    NOT_APPLICABLE  the drift regime is defective (Prop. 4.4.1 fails), so
+                    (CCM, mu) do not exist and nothing downstream of them does.
+    """
+
+    GRID_INTERIOR = "GRID_INTERIOR"
+    ANALYTICAL = "ANALYTICAL"
+    OFF_GRID = "OFF_GRID"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+
+
 @dataclass
 class GridLookup:
     value: float
     off_grid: bool                # True if (CCM, mu) was clamped to an edge
+    basis: RatingBasis = RatingBasis.GRID_INTERIOR
+    at_floor: bool = False        # value sits on the grid's TTC floor (2bp)
 
 
 def _axis(series: pd.Series) -> np.ndarray:
@@ -129,8 +157,55 @@ def _bilinear(grid: np.ndarray, xaxis: np.ndarray, yaxis: np.ndarray,
 
 
 def ttc_pd(tables: ConversionTables, ccm: float, mu: float) -> GridLookup:
-    """No-arbitrage Through-The-Cycle PD by (CCM, mu) from the TTC grid."""
-    return _bilinear(tables.ttc_grid, tables.ccm_axis, tables.mu_axis, ccm, mu)
+    """No-arbitrage Through-The-Cycle PD by (CCM, mu), with its rating basis.
+
+    A point outside the grid is reported as ``OFF_GRID`` with a NaN value. The
+    clamped edge value is deliberately **not** returned as a rating: for every
+    off-grid company in the current universe the clamped cell sits on the grid's
+    2bp TTC floor, so publishing it meant the grid boundary chose the letter.
+    """
+    # A defective drift regime leaves (CCM, mu) undefined; nothing to look up.
+    if not (np.isfinite(ccm) and np.isfinite(mu)):
+        return GridLookup(float("nan"), False, RatingBasis.NOT_APPLICABLE, False)
+
+    look = _bilinear(tables.ttc_grid, tables.ccm_axis, tables.mu_axis, ccm, mu)
+    if look.off_grid:
+        # Prop. 5.2.1's analytical route would belong here, but it needs Eq. (27)
+        # to turn CCM* into a rating and that is not implemented (#11). Until it
+        # is, an off-grid point has no defensible rating.
+        return GridLookup(float("nan"), True, RatingBasis.OFF_GRID, False)
+
+    look.basis = RatingBasis.GRID_INTERIOR
+    look.at_floor = is_floor_determined(tables, look.value)
+    return look
+
+
+# Width of the grid's floor region, as a multiple of the floor itself. The
+# shipped workbook floors at 2bp and its next distinct values are 0.00020022,
+# 0.00020023, ... -- cells that differ only in the fifth significant figure
+# because the underlying no-arbitrage PD is far below what the grid expresses.
+# Anything inside this band is saturated, not resolved.
+FLOOR_BAND = 1.05
+
+
+def ttc_floor(tables: ConversionTables) -> float:
+    """The smallest TTC PD the grid can express (2bp in the shipped workbook)."""
+    finite = tables.ttc_grid[np.isfinite(tables.ttc_grid)]
+    return float(finite.min()) if finite.size else float("nan")
+
+
+def is_floor_determined(tables: ConversionTables, value: float) -> bool:
+    """Is this TTC PD set by the grid's floor rather than by the model?
+
+    A value inside the floor band means the model asked for a smaller number
+    than the grid can represent, so the letter that follows is an artifact of
+    where the table stops -- not a measurement. This is the honest explanation
+    for a cluster of identical top ratings.
+    """
+    if value is None or not np.isfinite(value):
+        return False
+    floor = ttc_floor(tables)
+    return bool(np.isfinite(floor) and value <= floor * FLOOR_BAND)
 
 
 def sp_rating(tables: ConversionTables, pd_value: float) -> str:

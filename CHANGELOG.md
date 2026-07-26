@@ -26,3 +26,11 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
 - **#3** `mdt --years` no longer hard-codes a default of 2, which shadowed
   `DEFAULT_YEARS`. Balance-sheet history now unions quarterly and annual statements
   instead of using one or the other.
+- **#12** Every rating now carries a `rating_basis`: `GRID_INTERIOR`,
+  `ANALYTICAL`, `OFF_GRID` or `NOT_APPLICABLE`. Clamped edge values are no longer
+  published as ratings — an off-grid `(CCM, µ)` reports no letter instead of one
+  chosen by the grid boundary. Added `ttc_at_floor`, which marks a TTC PD sitting
+  in the grid's 2bp floor band as floor-determined rather than model-determined.
+  COST, KO and WMT are now unrated (OFF_GRID); of the 5 remaining ratings, 3
+  (PNC, AMZN, T — all AAA-) are floor-determined and only DELL and ORCL are
+  model-determined.

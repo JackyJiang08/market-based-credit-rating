@@ -72,3 +72,10 @@ class CompanyData:
     sp_rating: Optional[str] = None       # S&P-equivalent letter grade
     outlook: Optional[float] = None       # PIT PD - TTC PD (Prop. 5.3)
     rating_off_grid: Optional[bool] = None  # (CCM, mu) outside the lookup grid
+    # How the rating was arrived at: GRID_INTERIOR | ANALYTICAL | OFF_GRID |
+    # NOT_APPLICABLE. Only GRID_INTERIOR (and, once Eq. 27 lands, ANALYTICAL)
+    # carries a letter; the others report none rather than a clamped one.
+    rating_basis: Optional[str] = None
+    # True when the TTC PD sits on the grid's smallest expressible value (2bp).
+    # The letter is then floor-determined, not model-determined.
+    ttc_at_floor: Optional[bool] = None

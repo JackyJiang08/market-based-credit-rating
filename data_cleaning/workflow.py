@@ -177,12 +177,25 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             tables = conversion.load_tables()
             ttc = conversion.ttc_pd(tables, data.ccm, data.mu)
             data.ttc_pd = ttc.value
-            data.sp_rating = conversion.sp_rating(tables, ttc.value)
-            data.outlook = conversion.outlook(data.pit_pd, ttc.value)
+            data.rating_basis = ttc.basis.value
             data.rating_off_grid = ttc.off_grid
-            LOG.info("  rating: TTC_PD=%.4f  S&P=%-4s Outlook=%+.4f%s",
-                     data.ttc_pd, data.sp_rating, data.outlook,
-                     "  (off-grid)" if ttc.off_grid else "")
+            data.ttc_at_floor = ttc.at_floor
+            if ttc.basis is conversion.RatingBasis.GRID_INTERIOR:
+                data.sp_rating = conversion.sp_rating(tables, ttc.value)
+                data.outlook = conversion.outlook(data.pit_pd, ttc.value)
+                LOG.info("  rating: TTC_PD=%.4f  S&P=%-4s Outlook=%+.4f  "
+                         "basis=%s%s",
+                         data.ttc_pd, data.sp_rating, data.outlook,
+                         data.rating_basis,
+                         "  (TTC at grid floor -- floor-determined)"
+                         if ttc.at_floor else "")
+            else:
+                # No letter. An off-grid or not-applicable point has no rating,
+                # and the clamped edge value is not a substitute for one.
+                data.sp_rating = None
+                data.outlook = None
+                LOG.warning("  rating: %s -- no letter reported (CCM=%.4g, mu=%.4g)",
+                            data.rating_basis, data.ccm, data.mu)
         except FileNotFoundError as exc:
             LOG.warning("  TTC/S&P skipped: %s", exc)
 

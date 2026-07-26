@@ -35,6 +35,29 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-25 - Rating basis: stop publishing clamped values as ratings
+
+- **Scope:** Layer 3 conversion, Layer 4 validation sheet; changes which
+  companies receive a rating. Closes #12.
+- **Summary:**
+  - Added `RatingBasis` (GRID_INTERIOR / ANALYTICAL / OFF_GRID /
+    NOT_APPLICABLE). `conversion.ttc_pd` returns the basis with every lookup.
+  - An off-grid `(CCM, mu)` now returns NaN with basis OFF_GRID instead of the
+    clamped edge value, and `workflow` reports no letter for it. A defective
+    drift regime returns NOT_APPLICABLE, a distinct state from off-grid.
+  - Added `ttc_floor`, `is_floor_determined` and the `ttc_at_floor` flag. The
+    shipped grid floors at 2bp and its next distinct cells differ only in the
+    fifth significant figure, so a 5% band above the floor counts as saturated.
+  - The validation sheet now carries drift regime, drift SE, drift span,
+    rating basis and the floor flag.
+- **Breaking changes:** COST, KO and WMT are no longer rated (OFF_GRID); they
+  previously received AAA- from a clamped edge cell.
+- **Validation:** `python -m pytest -q` -> 32 passed, run before this push.
+  Live batch re-run; Asset sheet captured as
+  `docs/reconciliation/history/03_after_12_rating_basis.csv`.
+- **Follow-ups:** the ANALYTICAL basis is defined but unreachable until Eq. (27)
+  is implemented (#11); until then off-grid points have no rating at all.
+
 ### 2026-07-25 - Drift estimation: remove abs(), split the estimation windows
 
 - **Scope:** Layers 1-3 and the CLI; changes model output. Closes #3 (a, b, c).

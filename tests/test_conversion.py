@@ -7,6 +7,7 @@ it is absent, so a fresh clone still runs green.
 
 from __future__ import annotations
 
+import math
 import os
 
 import pytest
@@ -82,3 +83,59 @@ def test_off_grid_is_flagged():
     assert conversion.ttc_pd(t, 0.05, 1.0).off_grid       # CCM below grid min 0.1
     assert conversion.ttc_pd(t, 1.0, 500.0).off_grid      # mu above grid max 160
     assert not conversion.ttc_pd(t, 1.5, 5.0).off_grid    # inside the grid
+
+
+# --- Rating basis: a clamped value is never reported as a rating (#12) -------
+@needs_tables
+def test_off_grid_returns_no_value_and_the_off_grid_basis():
+    t = conversion.load_tables()
+    for ccm, mu in [(0.05, 1.0), (1.0, 500.0), (0.05, 500.0)]:
+        look = conversion.ttc_pd(t, ccm, mu)
+        assert look.basis is conversion.RatingBasis.OFF_GRID
+        assert math.isnan(look.value), "off-grid must not return the clamped edge value"
+        assert not look.at_floor
+
+
+@needs_tables
+def test_grid_interior_carries_the_interior_basis():
+    t = conversion.load_tables()
+    look = conversion.ttc_pd(t, 1.5, 5.0)
+    assert look.basis is conversion.RatingBasis.GRID_INTERIOR
+    assert math.isfinite(look.value)
+
+
+@needs_tables
+def test_defective_regime_is_not_applicable_not_off_grid():
+    """NaN (CCM, mu) means the drift regime failed, which is a distinct state."""
+    t = conversion.load_tables()
+    look = conversion.ttc_pd(t, float("nan"), float("nan"))
+    assert look.basis is conversion.RatingBasis.NOT_APPLICABLE
+    assert math.isnan(look.value)
+    assert not look.off_grid       # it is not off the grid; it never reached it
+
+
+@needs_tables
+def test_floor_determined_values_are_flagged():
+    """A TTC PD on the grid's smallest expressible value is floor-determined."""
+    t = conversion.load_tables()
+    floor = conversion.ttc_floor(t)
+    assert floor == pytest.approx(2e-4, abs=1e-6), "shipped grid floors at 2bp"
+    # Exactly at the floor, and inside the saturation band just above it.
+    assert conversion.is_floor_determined(t, floor)
+    assert conversion.is_floor_determined(t, floor * 1.04)
+    # Clearly resolved values are not floor-determined.
+    assert not conversion.is_floor_determined(t, floor * 1.06)
+    assert not conversion.is_floor_determined(t, 0.0014)   # DELL
+    assert not conversion.is_floor_determined(t, 0.0109)   # ORCL
+    assert not conversion.is_floor_determined(t, float("nan"))
+    # A very safe interior point saturates; a risky one does not.
+    assert conversion.ttc_pd(t, 0.5, 150.0).at_floor
+    assert not conversion.ttc_pd(t, 5.0, 1.0).at_floor
+
+
+def test_sp_rating_refuses_a_non_finite_pd():
+    class _T:
+        sp_thresholds = None
+        sp_labels = None
+    assert conversion.sp_rating(_T(), float("nan")) == "n/a"
+    assert conversion.sp_rating(_T(), None) == "n/a"
