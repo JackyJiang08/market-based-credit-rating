@@ -49,6 +49,9 @@ class CompanyData:
     em_iters: Optional[int] = None
     em_converged: Optional[bool] = None
     em_warnings: list = field(default_factory=list)
+    # Why EM/measures did not produce estimates, when they did not. Logged
+    # failures are invisible to a batch post-mortem; recorded ones are not.
+    em_error: Optional[str] = None
 
     # Derived first-passage credit measures (Layer 3)
     mu: Optional[float] = None            # life expectancy E[tau]

@@ -202,6 +202,7 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
         "em_iters": c.em_iters,
         "em_converged": c.em_converged,
         "em_warnings": c.em_warnings,
+        "em_error": c.em_error,
     }
 
 
@@ -257,7 +258,8 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
     if r["data_status"] and r["data_status"] != "OK":
         flags.append(f"data status {r['data_status']}")
     if r["sigma_A"] is None and r["data_status"] in (None, "OK"):
-        flags.append("EM/measures did not run")
+        flags.append("EM/measures did not run"
+                     + (f": {r['em_error']}" if r.get("em_error") else ""))
     if r["em_converged"] is False:
         flags.append("EM did not converge")
     if r["drift_regime"] == "DEFECTIVE":

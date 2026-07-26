@@ -35,6 +35,39 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Acquisition cache, parallel/resumable batch, 150-name universe
+
+- **Scope:** Layer 1 (`raw_data_architecture/cache.py`), Layer 2
+  (`workflow.py` cache integration + thread-pool runner), `mdt batch
+  --workers`, `config/universe.yaml`, `CompanyData.em_error`, tests.
+- **Summary:**
+  - **Read-through disk cache** under `data/cache/` (parquet frames, JSON
+    dicts, per-artifact meta with UTC `fetched_at`): a batch is resumable (a
+    rerun refetches only what is missing), offline-runnable once cached, and
+    stale entries WARN so a mixed-vintage batch is visible
+    (docs/TIMING_PROTOCOL.md ingestion note). Switches: MDT_CACHE_DIR /
+    MDT_CACHE_OFF / MDT_CACHE_REFRESH.
+  - **Parallel batch:** `RunConfig.workers` / `mdt batch --workers N`;
+    per-company isolation is the contract -- a raising ticker is recorded and
+    reported, never propagated (and a raiser is by definition a bug, since
+    data problems must degrade to statuses).
+  - **Symbol fast-path:** config-file tickers no longer cost one resolver
+    network call each; only free-text names hit the search API.
+  - `CompanyData.em_error` records why EM/measures failed (previously
+    log-only, invisible to a batch post-mortem); surfaced in validation
+    Warnings.
+  - **`config/universe.yaml`: 150 names**, each with a recorded reason and an
+    APPROXIMATE agency rating (S&P scale, mid-2026, indicative only, never a
+    model input): rating spectrum AAA..CCC-, dual-class, negative book
+    equity, banks/insurers/REITs, utilities, ADRs (reporting-currency risk),
+    recent IPOs (short history), distressed, and three bankrupt/delisted
+    names to exercise the failure paths on purpose.
+- **Breaking changes:** None (workers defaults to 1 = historical behavior).
+- **Validation:** `python3 -m pytest -q` -> 311 passed, run before this push
+  (new: cache round-trips incl. tz-aware index and Timestamp statement
+  columns, cache switches, batch isolation at workers=1 and 4).
+- **Follow-ups:** run the 150-name batch; failure taxonomy; fixture subset.
+
 ### 2026-07-26 - Repositioned referencing; relicensed Apache-2.0
 
 - **Scope:** README, code comments/loggers, LICENSE/NOTICE, pyproject,

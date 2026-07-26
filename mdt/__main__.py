@@ -130,10 +130,14 @@ def _batch(args) -> None:
 
     with open(args.config) as fh:
         data = yaml.safe_load(fh) or {}
-    tickers = [str(x).strip() for x in (data.get("companies") or [])]
+    entries = data.get("companies") or []
+    # Accept both the plain list (companies.yaml) and the annotated mapping
+    # form (universe.yaml: {ticker: ..., why: ...}).
+    tickers = [str(x.get("ticker") if isinstance(x, dict) else x).strip()
+               for x in entries]
     if not tickers:
         raise SystemExit(f"No 'companies:' list found in {args.config}")
-    run(RunConfig(tickers=tickers, years=args.years))
+    run(RunConfig(tickers=tickers, years=args.years, workers=args.workers))
 
 
 def main(argv: Optional[Sequence[str]] = None) -> None:
@@ -152,6 +156,9 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
     pb = sub.add_parser("batch", help="run the batch from a companies.yaml")
     pb.add_argument("config")
+    pb.add_argument("--workers", type=int, default=1,
+                    help="concurrent company fetches (default 1 = sequential; "
+                         "cached reruns tolerate higher values)")
     pb.set_defaults(func=_batch)
 
     args = p.parse_args(argv)

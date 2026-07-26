@@ -67,6 +67,18 @@ class TickerResolutionError(ValueError):
     """Raised when a company name / query cannot be resolved to one ticker."""
 
 
+def looks_like_symbol(query: str) -> bool:
+    """True when the query is a plain ticker token (no search needed).
+
+    Config files carry exact symbols; probing each one over the network before
+    a batch would cost one vendor call per name for no information. A wrong
+    symbol still fails loudly in acquisition with a per-company status.
+    """
+    q = (query or "").strip().upper()
+    return (bool(q) and " " not in q and len(q) <= 6
+            and all(c.isalnum() or c in ".-" for c in q))
+
+
 def resolve_ticker(query: str) -> str:
     """Resolve a ticker symbol or company name to a single Yahoo ticker.
 

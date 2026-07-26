@@ -17,6 +17,7 @@ from typing import Optional, Sequence
 import pandas as pd
 import yfinance as yf
 
+from raw_data_architecture import cache
 from raw_data_architecture import config as raw_config
 from raw_data_architecture import errors as raw_errors
 from raw_data_architecture import sources
@@ -35,6 +36,10 @@ class RunConfig:
     include_rates: bool = True
     run_credit_model: bool = True
     run_bootstrap: bool = True
+    # Concurrent company fetches. 1 keeps the historical sequential behavior
+    # (with the polite inter-ticker delay); >1 uses a thread pool with
+    # per-company isolation, so one failure cannot abort the run.
+    workers: int = 1
 
     @property
     def cutoff_date(self) -> datetime:
@@ -53,14 +58,17 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     # Each acquisition records why it failed. The worst status seen wins, so a
     # rate limit is never reported as "this company has no data".
     statuses: list[raw_errors.DataStatus] = []
-    try:
-        info = sources.get_info(tk)
-        if not info:
-            raise raw_errors.NoDataError("Ticker.info returned nothing")
-    except raw_errors.DataSourceError as exc:
-        info = {}
-        statuses.append(exc.status)
-        LOG.warning("  info unavailable (%s): %s", exc.status.value, exc)
+    info = cache.load_info(ticker)
+    if info is None:
+        try:
+            info = sources.get_info(tk)
+            if not info:
+                raise raw_errors.NoDataError("Ticker.info returned nothing")
+            cache.save_info(ticker, info)
+        except raw_errors.DataSourceError as exc:
+            info = {}
+            statuses.append(exc.status)
+            LOG.warning("  info unavailable (%s): %s", exc.status.value, exc)
     data.name = info.get("longName") or info.get("shortName") or ticker
     data.currency = info.get("currency", "")
     data.sector = info.get("sector", "")
@@ -71,16 +79,20 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     data.dividend_yield = info.get("dividendYield")
 
     # --- prices ---
-    try:
-        prices = sources.get_history(tk, cfg.cutoff_date)
-        if prices is None or prices.empty:
-            raise raw_errors.NoDataError("no price history returned")
-    except raw_errors.DataSourceError as exc:
-        prices = pd.DataFrame()
-        statuses.append(exc.status)
-        LOG.warning("  prices unavailable (%s): %s", exc.status.value, exc)
+    prices = cache.load_prices(ticker)
+    if prices is None:
+        try:
+            prices = sources.get_history(tk, cfg.cutoff_date)
+            if prices is None or prices.empty:
+                raise raw_errors.NoDataError("no price history returned")
+            cache.save_prices(ticker, prices)
+        except raw_errors.DataSourceError as exc:
+            prices = pd.DataFrame()
+            statuses.append(exc.status)
+            LOG.warning("  prices unavailable (%s): %s", exc.status.value, exc)
     if not prices.empty:
-        prices.index = prices.index.tz_localize(None)
+        if getattr(prices.index, "tz", None) is not None:
+            prices.index = prices.index.tz_localize(None)
         # The vendor sometimes appends a placeholder row for the current session
         # with a missing Close. Left in, it makes last_close NaN, which
         # propagates through reference_shares into an all-NaN equity series and
@@ -119,14 +131,17 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             data.dividends = divs
 
     # --- statements ---
-    try:
-        stmts = sources.get_statements(tk)
-        if not any(v is not None and not v.empty for v in (stmts or {}).values()):
-            raise raw_errors.NoDataError("no statements returned")
-    except raw_errors.DataSourceError as exc:
-        stmts = {}
-        statuses.append(exc.status)
-        LOG.warning("  statements unavailable (%s): %s", exc.status.value, exc)
+    stmts = cache.load_statements(ticker)
+    if stmts is None:
+        try:
+            stmts = sources.get_statements(tk)
+            if not any(v is not None and not v.empty for v in (stmts or {}).values()):
+                raise raw_errors.NoDataError("no statements returned")
+            cache.save_statements(ticker, stmts)
+        except raw_errors.DataSourceError as exc:
+            stmts = {}
+            statuses.append(exc.status)
+            LOG.warning("  statements unavailable (%s): %s", exc.status.value, exc)
     data.q_income = transforms.trim_to_window(stmts.get("q_income"), cfg.cutoff_date)
     data.q_balance = transforms.trim_to_window(stmts.get("q_balance"), cfg.cutoff_date)
     data.q_cashflow = transforms.trim_to_window(stmts.get("q_cashflow"), cfg.cutoff_date)
@@ -243,6 +258,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
                      "EDF=%.4f  PIT_PD=%.4f",
                      m.risk_score, m.ccm, m.mu, m.dd, m.edf, m.pit_pd)
         except (em.EMError, ValueError) as exc:
+            data.em_error = f"{type(exc).__name__}: {exc}"
             LOG.warning("  EM/measures failed: %s", exc)
 
     # --- market-based applicability (ADR 0003, revision 1) ---
@@ -378,6 +394,12 @@ def run(cfg: RunConfig) -> list[CompanyData]:
     # ones with an actionable message rather than aborting the whole run.
     resolved: list[str] = []
     for raw_query in cfg.tickers:
+        # A plain symbol goes straight through -- config files carry exact
+        # tickers, and probing each over the network would cost one vendor
+        # call per name. Only free-text company names need the resolver.
+        if sources.looks_like_symbol(raw_query):
+            resolved.append(raw_query.strip().upper())
+            continue
         try:
             resolved.append(sources.resolve_ticker(raw_query))
         except sources.TickerResolutionError as exc:
@@ -386,19 +408,49 @@ def run(cfg: RunConfig) -> list[CompanyData]:
         LOG.error("No resolvable tickers/companies in %s", list(cfg.tickers))
         return []
 
-    rates = sources.fetch_rates(cfg.years) if cfg.include_rates else pd.DataFrame()
+    rates = pd.DataFrame()
+    if cfg.include_rates:
+        cached_rates = cache.load_rates()
+        if cached_rates is not None:
+            rates = cached_rates
+        else:
+            rates = sources.fetch_rates(cfg.years)
+            cache.save_rates(rates)
 
-    companies: list[CompanyData] = []
-    for i, ticker in enumerate(resolved):
+    # One company end to end, isolated: an exception is recorded and returned,
+    # never propagated, so one failure cannot abort the batch.
+    def _one(ticker: str):
         try:
             data = fetch_company(ticker, cfg, rates)
             if data is not None:
                 excel.write_company_workbook(data, cfg.years)
-                companies.append(data)
-        except Exception as exc:  # noqa: BLE001
+            return ticker, data, None
+        except Exception as exc:  # noqa: BLE001 - isolation is the contract
             LOG.error("Ticker %s aborted: %s", ticker, exc)
-        if i < len(resolved) - 1:
-            time.sleep(raw_config.INTER_TICKER_DELAY_SECONDS)
+            return ticker, None, exc
+
+    companies: list[CompanyData] = []
+    failures: list[tuple[str, Exception]] = []
+    if cfg.workers > 1:
+        from concurrent.futures import ThreadPoolExecutor
+
+        with ThreadPoolExecutor(max_workers=cfg.workers) as pool:
+            results = list(pool.map(_one, resolved))
+    else:
+        results = []
+        for i, ticker in enumerate(resolved):
+            results.append(_one(ticker))
+            if i < len(resolved) - 1:
+                time.sleep(raw_config.INTER_TICKER_DELAY_SECONDS)
+    for ticker, data, exc in results:
+        if data is not None:
+            companies.append(data)
+        elif exc is not None:
+            failures.append((ticker, exc))
+    if failures:
+        LOG.error("%d ticker(s) raised instead of degrading -- by this "
+                  "codebase's rules that is a bug, not a data condition: %s",
+                  len(failures), ", ".join(t for t, _ in failures))
 
     if companies:
         _log_vol_comparison(companies)
