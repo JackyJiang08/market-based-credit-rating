@@ -35,6 +35,35 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - pandas-3 dtype fix, CI pandas matrix, final phrasing sweep
+
+- **Scope:** `raw_data_architecture/cache.py`, `tests/test_cache.py`,
+  `.github/workflows/tests.yml`, README + docs phrasing sweep. No model code.
+- **pandas 3 (suite was red on a fresh clone):** parquet round-trips come
+  back `datetime64[us]` on pandas >= 2/3 while fresh downloads are `[ns]`;
+  pandas 3 raises MergeError when the as-of join mixes them
+  (test_currency_gate, test_offline_fixture). Fixed at the one right place:
+  `cache._normalize_datetimes` is the dtype chokepoint -- every datetime
+  index/column/column-index leaving the cache is coerced to canonical
+  `[ns]`, tz preserved, on every load path. Tests assert the contract (a
+  round-trip lands on `[ns]` and is a fixed point) rather than
+  source-dtype identity, which pandas 3's `[us]` default construction makes
+  unstatable. `requirements.txt` stays `pandas>=1.5` deliberately; the CI
+  matrix now runs the suite on `pandas>=2,<3` AND `pandas>=3` forever -- the
+  red badge is the regression test.
+- **Validation:** pandas 2.3.3 (py3.9): 322 passed. pandas 3.0.5 (py3.11
+  venv): 322 passed. Both run before this push.
+- **Phrasing sweep:** the README heading "...methodology's own thesis..." is
+  now "Why the framework itself predicts this result"; every remaining
+  thesis/paper/deck occurrence outside code docstrings swept from README,
+  CLAUDE.md, GAP_ANALYSIS, the ADRs and reconciliation REPORT
+  ("DECIDABLE-BY-PAPER" -> "DECIDABLE-BY-REFERENCE", slide cites -> "ref
+  §NN" with the local/ pointer). DEVLOG history entries keep their original
+  wording -- this file is a record, not a shop window. The literal filename
+  `Market_Based_Credit_Risk_deck.pdf` stays: it names the actual file.
+- **Breaking changes:** None.
+- **Follow-ups:** the validation study (Part 1 of the current work order).
+
 ### 2026-07-26 - The 150-name universe run: taxonomy, two bugs fixed, fixtures
 
 - **Scope:** this push carries the universe run of record and everything it

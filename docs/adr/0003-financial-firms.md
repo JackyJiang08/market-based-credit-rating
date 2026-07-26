@@ -53,7 +53,7 @@ silent zero.
 
 | Variant | Definition |
 |---|---|
-| `standard` | `1.0·ST + 0.5·LT` — the deck's rule |
+| `standard` | `1.0·ST + 0.5·LT` — the standard KMV convention |
 | `total_liabilities` | all liabilities treated as the barrier |
 | `total_liabilities_ex_deposits` | liabilities less deposits |
 

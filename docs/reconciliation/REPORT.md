@@ -16,18 +16,18 @@ Generated 2026-07-25 from `crossover.py`. Sources:
 
 ## The headline
 
-**Neither workbook implements the model the paper defines.** Both take `|η − σ²/2|` when the
+**Neither workbook implements the model the methodology defines.** Both take `|η − σ²/2|` when the
 drift is negative, in **4 of 10** companies for us and **5 of 10** for the peer. Proposition
 4.4.1 states the assumption explicitly — *"Assume η − σ_A²/2 > 0 and D < A₀"* — and defines
 `µ` and `CCM` (Eq. 11) with the **signed** drift in the denominator. Where the drift is
 negative the first-passage time is defective and `µ = E[τ]` does not exist; the number both
-workbooks print is not the quantity the paper defines. This is the finding that should lead
+workbooks print is not the quantity the methodology defines. This is the finding that should lead
 the deliverable, and it is not a coding bug in either implementation — it is an undeclared
 modelling substitution.
 
 ## One pre-computed finding is wrong
 
-**B2 is refuted.** The paper's Eq. (28) reads `Outlook = PD_FH − S&P TTC`, i.e. **PIT − TTC**,
+**B2 is refuted.** The methodology's Eq. (28) reads `Outlook = PD_FH − S&P TTC`, i.e. **PIT − TTC**,
 which is exactly what this repo computes. The proposed "one-line fix" would have inverted a
 correct implementation. Do not change it. Evidence in §B2.
 
@@ -35,12 +35,12 @@ correct implementation. Do not change it. Evidence in §B2.
 
 | # | Disagreement | Verdict | Class |
 |---|---|---|---|
-| B5 | `abs()` on negative drift | **CONFIRMED** — 4/10 ours, 5/10 theirs | **DECIDABLE-BY-PAPER** (violation is provable) → **OPEN** (remedy is the owner's call) |
-| B6 | Grid clamping | **CONFIRMED and widened** — 5/10 ours, 3/10 theirs | DECIDABLE-BY-PAPER (clamping is not a rating) → OPEN |
+| B5 | `abs()` on negative drift | **CONFIRMED** — 4/10 ours, 5/10 theirs | **DECIDABLE-BY-REFERENCE** (violation is provable) → **OPEN** (remedy is the owner's call) |
+| B6 | Grid clamping | **CONFIRMED and widened** — 5/10 ours, 3/10 theirs | DECIDABLE-BY-REFERENCE (clamping is not a rating) → OPEN |
 | B3 | Long-term debt field | **CONFIRMED, cause identified per name** | DECIDABLE-BY-SPEC (ORCL, AMZN); NOT COMPARABLE (PNC, COST) |
 | B1 | `Total Debt` column semantics | **CONFIRMED** — reporting only, model is correct | **DECIDABLE-BY-SPEC** → OPEN (which semantics the deliverable wants) |
 | B4 | Fractional shares | **REFINED** — by design, agrees to rounding on 8/10 | DECIDABLE-BY-SPEC (ours is defensible) |
-| B2 | Outlook sign | **REFUTED** — ours matches Eq. (28) | **DECIDABLE-BY-PAPER** (closed) |
+| B2 | Outlook sign | **REFUTED** — ours matches Eq. (28) | **DECIDABLE-BY-REFERENCE** (closed) |
 | — | Screenshot figures | irreconcilable with either workbook | **NOT COMPARABLE** |
 
 ## Are they comparable?
@@ -76,7 +76,7 @@ available here. Without its inputs, no correctness claim is possible in either d
 - **B1:** should the `Total Debt` column carry gross debt or the default point `D`?
 - **B3:** is `Long Term Debt And Capital Lease Obligation` (ours) or plain `Long Term Debt`
   (theirs) the intended field? Post-ASC 842 the lease obligation is real debt, which argues
-  for ours — but the reference deck should settle it.
+  for ours — but the reference materials should settle it.
 
 ---
 
@@ -212,14 +212,14 @@ ln(432.2bn / 4.068bn) / 0.1899 = 24.63     our recomputed DD = 24.62   ✅
 `SHORT_TERM_DEBT_WEIGHT = 1.0`, `LONG_TERM_DEBT_WEIGHT = 0.5` throughout. There is **no model
 bug** — the two workbooks put different quantities in a column with the same name.
 
-**Class: DECIDABLE-BY-SPEC, then OPEN.** The deck fixes `D = ST + 0.5·LT` for the *model*.
+**Class: DECIDABLE-BY-SPEC, then OPEN.** The reference fixes `D = ST + 0.5·LT` for the *model*.
 It does not fix what the deliverable's `Total Debt` column should display. Needs your call —
 my recommendation is to publish both (`Total Debt` gross **and** `Default Point D`), since
 dropping either loses information a reviewer needs.
 
 ## B2 — Outlook sign — **REFUTED**
 
-The premise states the paper defines `Outlook = S&P TTC − PD_FH`. It does not.
+The premise states the methodology defines `Outlook = S&P TTC − PD_FH`. It does not.
 
 Proposition 5.3, Eq. (28), verbatim from `local/TiC_paper.pdf`:
 
@@ -236,14 +236,14 @@ computes and what the CLI labels `Outlook (PIT-TTC)`.
 
 The sign convention is internally consistent: `Outlook > 0` means PIT exceeds TTC, i.e.
 short-term risk is elevated relative to through-the-cycle, so mean reversion implies
-improvement — "the future trend is positive". Inverting it would make the paper's own
+improvement — "the future trend is positive". Inverting it would make the methodology's own
 interpretation of the sign wrong.
 
 The prose paragraph immediately above Eq. (28) says "the difference between S&P TTC and
 PDFH", which reads in the opposite order and is very likely what the premise was drawn from.
 The displayed equation governs.
 
-**No change. No regression test needed. Class: DECIDABLE-BY-PAPER, closed.**
+**No change. No regression test needed. Class: DECIDABLE-BY-REFERENCE, closed.**
 
 ⚠️ Had this been applied as specified, it would have inverted a correct implementation and the
 regression test would have locked the error in.
@@ -280,10 +280,10 @@ quarterly is empty (`data_cleaning/workflow.py:111`).
 
 **Defensible alternative:** plain `Long Term Debt`, matching the peer. Argument for ours:
 post-ASC 842 finance-lease obligations are contractual fixed claims that trigger default, so
-they belong in the default point. Argument for theirs: the reference deck's default point is
+they belong in the default point. Argument for theirs: the reference materials' default point is
 described in terms of short- and long-term *debt*, and lease capitalization is an accounting
 convention the KMV/Merton literature predates. **Class: DECIDABLE-BY-SPEC** for ORCL/AMZN/T
-once the deck is consulted; **NOT COMPARABLE** for PNC, where their input is not reproducible
+once the reference is consulted; **NOT COMPARABLE** for PNC, where their input is not reproducible
 from our source.
 
 ## B4 — Fractional shares outstanding — **REFINED, not an error**
@@ -364,11 +364,11 @@ magnitude of a statistically insignificant drift estimate.
 
 **This is a modelling violation, not a bug.** Taking the absolute value silently converts a
 defective first-passage problem (default almost surely, infinite mean hitting time) into a
-finite `µ` and prints it as if the paper's quantity had been computed. Rule 3 of `CLAUDE.md`
+finite `µ` and prints it as if the methodology's quantity had been computed. Rule 3 of `CLAUDE.md`
 requires a provenance flag on exactly this kind of substitution, and there is none — the flag
 does not reach the `validation` sheet or the CLI.
 
-**Class: DECIDABLE-BY-PAPER** that the current output is not the paper's quantity;
+**Class: DECIDABLE-BY-REFERENCE** that the current output is not the methodology's quantity;
 **OPEN** on the remedy. Options, in my order of preference:
 
 1. Flag it — emit `µ`/`CCM` with a `drift_negative` provenance flag reaching the workbook, and
@@ -411,7 +411,7 @@ know to be mis-specified (§B3).
 A clamped lookup is not a rating. `CLAUDE.md` already records the analytical no-arbitrage
 route (`no_arb_ccm_star`) as the way past the grid edges; it is implemented and unused here.
 
-**Class: DECIDABLE-BY-PAPER** (an edge-clamped value is not the model's output) → **OPEN** on
+**Class: DECIDABLE-BY-REFERENCE** (an edge-clamped value is not the model's output) → **OPEN** on
 whether to return `OFF_GRID`, fall back to the analytical route, or keep clamping with a
 louder flag.
 
@@ -421,10 +421,10 @@ louder flag.
 
 | Disagreement | Ours | Theirs | Who is right | Class |
 |---|---|---|---|---|
-| Outlook sign | PIT − TTC | categorical label only | **Ours** — Eq. (28) | DECIDABLE-BY-PAPER |
-| `abs()` on negative drift | yes (4 names) | yes (5 names) | **Neither** — both violate Prop. 4.4.1 | DECIDABLE-BY-PAPER → OPEN |
-| Off-grid handling | clamp + flag (5 names) | clamp, no flag visible (3 names) | **Ours marginally** — at least the flag exists | DECIDABLE-BY-PAPER → OPEN |
-| LT debt field | incl. capital leases | plain `Long Term Debt` | **Undecided** — needs the deck | DECIDABLE-BY-SPEC |
+| Outlook sign | PIT − TTC | categorical label only | **Ours** — Eq. (28) | DECIDABLE-BY-REFERENCE |
+| `abs()` on negative drift | yes (4 names) | yes (5 names) | **Neither** — both violate Prop. 4.4.1 | DECIDABLE-BY-REFERENCE → OPEN |
+| Off-grid handling | clamp + flag (5 names) | clamp, no flag visible (3 names) | **Ours marginally** — at least the flag exists | DECIDABLE-BY-REFERENCE → OPEN |
+| LT debt field | incl. capital leases | plain `Long Term Debt` | **Undecided** — needs the reference | DECIDABLE-BY-SPEC |
 | PNC ST/LT split | 0 / 66,666 | 24,143 / 42,523 | **Theirs** — better decomposition, unreproducible source | NOT COMPARABLE |
 | `Total Debt` column | gross reported | default point `D` | **Undecided** — presentation | DECIDABLE-BY-SPEC → OPEN |
 | Shares method | market cap ÷ price | share count | **Ours defensible** — same to 10⁻⁷ on 8/10 | DECIDABLE-BY-SPEC |

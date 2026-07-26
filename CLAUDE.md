@@ -21,7 +21,7 @@ raw_data_architecture  →  data_cleaning   →  signal_construction   →  dash
 
 Methodology basis: the Time-Consistent (TiC) credit rating framework (Yimin Yang, Duke).
 
-**The paper and the conversion grids are proprietary and are NOT in this repository.** They
+**The reference materials and the conversion grids are licensed third-party material and are NOT in this repository.** They
 live in a git-ignored `local/` tree that each contributor supplies:
 
 - `local/TiC_paper.pdf`
@@ -38,7 +38,7 @@ check `git ls-files --cached` for those extensions before every push.
 **Attribution / IP:** the TiC methodology is not ours. It may be implemented and
 demonstrated, with citation, as an independent implementation. It must never be presented to
 third parties as original methodology. Keep the attribution/IP notice in `README.md`, and
-cite the paper by equation number in the docstring of every module implementing a TiC
+cite the methodology by equation number in the docstring of every module implementing a TiC
 formula (`signal_construction/em.py`, `measures.py`, `conversion.py` already do this).
 
 **Positioning:** all public-facing material (README, docs, commit messages) reads as
@@ -202,7 +202,7 @@ review gate, so the discipline that a PR used to provide now lives in the commit
 ## Engineering rules
 
 1. **Cite the maths.** Every formula carries a comment with its paper reference:
-   `# Paper Eq. (13)`, `# Prop. 4.5.2`, or a deck slide number. If code and paper disagree,
+   `# Eq. (13)` or `# Prop. 4.5.2`. If code and the reference disagree,
    record it in `docs/GAP_ANALYSIS.md` and raise it — never silently "fix" a number.
 
 2. **No fabricated data, ever.** If a source fails, the output says so. No interpolation to
@@ -278,8 +278,8 @@ you need it, add it with its proposition reference rather than assuming it exist
 
 ## Known model limitations (state them, don't paper over them)
 
-- **Drift is noise-dominated.** `η_A` from ~252 daily returns is noisy (the deck says it
-  "makes both unstable"); since `µ = ln(A/D)/|η_A − σ_A²/2|`, µ and CCM inherit that noise.
+- **Drift is noise-dominated.** `η_A` from ~252 daily returns is noisy (the well-known
+  short-window drift-estimation problem); since `µ = ln(A/D)/|η_A − σ_A²/2|`, µ and CCM inherit that noise.
   The RiskScore (`100·σ_A²/ln²(A/D)`, Eq. 12/5) is η-independent and therefore stable.
 - **Negative-drift regime.** `signal_construction/measures.py:75` currently takes
   `abs(drift)` for µ and CCM, with no flag on the output. When `η_A − σ_A²/2 ≤ 0` the
@@ -294,7 +294,7 @@ you need it, add it with its proposition reference rather than assuming it exist
   meaningful for banks without a sector-specific default point. Yahoo also omits a clean
   current/non-current split for them (handled by a debt fallback).
 - **TTC grid provenance.** The grid's generating formula was not recovered in closed form
-  from the paper; it is internally consistent and reproduces Tables 13/14, so it is treated
+  from the methodology text; it is internally consistent and reproduces Tables 13/14, so it is treated
   as authoritative. Discussed in `docs/GAP_ANALYSIS.md`.
 - **Market-implied PIT PDs are liquidity-sensitive.** For large, liquid, investment-grade
   names PIT PD is legitimately ~0 — compare firms by DD and RiskScore instead. Typical asset
@@ -317,7 +317,7 @@ config/companies.yaml    batch universe
 docs/                    DEVLOG, TIMING_PROTOCOL, DEPENDENCY_MAPS, GAP_ANALYSIS, tools/
 tests/                   pytest suite (24 tests, offline)
 run.py                   legacy/compatibility workflow entry
-local/                   proprietary paper, deck, conversion workbook — GIT-IGNORED
+local/                   licensed reference materials + conversion workbook — GIT-IGNORED
 .agents/                 team agent protocol  ← read first
 ```
 

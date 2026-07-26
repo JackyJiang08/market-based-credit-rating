@@ -57,7 +57,7 @@ information, which is exactly what `SE > |η̂|` already says more compactly.
 1. It changes nothing today. Both names still blank, at the cost of a new output concept.
 2. The interval it would produce elsewhere spans ~20 notches. A "range" that wide invites
    readers to anchor on its favourable end.
-3. `η̂ ± 1·SE` is a 68% interval. Nothing in the paper motivates one standard error, and the
+3. `η̂ ± 1·SE` is a 68% interval. Nothing in the methodology text motivates one standard error, and the
    choice silently sets how often a company is rated.
 4. It measures only drift uncertainty. σ_A, the default point `D`, and the reference share
    count all carry their own error and would remain point estimates, so the interval would

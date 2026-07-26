@@ -1,12 +1,13 @@
 # Methodology Coverage — TiC / Market-Based Credit Rating
 
 This document maps the credit-rating methodology (*Universal Time-Consistent (TiC) Credit
-Rating* and the *Market-Based Credit Risk Rating Model for Public Companies* deck) to the
+Rating* and the *Market-Based Credit Risk Rating Model for Public Companies* reference
+materials) to the
 code on `main`, and records the conventions chosen where the references allowed more than
 one reading.
 
 Refreshed 2026-07-25 from a full read of every file in the repository, with each equation
-re-checked against the paper rather than against the previous revision of this document.
+re-checked against the methodology text rather than against the previous revision of this document.
 Findings that need work are filed as GitHub issues and referenced by number below.
 
 > **Note.** This file cites equations by number only; it does not reproduce derivations or
@@ -35,7 +36,7 @@ Findings that need work are filed as GitHub issues and referenced by number belo
 | 5 | First-passage `µ`, `CCM` from `σ_A`, `A₀/D`, `η` | Prop. 4.4.1, Eq. (11) | `measures.py:74-83` | **wrong** — Eq. (11) uses the **signed** drift and Prop. 4.4.1 assumes `η − σ_A²/2 > 0`. The code substitutes `abs(drift)`, silently, affecting 4 of 10 companies. **Headline finding.** #3 |
 | 6 | `TiC_FH = σ_A²/ln²(A₀/D)`, `Q = 1`, Girsanov-invariant | Eq. (12), Prop. 4.4.2 | `measures.py:86`; invariance tested at `test_measures.py:49` | **partial** — Eq. (12) is correct and its η-independence is tested. Prop. 4.4.2's actual content, the empirical↔risk-neutral bridge `1/µ − 1/µ_RN = TiC·MPR` (Eq. 15), is **missing**. #11 |
 | 7 | PIT PD (inverse-Gaussian first-hitting) | Eq. (13) | `measures.py::pit_pd_first_hitting`; reproduces the Tables 13–14 anchors | **partial** — correct on the tested range. For `CCM < 0.00276` the `exp(2/CCM)` term overflows and the `except OverflowError` branch drops the second term entirely, understating PD by up to 0.9pp. The comment claims log space; the code is linear space. #4, #5 |
-| 8 | `DD`, `EDF = Φ(−DD)` | Eq. (14) | `measures.py:92-93` | **correct** — matches the paper, tested against hand values. Caveat: `norm.cdf(-DD)` returns exactly `0.0` for `DD ≥ 38`, and at our current maximum (`COST DD = 24.6`) reports `EDF = 6.3e-134`, a true value with no meaning as a probability. #5 |
+| 8 | `DD`, `EDF = Φ(−DD)` | Eq. (14) | `measures.py:92-93` | **correct** — matches the reference, tested against hand values. Caveat: `norm.cdf(-DD)` returns exactly `0.0` for `DD ≥ 38`, and at our current maximum (`COST DD = 24.6`) reports `EDF = 6.3e-134`, a true value with no meaning as a probability. #5 |
 | 9 | Capital confidence level `α(CCM)`, `CML = e^1.35`, `θ = 1` | Prop. 4.5.2 Eq. (22), Prop. 4.5.3 | `conversion.py::alpha_first_hitting`; `CML`, `SQRT_CML` at `:37-38` | **correct** — reproduces `α_FH(1.5) = 0.91906`. Only the inverse-Gaussian branch of Eq. (22) is implemented; the log-normal and log-logistic branches are not needed on the first-passage path. The `exp(2/ccm)` term here has **no** overflow guard and will raise rather than degrade. #5 |
 | 10 | No-Regulatory-Arbitrage conversion `CL_B(CCM*) = CL_A(CCM_A)` | Prop. 5.2.1 Eq. (26)–(27) | `conversion.py::no_arb_ccm_star` | **partial** — Eq. (26) is implemented and reproduces `CCM* = 1.35373`. Eq. (27) (`RS_B = TiC_B(PD_A, CCM*)`) is **missing**, so the analytical route cannot emit a rating. `no_arb_ccm_star` is therefore reachable **only from tests**, while the module docstring claims it "extends past the grid edges". #6, #11 |
 | 11 | S&P TiC rating formula, `Q_S&P = 0.625913` | Prop. 4.5.4 Eq. (24) | `conversion.py::alpha_sp` (confidence-level half only) | **partial** — the α half is **correct**: `(1.35 − (1/Q)·ln CCM + ln(CCM+1)/2) / √(ln(CCM+1))`, verified through the `CCM*` anchor. ⚠️ In the PDF this renders as a stacked fraction that reads like `0.625913 · ln CCM`; the coefficient is `1/0.625913`. Do not "correct" it. The rating half, `ln(TiC_SP) = Q·Φ⁻¹(PD)·√(ln(CCM+1)) − (Q/2)·ln(CCM+1) + ln(CCM)`, is **missing**. #11 |
@@ -43,16 +44,18 @@ Findings that need work are filed as GitHub issues and referenced by number belo
 | 13 | `Outlook` | Prop. 5.3 Eq. (28) | `conversion.py::outlook:151` — `pit_pd - ttc_pd_value` | **correct**, and note the direction. Eq. (28) reads `Outlook = PD_FH − S&P TTC`, i.e. **PIT − TTC**, which is what the code does. The previous revision of this file stated `Outlook = S&P TTC − PIT PD` in two places — wrong, corrected here. The prose above Eq. (28) reads in the opposite order and has already prompted one proposal to invert working code. **No test covers `outlook`.** #14, #13 |
 | 14 | Agency `Q` values: Moody's `0.746`, S&P `0.626` | Prop. 4.2 | `conversion.py:39` — `Q_SP = 0.625913` only | **partial** — the S&P constant is present (§5.3's precise value; Prop. 4.2 quotes `0.626`). Moody's `Q = 0.746` is **not defined anywhere**, so no Moody's-side conversion and no Table 12 reproduction is possible. #11 |
 
-### Supporting pipeline (deck, not the paper)
+### Supporting pipeline (model-reference materials, not the methodology text)
+
+§ numbers cite the model-reference materials kept under `local/`.
 
 | Concept | Reference | Implementation | Status |
 |---|---|---|---|
-| Asset GBM; equity as a call on assets | Eq. (10); deck 52–68 | `signal_construction/em.py` | **correct** — σ_A recovery from synthetic data tested |
-| EM: E-step bisection inverse, M-step σ_A and η_A | deck 56–68 | `em.py::estimate` | **correct** — converges within `EM_MAX_ITER = 20`; the `A > D` and `A > E` invariants raise. The bracket-expansion loop can exit without raising. #10 |
-| `D = 1.0·ST + 0.5·LT` | deck 55 | `data_cleaning/transforms.py::default_point_debt` | **correct** |
+| Asset GBM; equity as a call on assets | Eq. (10); ref §52–68 | `signal_construction/em.py` | **correct** — σ_A recovery from synthetic data tested |
+| EM: E-step bisection inverse, M-step σ_A and η_A | ref §56–68 | `em.py::estimate` | **correct** — converges within `EM_MAX_ITER = 20`; the `A > D` and `A > E` invariants raise. The bracket-expansion loop can exit without raising. #10 |
+| `D = 1.0·ST + 0.5·LT` | ref §55 | `data_cleaning/transforms.py::default_point_debt` | **correct** |
 | ST/LT split with fallbacks | — | `transforms.py::split_term_debt` | **partial** — the `max(Total − LT, 0)` fallback yields `ST = 0` for banks, a 36% default-point difference on PNC. Untested. #13 |
-| Equity = shares × price, dividends added back | deck 61 | `data_cleaning/alignment.py` | **correct** — tested |
-| Prior-quarter as-of join (no look-ahead) | deck 62 | `alignment.py`, `merge_asof(..., "backward")` | **correct** — canary tested. Aligns on `period_end`, not publication-time `available_at`; see `docs/TIMING_PROTOCOL.md` §9 |
+| Equity = shares × price, dividends added back | ref §61 | `data_cleaning/alignment.py` | **correct** — tested |
+| Prior-quarter as-of join (no look-ahead) | ref §62 | `alignment.py`, `merge_asof(..., "backward")` | **correct** — canary tested. Aligns on `period_end`, not publication-time `available_at`; see `docs/TIMING_PROTOCOL.md` §9 |
 | Submission `Asset` sheet | conversion workbook `Asset` sheet, 1 × 23 | `dashboard/submission.py` | **wrong** — omits `A`, splits `TiC Risk Score` into two columns, adds `EM iters`, renames four headers, and declares no schema constant. #7 |
 
 ---
@@ -61,9 +64,9 @@ Findings that need work are filed as GitHub issues and referenced by number belo
 
 | Question | Decision |
 |---|---|
-| Risk-free rate | **1-year** (FRED `DGS1`); horizon `T = 1yr`, per the deck |
-| `R_A` / asset return | The deck's **η_A**, estimated jointly in the EM M-step; `DD = [ln(A/D) + (η_A − σ_A²/2)T]/(σ_A√T)` |
-| EM estimation window | Trailing **252** trading days; a year is sized at **250** days (`TRADING_DAYS_PER_YEAR`), per the deck's "about 1/250 years" |
+| Risk-free rate | **1-year** (FRED `DGS1`); horizon `T = 1yr`, per the reference |
+| `R_A` / asset return | The reference's **η_A**, estimated jointly in the EM M-step; `DD = [ln(A/D) + (η_A − σ_A²/2)T]/(σ_A√T)` |
+| EM estimation window | Trailing **252** trading days; a year is sized at **250** days (`TRADING_DAYS_PER_YEAR`), per the reference's "about 1/250 years" |
 | `Asset` sheet `R` vs `eta` | `eta = η_A`; `R = η_A − σ_A²/2`, the drift term inside DD |
 | `Total Debt` column | Currently the **as-reported gross** balance-sheet row, not the default point `D`. The peer implementation puts `D` in the same column. **Open** — `docs/reconciliation/REPORT.md` §B1 |
 | Long-term debt field | `Long Term Debt And Capital Lease Obligation` in preference to plain `Long Term Debt`. **Open** — `REPORT.md` §B3 |
@@ -136,5 +139,5 @@ Axes used at runtime: **CCM ∈ [0.1, 540]** (154 points), **µ ∈ [1, 160]** (
 - **Timing.** Point-in-time compliance is tracked in `docs/TIMING_PROTOCOL.md` §9.
 - **Cross-implementation differences.** How our outputs compare with a peer implementation
   and the screenshot figures is in `docs/reconciliation/REPORT.md`.
-- **Grid contents.** The conversion grids are proprietary; only their axes and the paper's
+- **Grid contents.** The conversion grids are proprietary; only their axes and the methodology's
   published anchors appear in this repository.

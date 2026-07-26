@@ -16,7 +16,7 @@ CCM = σ_A² / (ln(A₀/D) · (η − σ_A²/2))
 ```
 
 `measures.py` substituted `abs(η − σ_A²/2)`. Where the drift was negative this produced a
-finite `µ` and `CCM` that are **not** the paper's quantities — the first-passage time is
+finite `µ` and `CCM` that are **not** the methodology's quantities — the first-passage time is
 defective there, default occurs almost surely, and `E[τ]` diverges. Nothing on the output
 said so. Four of ten companies were affected (ORCL, INTU, T, KHC).
 

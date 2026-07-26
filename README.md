@@ -182,7 +182,7 @@ misordered — COST ranks 1st in 100% of replicates, ORCL 10th in 99.7%.
    5–9 and swap freely (INTU holds its exact point rank in only 35% of replicates). The
    stability is at the extremes, where the companies are actually far apart.
 
-### Why this is the methodology's own thesis, demonstrated numerically
+### Why the framework itself predicts this result
 
 This is not a defect we discovered; it is the result the framework predicts. Prop. 4.4.2
 establishes that `TiC = σ_A²/ln²(A₀/D)` is invariant under the Girsanov change of measure
