@@ -35,6 +35,53 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - The 150-name universe run: taxonomy, two bugs fixed, fixtures
+
+- **Scope:** this push carries the universe run of record and everything it
+  surfaced: two data-layer bug fixes (one commit each, failing company as the
+  regression fixture), a determination consistency fix, the committed offline
+  fixture subset, the analysis outputs, `docs/UNIVERSE.md`, and history/15.
+- **Run of record:** 150/150 companies processed, first run **3m50s**
+  (all-network, workers=6), cached rerun with 500-rep bootstrap 4m03s
+  (CPU-bound). Captured as `history/15_universe_150.csv`; analysis CSVs under
+  `docs/reconciliation/universe/`.
+- **Failure taxonomy (final):** RATED 85 / MODEL_NOT_APPLICABLE 41
+  (12 bank, 5 insurer, 6 REIT, 11 assets-below-total-debt, 7 currency) /
+  DEFECTIVE_DRIFT 20 / DATA_UNAVAILABLE 4 (PARA, NKLA, FSR delisted; SATS --
+  vendor returns one price row, verified live, not a cache artifact) /
+  OFF_SCALE 0 / **BUG 0** after the fixes below.
+- **Bugs found by scale (both fixed with named regression tests):**
+  1. `REPORTING_CURRENCY_MISMATCH` -- TM (JPY statements, USD prices) made EM
+     raise `A <= D`; TSM/BABA/SAP/ASML were silently RATED on the same
+     mismatch. Gated, measures suppressed (unit-corrupt), no FX conversion
+     attempted; TM cache entry committed as the fixture.
+  2. V/MA/PYPL misgated `BANK_DEPOSIT_FUNDED` via the vendor's 'Credit
+     Services' string; pinned NONFINANCIAL, ALLY/COF/AXP stay gated.
+  3. (consistency) currency-gated names now carry the MODEL_NOT_APPLICABLE
+     determination instead of a blank.
+- **Findings** (full tables in `docs/UNIVERSE.md`): sigma_A by sector is
+  cleanly ordered (Technology median 0.555 ... Utilities 0.141, n=139);
+  drift regime VALID 108 / DEFECTIVE 31 (one in five names has a defective
+  first-passage regime -- structural, not a small-sample accident);
+  determination split SCALE_RESOLVED 39 / floor 29 / scale-top 17 / gated 41
+  / NOT_RATED 20 -- only 26% of the universe gets a scale-resolved letter;
+  the model letter distribution saturates at AAA/AAA- (51 of 85 rated)
+  against an approximate agency distribution centered on A/BBB -- the
+  floor-pinning finding made distributional.
+- **Fixtures:** the original 10 names + TM + FRED rates committed under
+  `data/cache/` (~1.6MB, our own cached vendor responses); the demo and
+  `test_offline_fixture.py` run with no network. CLAUDE.md rule 8 and the
+  acceptance-gate extension list updated accordingly.
+- **Breaking changes:** ADRs filing in non-USD currencies are no longer
+  rated (they were silently wrong); V/MA/PYPL are rated again.
+- **Validation:** `python3 -m pytest -q` -> 321 passed, run before this push
+  (offline-fixture end-to-end test, TM currency-gate end-to-end test,
+  classification both-directions tests, cache and isolation tests). Live
+  batch + two offline reruns as above.
+- **Follow-ups:** sweep the debt-weight convention across the full universe;
+  a proper GICS/SIC feed for classification; FX-converted ADR support would
+  need a dated FX series, not a spot guess.
+
 ### 2026-07-26 - Acquisition cache, parallel/resumable batch, 150-name universe
 
 - **Scope:** Layer 1 (`raw_data_architecture/cache.py`), Layer 2

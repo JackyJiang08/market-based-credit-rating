@@ -22,6 +22,7 @@ code docstrings cite the methodology by equation number.
 - **τ = 0.956** — median Kendall's τ of the risk ordering across 2,000 bootstrap replicates; the extremes are essentially never misordered → [rank stability](#parameter-uncertainty-the-bootstrap)
 - **7 notches** — how far one company's letter (T) moves on the unargued long-term-debt weight alone → [convention uncertainty](#convention-uncertainty-the-debt-weight-sweep)
 - **7/10 rated, 3/10 scale-resolved** — coverage stated honestly: most letters are pinned by the scale, not resolved by the model → [what the scale could resolve](#what-the-scale-could-resolve)
+- **150-name universe, 0 unexplained failures** — every non-rating classified (gates, defective drift, data), two real bugs found and fixed by scale alone → [docs/UNIVERSE.md](docs/UNIVERSE.md)
 
 ![Amplification ladder: median relative bootstrap interval width per quantity, log scale](docs/figures/amplification_ladder.svg)
 
@@ -76,6 +77,9 @@ python -m mdt rate AAPL
 # The batch run -> outputs/submission_<timestamp>.xlsx
 python -m mdt batch config/companies.yaml
 
+# The 150-name universe (parallel, resumable via data/cache/) -- docs/UNIVERSE.md
+python -m mdt batch config/universe.yaml --workers 6
+
 # Backward-compatible workflow entry
 python run.py COST KO --years 2
 ```
@@ -108,6 +112,9 @@ What `rate` prints (abbreviated — a real run, 2026-07-26):
     ! TTC PD at the grid's 2bp floor -> letter is floor-determined
 ======================================================
 ```
+
+Committed cache fixtures make the demo run **offline**: `python -m mdt rate COST`
+works on a fresh clone with no network (data/cache/, see docs/UNIVERSE.md).
 
 To enable the TTC/S&P conversion, place the
 `TiC_TTC_conversion.xlsx` workbook at `local/TiC_TTC_conversion.xlsx` (git-ignored).

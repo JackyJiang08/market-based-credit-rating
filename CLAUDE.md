@@ -244,10 +244,11 @@ review gate, so the discipline that a PR used to provide now lives in the commit
 8. **Reproducibility.** `raw_data_architecture/lineage.py` records run provenance today:
    `RUN_TIMESTAMP`, `EQUITY_SOURCE`, `RATES_SOURCE`. **(planned)** a full run manifest (git
    SHA, package version, input hashes, data vintage, config) — extend `lineage.py` rather
-   than starting a parallel mechanism. There are no committed offline fixtures and no
-   `data/fixtures/` directory; instead, tests needing the proprietary workbook skip via
-   `needs_tables` (`tests/test_conversion.py:17`) so a fresh clone stays green. Keep that
-   skip behaviour working.
+   than starting a parallel mechanism. Offline cache fixtures ARE committed under `data/cache/` (the original
+   10-name universe, TM as the currency-gate regression case, and the FRED rates frame),
+   so the demo and `tests/test_offline_fixture.py` run with no network. Tests needing the
+   proprietary workbook still skip via `needs_tables` (`tests/test_conversion.py:17`) so a
+   fresh clone stays green. Keep both behaviours working.
 
 9. **Ask, don't assume.** Ambiguity in a convention (drift definition, debt fields, EM
    window, rate series) → stop and ask. Assumptions get written into `docs/GAP_ANALYSIS.md`
@@ -331,6 +332,9 @@ There is no `Makefile` in this repo. Use these directly:
 pip install -r requirements.txt          # deps (Python 3.11+ recommended)
 python -m mdt rate <TICKER>              # one company → rating table + report
 python -m mdt batch config/companies.yaml  # batch → outputs/submission_<stamp>.xlsx
+python -m mdt batch config/universe.yaml --workers 6  # 150-name universe (docs/UNIVERSE.md)
+# Acquisition cache: data/cache/ (MDT_CACHE_DIR / MDT_CACHE_OFF / MDT_CACHE_REFRESH=1);
+# committed fixtures make `mdt rate COST` and the suite run offline.
 python run.py COST KO --years 2           # legacy workflow entry
 pytest                                    # offline suite, 24 tests
 ```
@@ -350,10 +354,12 @@ Run them, and record in the commit body and `docs/DEVLOG.md` what you actually r
 - Paper Tables 13/14 and the `alpha_FH(1.5) = 0.91906` / `CCM* = 1.35373` anchors still
   reproduce (`tests/test_measures.py`, `tests/test_conversion.py`).
 - `tests/test_no_lookahead.py` passes, and any alignment change adds to it.
-- `git ls-files --cached` contains no `.pdf` or `.parquet`, no `.csv` outside
-  `docs/reconciliation/history/`, no `.xlsx` outside `docs/deliverables/`, and nothing
-  under `local/`. (The two exceptions are our own generated outputs, negated explicitly
-  in `.gitignore`; everything else with those extensions stays out.)
+- `git ls-files --cached` contains no `.pdf`; `.parquet` only under `data/cache/`
+  (committed fixtures); `.csv` only under `docs/reconciliation/history/`,
+  `docs/reconciliation/universe/`, and `docs/figures/data/`; `.xlsx` only under
+  `docs/deliverables/`; and nothing under `local/`. (Every exception is our own
+  generated output, negated explicitly in `.gitignore`; everything else with those
+  extensions stays out.)
 - `docs/DEVLOG.md` is updated in the same push.
 - Invariants above hold across the 10-company batch — this needs a live network run
   (`python -m mdt batch config/companies.yaml`), so it is a release check rather than a

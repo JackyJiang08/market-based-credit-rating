@@ -9,6 +9,8 @@
   and what does not, and the bug episode that produced the current numbers.
 - [`RATING_DETERMINATION.md`](RATING_DETERMINATION.md): what the scale could
   resolve, and why that is not the same as precision.
+- [`UNIVERSE.md`](UNIVERSE.md): the 150-name universe run -- failure taxonomy,
+  sigma-by-sector, determination split, letters vs the agency distribution.
 - [`GAP_ANALYSIS.md`](GAP_ANALYSIS.md): methodology-to-code mapping and the
   resolved modelling conventions.
 - [`../LICENSE`](../LICENSE): project Apache-2.0 license (see also [`../NOTICE`](../NOTICE)).
