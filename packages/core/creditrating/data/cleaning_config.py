@@ -79,6 +79,6 @@ RATE_PERCENT_SUSPICIOUS_MAX = 0.5
 # alignment. Owned by the cleaning layer that builds the daily panel.
 HORIZON_YEARS = 1.0
 
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from creditrating._paths import REPO_ROOT as PROJECT_ROOT  # noqa: E501
 CLEAN_DATA_DIR = os.path.join(PROJECT_ROOT, "data_cleaning", "data")
 RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "raw_data_architecture", "data")

@@ -12,8 +12,9 @@ import os
 
 import pytest
 
-from data_cleaning.workflow import RunConfig, fetch_company
-from raw_data_architecture import cache, sources
+from creditrating.data.pipeline import RunConfig, fetch_company
+from creditrating.data import cache
+from creditrating.data import providers as sources
 
 FIXTURE_PRESENT = os.path.exists(
     os.path.join(cache.cache_dir(), "COST", "prices.parquet"))

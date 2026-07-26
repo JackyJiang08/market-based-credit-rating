@@ -32,10 +32,12 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(ROOT, "packages", "core"))
 sys.path.insert(0, ROOT)
 
-from data_cleaning.workflow import RunConfig, fetch_company   # noqa: E402
-from raw_data_architecture import cache, sources              # noqa: E402
+from creditrating.data.pipeline import RunConfig, fetch_company   # noqa: E402
+from creditrating.data import cache
+from creditrating.data import providers as sources              # noqa: E402
 
 OUT = os.path.join(HERE, "universe")
 

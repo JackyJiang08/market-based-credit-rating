@@ -38,7 +38,7 @@ REQUEST_TIMEOUT = 20
 # --------------------------------------------------------------------------- #
 # Paths
 # --------------------------------------------------------------------------- #
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from creditrating._paths import REPO_ROOT as PROJECT_ROOT  # noqa: E501
 RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "raw_data_architecture", "data")
 
 # Trailing window for prices and financials. Must cover

@@ -13,8 +13,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from data_cleaning import config as clean_config
-from data_cleaning import transforms
+from creditrating.data import cleaning_config as clean_config
+from creditrating.data import cleaning as transforms
 
 
 def _balance(rows: dict[str, list[float]], periods: list[str]) -> pd.DataFrame:

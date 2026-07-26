@@ -12,8 +12,9 @@ import os
 
 import pytest
 
-from data_cleaning.workflow import RunConfig, fetch_company
-from raw_data_architecture import cache, sources
+from creditrating.data.pipeline import RunConfig, fetch_company
+from creditrating.data import cache
+from creditrating.data import providers as sources
 
 TM_FIXTURE = os.path.exists(os.path.join(cache.cache_dir(), "TM", "info.json"))
 
@@ -44,7 +45,7 @@ def test_tm_is_gated_for_currency_mismatch_not_crashed(monkeypatch):
 
 def test_matching_currencies_do_not_gate():
     """The gate must not fire on ordinary domestic names (or USD-filing ADRs)."""
-    from data_cleaning.company import CompanyData
+    from creditrating.data.company import CompanyData
 
     c = CompanyData(ticker="XX")
     c.currency, c.financial_currency = "USD", "USD"
@@ -56,7 +57,7 @@ def test_matching_currencies_do_not_gate():
 
 def test_missing_financial_currency_does_not_gate():
     """Absent metadata is not evidence of a mismatch."""
-    from data_cleaning.company import CompanyData
+    from creditrating.data.company import CompanyData
 
     c = CompanyData(ticker="XX")
     c.currency, c.financial_currency = "USD", ""

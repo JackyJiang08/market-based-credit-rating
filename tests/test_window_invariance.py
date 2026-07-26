@@ -19,9 +19,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from data_cleaning import alignment
-from signal_construction import config as sig_config
-from signal_construction import conversion, em, measures
+from creditrating.data import alignment
+from creditrating.model import config as sig_config
+from creditrating.model import conversion, em
+from creditrating.model import tic as measures
 
 # Tolerances. sigma_A and A are asserted tightly: a window-invariant
 # construction should reproduce them to within EM's own convergence tolerance
@@ -244,7 +245,7 @@ def test_bootstrap_sigma_is_centred_on_the_pipeline_sigma():
     """
     import numpy as np
 
-    from signal_construction import bootstrap as bs
+    from creditrating.diagnostics import uncertainty as bs
 
     rng = np.random.default_rng(11)
     # A path whose recent volatility is deliberately unlike its full-span one.
@@ -274,7 +275,7 @@ def test_bootstrap_records_drift_free_quantities_for_defective_replicates():
     """
     import numpy as np
 
-    from signal_construction import bootstrap as bs
+    from creditrating.diagnostics import uncertainty as bs
 
     rng = np.random.default_rng(5)
     # Negative mean drift -> many defective replicates.

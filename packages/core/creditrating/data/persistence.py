@@ -13,7 +13,7 @@ import os
 
 import pandas as pd
 
-from . import config
+from . import cleaning_config as config
 from .company import CompanyData
 
 LOG = logging.getLogger(__name__)

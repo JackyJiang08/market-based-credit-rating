@@ -40,7 +40,7 @@ import pandas as pd
 
 LOG = logging.getLogger(__name__)
 
-_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from creditrating._paths import REPO_ROOT as _ROOT  # noqa: E501
 STATEMENT_KEYS = ("q_income", "q_balance", "q_cashflow",
                   "a_income", "a_balance", "a_cashflow")
 

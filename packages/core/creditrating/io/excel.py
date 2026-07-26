@@ -16,10 +16,10 @@ import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from data_cleaning.company import CompanyData
-from raw_data_architecture import config as raw_config
-from raw_data_architecture import lineage
-from signal_construction import config as signal_config
+from ..data.company import CompanyData
+from ..data import provider_config as raw_config
+from ..data import provenance as lineage
+from ..model import config as signal_config
 
 from . import config, records
 

@@ -17,13 +17,14 @@ from typing import Optional, Sequence
 import pandas as pd
 import yfinance as yf
 
-from raw_data_architecture import cache
-from raw_data_architecture import config as raw_config
-from raw_data_architecture import errors as raw_errors
-from raw_data_architecture import sources
+from . import cache
+from . import provider_config as raw_config
+from . import errors as raw_errors
+from . import providers as sources
 
-from . import alignment, persistence, sectors, transforms
-from . import config as clean_config
+from . import alignment, persistence, sectors
+from . import cleaning as transforms
+from . import cleaning_config as clean_config
 from .company import CompanyData
 
 LOG = logging.getLogger(__name__)
@@ -235,7 +236,8 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             and data.applicability_reason != "REPORTING_CURRENCY_MISMATCH"):
         # Import the modelling layer only when used, so Layer 1/2 tooling and
         # CLI help do not require SciPy.
-        from signal_construction import config as sig_config, em, measures
+        from creditrating.model import config as sig_config, em
+        from creditrating.model import tic as measures
 
         # Pass the full drift window; em.estimate takes sigma_A from its
         # trailing EM_WINDOW_DAYS and the drift from the whole span.
@@ -307,7 +309,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
 
     # --- PIT -> TTC -> S&P conversion (local tables; skipped if tables absent) ---
     if data.ccm is not None and data.mu is not None:
-        from signal_construction import conversion
+        from creditrating.model import conversion
 
         try:
             tables = conversion.load_tables()
@@ -352,7 +354,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     # --- uncertainty propagation (bootstrap) ---
     if (cfg.run_bootstrap and data.sigma_A is not None
             and data.asset_value is not None and _em_asset_path is not None):
-        from signal_construction import bootstrap as bs
+        from creditrating.diagnostics import uncertainty as bs
 
         try:
             import numpy as _np
@@ -407,8 +409,9 @@ def run(cfg: RunConfig) -> list[CompanyData]:
     # Layer 4 remains a compatibility publisher while only Layers 1/2 are
     # active. Keeping this import local prevents a dashboard dependency from
     # becoming part of the cleaning package's import contract.
-    from dashboard import config as dashboard_config
-    from dashboard import excel, longtable
+    from creditrating.io import config as dashboard_config
+    from creditrating.io import excel
+    from creditrating.io import export as longtable
 
     os.makedirs(dashboard_config.OUTPUT_DIR, exist_ok=True)
     LOG.info("Universe: %s | window: %dy | rates: %s | credit-model: %s",
@@ -480,7 +483,7 @@ def run(cfg: RunConfig) -> list[CompanyData]:
         _log_vol_comparison(companies)
         excel.write_master_workbook(companies, rates)
         longtable.write_long_table(longtable.build_long_table(companies, rates))
-        from dashboard import submission
+        from creditrating.io import workbook as submission
         submission.write_submission(companies)
 
     LOG.info("Done. %d/%d companies succeeded. Output: %s",

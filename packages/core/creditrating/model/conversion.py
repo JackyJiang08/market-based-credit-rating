@@ -52,7 +52,7 @@ from scipy.stats import norm
 
 LOG = logging.getLogger(__name__)
 
-_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from creditrating._paths import REPO_ROOT as _PROJECT_ROOT  # noqa: E501
 DEFAULT_XLSX = os.path.join(_PROJECT_ROOT, "local", "TiC_TTC_conversion.xlsx")
 CACHE_DIR = os.path.join(_PROJECT_ROOT, "local", "tables")
 

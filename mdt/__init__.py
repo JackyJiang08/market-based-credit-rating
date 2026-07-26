@@ -1,8 +1,17 @@
-"""One-click command-line interface for the market-based credit-rating pipeline.
+"""Compatibility shim: the CLI moved to creditrating.cli.
 
-    python -m mdt rate AAPL                    # one company -> table + report
-    python -m mdt batch config/companies.yaml  # the batch run
-
-The entry point lives in ``mdt.__main__:main`` (used by both ``python -m mdt``
-and the installed ``mdt`` console script).
+`python -m mdt` and the `mdt` console script keep working; new code should
+call `creditrating.cli` (or the `creditrating` console script) directly.
+The sys.path insert keeps the zero-install story true from a fresh clone;
+an installed wheel imports creditrating directly and never touches this.
 """
+
+import os
+import sys
+
+_PKG = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    "packages", "core")
+if _PKG not in sys.path:
+    sys.path.insert(0, _PKG)
+
+from creditrating.cli import main  # noqa: E402,F401

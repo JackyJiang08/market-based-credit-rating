@@ -7,7 +7,7 @@ from typing import Optional
 
 import pandas as pd
 
-from raw_data_architecture import lineage
+from . import provenance as lineage
 
 
 @dataclass

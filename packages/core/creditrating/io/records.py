@@ -34,9 +34,9 @@ from typing import Any, Optional
 
 import pandas as pd
 
-from data_cleaning import config as clean_config
-from data_cleaning.company import CompanyData
-from signal_construction import config as sig_config
+from ..data import cleaning_config as clean_config
+from ..data.company import CompanyData
+from ..model import config as sig_config
 
 # The reference workbook's `Asset` sheet, in order. Do not reorder: downstream
 # consumers diff against this prefix.
@@ -274,7 +274,7 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
         flags.append("RiskScore below the best published grade -> rating is "
                      "scale-determined, not model-determined")
     if r["model_applicable"] is False:
-        from data_cleaning import sectors as _sectors
+        from ..data import sectors as _sectors
         code = r["applicability_reason"]
         flags.append(f"MODEL_NOT_APPLICABLE ({code}): "
                      f"{_sectors.REASON_TEXT.get(code, 'see docs/adr/0003')}")
@@ -403,7 +403,7 @@ def ratings_frame(companies: list[CompanyData]) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 def _git_sha() -> str:
     """Short SHA of the commit this run was produced from, or 'unknown'."""
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    from creditrating._paths import REPO_ROOT as root
     try:
         out = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
                              cwd=root, capture_output=True, text=True, timeout=5)
@@ -418,7 +418,7 @@ def _git_sha() -> str:
 
 
 def _model_version() -> str:
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    from creditrating._paths import REPO_ROOT as root
     try:
         with open(os.path.join(root, "pyproject.toml"), encoding="utf-8") as fh:
             for line in fh:

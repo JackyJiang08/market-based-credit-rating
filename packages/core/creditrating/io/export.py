@@ -11,8 +11,8 @@ import os
 
 import pandas as pd
 
-from data_cleaning.company import CompanyData
-from raw_data_architecture import lineage
+from ..data.company import CompanyData
+from ..data import provenance as lineage
 
 from . import config, records
 

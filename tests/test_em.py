@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from signal_construction import em
+from creditrating.model import em
 
 
 def _simulate_equity(sigma_true=0.25, eta=0.08, D=100.0, r=0.04,
@@ -66,7 +66,7 @@ def test_inversion_raises_when_the_root_cannot_be_bracketed(monkeypatch):
     """
     import numpy as np
 
-    from signal_construction import em as em_mod
+    from creditrating.model import em as em_mod
 
     # g(A) = 0 for all A, so g(hi) < E can never be satisfied.
     monkeypatch.setattr(em_mod, "_bs_equity",
@@ -79,7 +79,7 @@ def test_inversion_raises_when_the_root_cannot_be_bracketed(monkeypatch):
 def test_bracket_failure_message_counts_the_offending_days(monkeypatch):
     import numpy as np
 
-    from signal_construction import em as em_mod
+    from creditrating.model import em as em_mod
 
     monkeypatch.setattr(em_mod, "_bs_equity",
                         lambda A, D, r, sigma, T: np.zeros_like(np.asarray(A, dtype=float)))

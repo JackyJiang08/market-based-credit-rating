@@ -13,7 +13,7 @@ import os
 import pytest
 from scipy.stats import norm
 
-from signal_construction import conversion
+from creditrating.model import conversion
 
 HAS_TABLES = os.path.exists(conversion.DEFAULT_XLSX)
 needs_tables = pytest.mark.skipif(not HAS_TABLES,
@@ -244,7 +244,7 @@ def test_table_13_and_14_ccm_star_anchors():
 
 @pytest.mark.parametrize("mu, rs_pub", TABLE_13)
 def test_table_13_sp_risk_score_reproduces(mu, rs_pub):
-    from signal_construction import measures
+    from creditrating.model import tic as measures
 
     pit = measures.pit_pd_first_hitting(mu, 1.5)
     got = conversion.no_arb_convert(pit, 1.5).risk_score
@@ -253,7 +253,7 @@ def test_table_13_sp_risk_score_reproduces(mu, rs_pub):
 
 @pytest.mark.parametrize("mu, rs_pub", TABLE_14)
 def test_table_14_sp_risk_score_reproduces(mu, rs_pub):
-    from signal_construction import measures
+    from creditrating.model import tic as measures
 
     pit = measures.pit_pd_first_hitting(mu, 5.0)
     got = conversion.no_arb_convert(pit, 5.0).risk_score
@@ -304,7 +304,7 @@ def test_analytical_agrees_with_the_grid_where_the_scale_resolves(ccm, mu):
     equality is not expected, but a disagreement wide enough to move the letter
     by more than one notch would mean one of them is wrong.
     """
-    from signal_construction import measures
+    from creditrating.model import tic as measures
 
     t = conversion.load_tables()
     grid = conversion.ttc_pd(t, ccm, mu)
@@ -333,7 +333,7 @@ def test_known_divergence_inside_the_ccc_band(ccm, mu):
     band. It reads ~2-5pp riskier than the grid there, which is up to two
     notches. Investment grade through BB is unaffected.
     """
-    from signal_construction import measures
+    from creditrating.model import tic as measures
 
     t = conversion.load_tables()
     grid = conversion.ttc_pd(t, ccm, mu)
@@ -348,7 +348,7 @@ def test_known_divergence_inside_the_ccc_band(ccm, mu):
 @needs_tables
 def test_off_grid_now_converts_analytically_instead_of_blanking():
     """The point of #11: a CCM below the grid floor still gets a rating."""
-    from signal_construction import measures
+    from creditrating.model import tic as measures
 
     t = conversion.load_tables()
     ccm, mu = 0.05, 30.0                      # CCM below the grid's 0.1 floor

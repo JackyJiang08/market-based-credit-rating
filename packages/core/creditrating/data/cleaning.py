@@ -12,7 +12,7 @@ from typing import Iterable, Optional
 import numpy as np
 import pandas as pd
 
-from . import config
+from . import cleaning_config as config
 
 
 def _norm(s: object) -> str:

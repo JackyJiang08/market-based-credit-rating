@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "market-based-credit-rating"
-version = "0.3.0"
+version = "0.4.0"
 description = "Market-based KMV/TiC credit-rating pipeline for public companies (EM asset estimation, PIT/TTC PD, S&P-equivalent rating)."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -21,14 +21,21 @@ dependencies = [
 ]
 
 [project.scripts]
-mdt = "mdt.__main__:main"
+mdt = "creditrating.cli:main"
+creditrating = "creditrating.cli:main"
 
 [tool.setuptools]
+package-dir = { "" = "packages/core" }
 packages = [
-    "raw_data_architecture",
-    "data_cleaning",
-    "signal_construction",
-    "dashboard",
-    "mdt",
+    "creditrating",
+    "creditrating.data",
+    "creditrating.model",
+    "creditrating.tables",
+    "creditrating.io",
+    "creditrating.diagnostics",
 ]
-py-modules = ["run"]
+
+[tool.pytest.ini_options]
+# The package lives under packages/core; the repo root stays importable for
+# the mdt compatibility shim and the legacy run.py entry.
+pythonpath = ["packages/core", "."]

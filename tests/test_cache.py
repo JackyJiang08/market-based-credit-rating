@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from raw_data_architecture import cache
+from creditrating.data import cache
 
 
 def _canonical(df):
@@ -114,8 +114,8 @@ def test_refresh_ignores_existing_entries(tmp_cache, monkeypatch):
 
 def test_batch_isolation_one_raising_company_cannot_abort_the_run(monkeypatch):
     """run() must return the survivors and record the raiser, never propagate."""
-    from data_cleaning import workflow
-    from data_cleaning.company import CompanyData
+    from creditrating.data import pipeline as workflow
+    from creditrating.data.company import CompanyData
 
     def fake_fetch(ticker, cfg, rates):
         if ticker == "BAD":
@@ -123,7 +123,9 @@ def test_batch_isolation_one_raising_company_cannot_abort_the_run(monkeypatch):
         return CompanyData(ticker=ticker, name=ticker)
 
     monkeypatch.setattr(workflow, "fetch_company", fake_fetch)
-    from dashboard import excel, longtable, submission
+    from creditrating.io import excel
+    from creditrating.io import export as longtable
+    from creditrating.io import workbook as submission
     monkeypatch.setattr(excel, "write_company_workbook", lambda *a, **k: None)
     monkeypatch.setattr(excel, "write_master_workbook", lambda *a, **k: None)
     monkeypatch.setattr(longtable, "write_long_table", lambda *a, **k: None)

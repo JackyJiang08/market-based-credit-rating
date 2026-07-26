@@ -31,13 +31,14 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(ROOT, "packages", "core"))
 sys.path.insert(0, ROOT)
 
-from data_cleaning.workflow import RunConfig, fetch_company          # noqa: E402
-from raw_data_architecture import sources                            # noqa: E402
-from signal_construction import bootstrap as bs                      # noqa: E402
-from signal_construction import config as sig_config                 # noqa: E402
-from signal_construction import conversion, em                       # noqa: E402
+from creditrating.data.pipeline import RunConfig, fetch_company          # noqa: E402
+from creditrating.data import providers as sources                            # noqa: E402
+from creditrating.diagnostics import uncertainty as bs                      # noqa: E402
+from creditrating.model import config as sig_config                 # noqa: E402
+from creditrating.model import conversion, em                       # noqa: E402
 
 DATA_DIR = os.path.join(HERE, "data")
 QUANTITIES = ("sigma_A", "risk_score", "dd", "ttc_pd", "pit_pd")

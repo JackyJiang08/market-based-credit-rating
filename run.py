@@ -15,8 +15,10 @@ import argparse
 import logging
 from typing import Optional, Sequence
 
-from data_cleaning.workflow import RunConfig, run
-from raw_data_architecture.config import DEFAULT_TICKERS, DEFAULT_YEARS
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "packages", "core"))
+from creditrating.data.pipeline import RunConfig, run
+from creditrating.data.provider_config import DEFAULT_TICKERS, DEFAULT_YEARS
 
 
 def _load_companies_yaml(path: str) -> list[str]:

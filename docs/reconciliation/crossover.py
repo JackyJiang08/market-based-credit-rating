@@ -57,11 +57,13 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(ROOT, "packages", "core"))
 sys.path.insert(0, ROOT)
 
-from data_cleaning import config as clean_config          # noqa: E402
-from signal_construction import config as sig_config      # noqa: E402
-from signal_construction import conversion, em, measures  # noqa: E402
+from creditrating.data import cleaning_config as clean_config          # noqa: E402
+from creditrating.model import config as sig_config      # noqa: E402
+from creditrating.model import conversion, em
+from creditrating.model import tic as measures  # noqa: E402
 
 PEER_XLSX = os.path.join(HERE, "other_answer.xlsx")
 OUT_CSV = os.path.join(HERE, "crossover_results.csv")

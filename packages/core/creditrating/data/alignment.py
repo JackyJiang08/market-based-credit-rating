@@ -18,7 +18,8 @@ import logging
 import numpy as np
 import pandas as pd
 
-from . import config, transforms
+from . import cleaning as transforms
+from . import cleaning_config as config
 
 LOG = logging.getLogger(__name__)
 

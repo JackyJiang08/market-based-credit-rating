@@ -29,13 +29,13 @@ import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from data_cleaning.company import CompanyData
+from ..data.company import CompanyData
 
 from . import records
 
 LOG = logging.getLogger(__name__)
 
-_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from creditrating._paths import REPO_ROOT as _PROJECT_ROOT  # noqa: E501
 OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "outputs")
 
 HEADER_FILL = PatternFill("solid", fgColor="1F4E78")
@@ -68,7 +68,7 @@ def write_submission(companies: list[CompanyData],
             f"{path} already exists; a submission is never overwritten. "
             "Re-run to get a fresh stamp, or pass a different filename.")
 
-    # All frames come from dashboard.records, the single source of truth for
+    # All frames come from io.records, the single source of truth for
     # every published credit field. The Asset sheet is guaranteed to carry
     # exactly records.ASSET_SCHEMA, in order.
     readme = records.readme_frame(companies)

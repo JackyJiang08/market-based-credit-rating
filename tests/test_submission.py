@@ -12,8 +12,9 @@ import math
 import pandas as pd
 import pytest
 
-from data_cleaning.company import CompanyData
-from dashboard import records, submission
+from creditrating.data.company import CompanyData
+from creditrating.io import records
+from creditrating.io import workbook as submission
 
 # --- GOLDEN: the exact Asset sheet, in order. -------------------------------
 # First 23 entries are the reference workbook's canonical `Asset` columns; the
@@ -158,7 +159,8 @@ def test_all_writers_project_from_the_same_record():
     """No writer may re-derive a credit field; all read dashboard.records."""
     import inspect
 
-    from dashboard import excel, longtable
+    from creditrating.io import excel
+    from creditrating.io import export as longtable
 
     for module in (submission, excel, longtable):
         src = inspect.getsource(module)

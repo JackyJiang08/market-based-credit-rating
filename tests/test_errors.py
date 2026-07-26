@@ -10,7 +10,7 @@ from __future__ import annotations
 import pytest
 import requests
 
-from raw_data_architecture import errors
+from creditrating.data import errors
 
 
 class _Resp:
@@ -96,7 +96,7 @@ def test_every_status_is_distinct():
 
 # --- retry policy -----------------------------------------------------------
 def test_only_throttling_and_transport_failures_are_retryable():
-    from raw_data_architecture import sources
+    from creditrating.data import providers as sources
 
     assert isinstance(errors.RateLimitedError("x"), sources.RETRYABLE)
     assert isinstance(errors.SourceUnavailableError("x"), sources.RETRYABLE)
@@ -106,7 +106,8 @@ def test_only_throttling_and_transport_failures_are_retryable():
 
 
 def test_retry_decorator_does_not_retry_a_delisted_symbol(monkeypatch):
-    from raw_data_architecture import config, sources
+    from creditrating.data import provider_config as config
+    from creditrating.data import providers as sources
 
     monkeypatch.setattr(config, "MAX_RETRIES", 4)
     monkeypatch.setattr(config, "BACKOFF_BASE_SECONDS", 0)
@@ -123,7 +124,8 @@ def test_retry_decorator_does_not_retry_a_delisted_symbol(monkeypatch):
 
 
 def test_retry_decorator_retries_a_rate_limit_then_raises_it_typed(monkeypatch):
-    from raw_data_architecture import config, sources
+    from creditrating.data import provider_config as config
+    from creditrating.data import providers as sources
 
     monkeypatch.setattr(config, "MAX_RETRIES", 3)
     monkeypatch.setattr(config, "BACKOFF_BASE_SECONDS", 0)
@@ -140,7 +142,8 @@ def test_retry_decorator_retries_a_rate_limit_then_raises_it_typed(monkeypatch):
 
 
 def test_retry_decorator_returns_on_success(monkeypatch):
-    from raw_data_architecture import config, sources
+    from creditrating.data import provider_config as config
+    from creditrating.data import providers as sources
 
     monkeypatch.setattr(config, "MAX_RETRIES", 3)
     monkeypatch.setattr(config, "BACKOFF_BASE_SECONDS", 0)
@@ -160,7 +163,7 @@ def test_risk_free_rate_outside_the_plausible_band_raises():
     import numpy as np
     import pandas as pd
 
-    from data_cleaning.alignment import build_panel
+    from creditrating.data.alignment import build_panel
 
     idx = pd.bdate_range("2024-01-02", periods=40)
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
@@ -186,7 +189,7 @@ def test_already_decimal_rate_warns_because_it_cannot_be_caught_by_a_band(caplog
 
     import pandas as pd
 
-    from data_cleaning.alignment import build_panel
+    from creditrating.data.alignment import build_panel
 
     idx = pd.bdate_range("2024-01-02", periods=40)
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
@@ -203,7 +206,7 @@ def test_missing_adj_close_is_nan_not_silently_the_close():
     import numpy as np
     import pandas as pd
 
-    from data_cleaning.alignment import build_panel
+    from creditrating.data.alignment import build_panel
 
     idx = pd.bdate_range("2024-01-02", periods=20)
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
@@ -213,7 +216,7 @@ def test_missing_adj_close_is_nan_not_silently_the_close():
 
 
 def test_reference_shares_reports_which_method_it_used():
-    from data_cleaning import transforms
+    from creditrating.data import cleaning as transforms
 
     shares, method = transforms.reference_shares(1_000_000.0, 50.0, 12_345.0)
     assert shares == pytest.approx(20_000.0)

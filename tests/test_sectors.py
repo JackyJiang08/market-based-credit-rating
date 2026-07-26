@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from data_cleaning import sectors, transforms
+from creditrating.data import sectors
+from creditrating.data import cleaning as transforms
 
 
 # --- classification ---------------------------------------------------------

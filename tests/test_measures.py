@@ -9,7 +9,7 @@ import pytest
 from scipy.special import log_ndtr
 from scipy.stats import invgauss
 
-from signal_construction import measures
+from creditrating.model import tic as measures
 
 
 # --- PIT PD (Eq. 13) vs paper Tables 13 (CCM=1.5) and 14 (CCM=5) -------------

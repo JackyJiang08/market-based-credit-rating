@@ -33,13 +33,15 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(ROOT, "packages", "core"))
 sys.path.insert(0, ROOT)
 
-from data_cleaning import alignment                       # noqa: E402
-from data_cleaning import config as clean_config          # noqa: E402
-from signal_construction import bootstrap as bs           # noqa: E402
-from signal_construction import config as sig_config      # noqa: E402
-from signal_construction import conversion, em, measures  # noqa: E402
+from creditrating.data import alignment                       # noqa: E402
+from creditrating.data import cleaning_config as clean_config          # noqa: E402
+from creditrating.diagnostics import uncertainty as bs           # noqa: E402
+from creditrating.model import config as sig_config      # noqa: E402
+from creditrating.model import conversion, em
+from creditrating.model import tic as measures  # noqa: E402
 
 TICKERS = ["COST", "KO", "DELL", "ORCL", "PNC", "WMT", "INTU", "AMZN", "T", "KHC"]
 LT_WEIGHTS = [0.0, 0.25, 0.5, 0.75, 1.0]

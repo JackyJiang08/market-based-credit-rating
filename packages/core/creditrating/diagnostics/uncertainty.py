@@ -41,9 +41,9 @@ from typing import Optional
 
 import numpy as np
 
-from . import config
-from .conversion import ConversionTables, RatingBasis, sp_rating, ttc_pd
-from .measures import DriftRegime, compute
+from ..model import config
+from ..model.conversion import ConversionTables, RatingBasis, sp_rating, ttc_pd
+from ..model.tic import DriftRegime, compute
 
 DEFAULT_REPLICATES = 2000
 DEFAULT_SEED = 20260726

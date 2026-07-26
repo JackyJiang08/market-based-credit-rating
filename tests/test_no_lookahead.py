@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from data_cleaning.alignment import build_panel
+from creditrating.data.alignment import build_panel
 
 
 def _balance_sheet() -> pd.DataFrame:
@@ -120,8 +120,8 @@ def _q_balance(period_ends, st=100.0, lt=200.0):
 
 
 def test_available_at_is_period_end_plus_the_filing_lag():
-    from data_cleaning import config as clean_config
-    from data_cleaning import transforms
+    from creditrating.data import cleaning_config as clean_config
+    from creditrating.data import cleaning as transforms
 
     q = _q_balance(["2024-03-31"])
     a = _q_balance(["2023-12-31"])
@@ -136,7 +136,7 @@ def test_available_at_is_period_end_plus_the_filing_lag():
 
 def test_statement_is_invisible_between_period_end_and_filing():
     """THE CANARY. No input on date t may depend on data published after t."""
-    from data_cleaning import transforms
+    from creditrating.data import cleaning as transforms
 
     idx = pd.bdate_range("2024-01-01", "2024-09-30")
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
@@ -159,7 +159,7 @@ def test_statement_is_invisible_between_period_end_and_filing():
 
 def test_every_row_only_sees_statements_already_available():
     """The general invariant, swept across every row of the panel."""
-    from data_cleaning import transforms
+    from creditrating.data import cleaning as transforms
 
     idx = pd.bdate_range("2024-01-01", "2025-06-30")
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
@@ -178,7 +178,7 @@ def test_every_row_only_sees_statements_already_available():
 
 def test_panel_exposes_the_timing_audit_fields():
     """TIMING_PROTOCOL §8 wants the cutoff and the source identifiable."""
-    from data_cleaning import transforms
+    from creditrating.data import cleaning as transforms
 
     idx = pd.bdate_range("2024-01-01", "2024-12-31")
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
@@ -191,7 +191,7 @@ def test_panel_exposes_the_timing_audit_fields():
 
 def test_period_end_join_would_have_leaked():
     """Red-first pin: the old behaviour is a look-ahead, and we can show it."""
-    from data_cleaning import transforms
+    from creditrating.data import cleaning as transforms
 
     idx = pd.bdate_range("2024-01-01", "2024-09-30")
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)

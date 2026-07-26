@@ -17,7 +17,7 @@ import pandas as pd
 import requests
 import yfinance as yf
 
-from . import config
+from . import provider_config as config
 from .errors import (DataSourceError, RateLimitedError,
                      SourceUnavailableError, classify)
 
