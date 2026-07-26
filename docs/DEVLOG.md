@@ -35,6 +35,42 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - CI made green for real: deps declared, golden made local-aware, gate hardened
+
+- **Scope:** requirements split + constraints regen, CI installs from
+  declared files only, column-aware golden test, synthetic-grid mechanism
+  tests, repository reformat under the pinned toolchain, CLAUDE.md rule.
+- **New git rule (owner-directed):** GREEN MEANS CI GREEN -- no ending a
+  session or starting a dependent task while the pushed HEAD's CI is failing
+  or unknown. Added to CLAUDE.md's git rules; the stale "there is no CI"
+  paragraph replaced.
+- **The three defects behind 5/7 red cells:**
+  1. pydantic/structlog/typer were imported but never declared;
+     requirements.txt + requirements-dev.txt now carry everything,
+     constraints.txt regenerated from a clean py3.11 env (also fixing the
+     lint job's ancient-black click ImportError), workflows install ONLY
+     from the files (the pandas matrix axis is the sole exception), and a
+     canary test asserts every package import is declared.
+  2. The golden workbook test baked in a grid-dependent value; it is now
+     column-aware (grid columns asserted equal with local/, asserted NaN
+     without -- both real assertions, absent path also monkeypatch-tested
+     everywhere), golden regenerated with a producing-environment MANIFEST.
+  3. The no-local coverage gate failed at 75% because the licensed grids
+     hid the loader/lookup/floor/letter code from CI entirely; seven
+     synthetic-workbook tests now exercise the mechanism with made-up
+     numbers, no-local coverage 90.8%.
+- **Local reproduction of all seven cells before pushing:** lint (pinned
+  venv: ruff, black --check, mypy -- clean), tests py3.11 x pandas 2.3.3 and
+  x pandas 3.0.5 in from-files-only venvs with the no-local simulation
+  (329 passed, coverage 90.8% each), acceptance in a clean no-local workdir
+  (offline fixture batch, panels present, 179 passed with the by-design
+  grid skips), DEVLOG gate (this entry). The py3.12 pair could not run
+  locally (no working 3.12 interpreter on this machine) and is verified on
+  CI after the push -- recorded here rather than glossed.
+- **Validation:** full local suite 356 passed (with local/); the no-local
+  simulations above; CI watched to green after this push per the new rule.
+- **Follow-ups:** phase 11 (services/api) next.
+
 ### 2026-07-26 - Restructured into packages/core/creditrating (behavior-identical)
 
 - **Scope:** the whole repository layout; ten commits, every one with the

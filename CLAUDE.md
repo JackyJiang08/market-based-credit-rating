@@ -182,6 +182,9 @@ review gate, so the discipline that a PR used to provide now lives in the commit
 - **`main` must be green at every commit.** Run the full test suite *before* every push.
   Never push a commit you have not run. If the suite is red, fix it or revert before
   pushing — do not push and follow up.
+- **GREEN MEANS CI GREEN: you may not end a session, or start a dependent task, while
+  the pushed HEAD's CI is failing or unknown.** Watch the run after every push
+  (`gh run list`); a red or unknown HEAD is unfinished work.
 - Atomic conventional commits: `feat(model):`, `fix(data):`, `test:`, `docs:`, `refactor:`,
   `chore:`, `ci:`. Never mix a refactor with a behaviour change in one commit.
 - **The commit message body replaces the PR description.** It states what changed, why, how
@@ -345,9 +348,10 @@ runs and reports σ_A / DD / PIT PD, and the grid tests skip.
 
 ## Acceptance gates (run these yourself, before every push)
 
-There is **no CI in this repo** (no `.github/`, no pre-commit, no ruff/black/mypy config or
-dependency) and, since going trunk-based, no review gate either. Nothing runs these for you.
-Run them, and record in the commit body and `docs/DEVLOG.md` what you actually ran:
+CI exists (`.github/workflows/ci.yml`: lint+mypy, py3.11/3.12 × pandas 2/3 matrix with a
+coverage gate, and the acceptance job; `devlog.yml`: the push gate) and pre-commit runs
+ruff/black/mypy locally. CI is the backstop, not the substitute — run these yourself
+before pushing, and record in the commit body and `docs/DEVLOG.md` what you actually ran:
 
 - `pytest` is fully green — currently 24 tests. This is the hard gate: never push a commit
   whose suite you have not run.
