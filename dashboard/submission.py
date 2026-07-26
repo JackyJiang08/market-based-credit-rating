@@ -93,7 +93,9 @@ def write_submission(companies: list[CompanyData],
         ws.column_dimensions["A"].width = 34
         ws.column_dimensions["B"].width = 110
         for row in ws.iter_rows(min_row=2):
-            row[1].alignment = row[1].alignment.copy(wrap_text=True, vertical="top")
+            # A fresh Alignment, not .copy(**kw) on the existing one -- the
+            # kwargs form of StyleProxy.copy is deprecated in openpyxl 3.1.
+            row[1].alignment = Alignment(wrap_text=True, vertical="top")
 
     LOG.info("submission workbook -> %s", os.path.relpath(path, _PROJECT_ROOT))
     return path
