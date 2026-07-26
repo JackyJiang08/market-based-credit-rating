@@ -11,5 +11,5 @@
   resolve, and why that is not the same as precision.
 - [`GAP_ANALYSIS.md`](GAP_ANALYSIS.md): methodology-to-code mapping and the
   resolved modelling conventions.
-- [`../LICENSE`](../LICENSE): project MIT license.
+- [`../LICENSE`](../LICENSE): project Apache-2.0 license (see also [`../NOTICE`](../NOTICE)).
 - [`tools/`](tools/): local helper launchers.

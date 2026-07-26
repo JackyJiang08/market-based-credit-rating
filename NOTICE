@@ -1,0 +1,15 @@
+market-based-credit-rating
+Copyright 2026 Yuqing Jiang
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This project is an independent implementation of the Time-Consistent (TiC)
+credit-rating methodology (Y. Yang), combined with standard KMV/Merton
+structural-model machinery. The methodology is third-party intellectual
+property: equation and proposition numbers are cited in the docstrings of the
+modules that implement TiC formulas, and the implementation must not be
+represented as original methodology.
+
+The methodology reference materials and the TiC_TTC_conversion.xlsx workbook
+are licensed third-party material. They are NOT covered by this project's
+license and are not distributed with this repository.

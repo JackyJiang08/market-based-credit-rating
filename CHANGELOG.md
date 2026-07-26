@@ -2,6 +2,21 @@
 
 Notable changes to the model and the delivered artifacts. Newest first.
 
+## Unreleased
+
+### Changed
+
+- **Relicensed MIT → Apache-2.0** while the project is sole-authored (no external
+  contributions to re-license). Apache-2.0 adds an explicit patent grant and the
+  NOTICE mechanism; the methodology acknowledgement now travels in `NOTICE` as
+  well as the README. The methodology reference materials and the conversion
+  workbook remain licensed third-party material outside the project license.
+- **Referencing repositioned:** methodology attribution consolidated into one
+  README "Methodology & acknowledgements" section; slide-number citations
+  replaced by the conventions they named (equation-number citations in code
+  docstrings are the attribution mechanism and stay); loggers renamed from
+  `pfpa.*` to package names.
+
 Entries reference the GitHub issue they close. Detailed rationale lives in
 `docs/DEVLOG.md`; architectural decisions live in `docs/adr/`.
 

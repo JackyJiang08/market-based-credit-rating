@@ -9,7 +9,7 @@ description = "Market-based KMV/TiC credit-rating pipeline for public companies 
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
-authors = [{ name = "JackyJiang08" }]
+authors = [{ name = "Yuqing Jiang" }]
 dependencies = [
     "yfinance>=0.2.40",
     "pandas>=1.5",
