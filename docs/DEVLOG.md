@@ -35,6 +35,64 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Restructured into packages/core/creditrating (behavior-identical)
+
+- **Scope:** the whole repository layout; ten commits, every one with the
+  suite green. Behavior did not change, and that is now a measured fact, not
+  a claim -- see the identity check at the bottom.
+- **Layout:** `packages/core/creditrating/` with `data/` (providers,
+  cleaning, alignment, sectors, cache, provenance + run manifest, pipeline),
+  `model/` (em, tic, conversion, config), `tables/` (grid loader +
+  structural validation; the grids themselves remain licensed material under
+  git-ignored `local/`), `io/` (records, workbook, excel, export),
+  `diagnostics/` (uncertainty, domain checks), `cli.py` (typer), `domain.py`
+  (pydantic v2 models). Every file moved with `git mv`; renamed siblings are
+  import-aliased so function bodies are untouched. `mdt` remains a
+  self-locating shim; runtime artifact paths are unchanged via the single
+  `_paths.REPO_ROOT` anchor. `services/api` and `apps/terminal` are
+  placeholder READMEs for phases 11/12.
+- **Deliberate deviation from the target layout:** no `model/merton.py` --
+  the Merton inversion IS the E-step of `em.py`, and splitting one algorithm
+  across two files to satisfy a filename would hurt the code. Flagged here
+  rather than done silently. `model/drift.py` likewise stays inside `tic.py`
+  (the regime enum is one screen of code); both can be split later without
+  behavior risk.
+- **New machinery:** pydantic v2 domain models (CompanyInputs /
+  AssetEstimates / RiskMeasures / RatingResult) encoding A > D,
+  0 < sigma_A < 3, PD in [0,1], EM <= 20 iters, letter-never-bare; asserted
+  loudly-but-non-fatally over every finished batch and fatally at any future
+  service boundary. structlog per-run correlation id; every run writes
+  `outputs/manifest_<run_id>.json` (sha256 input hashes, package version,
+  git SHA, data vintage, config, TIMING_PROTOCOL-10 timestamp). Typer CLI.
+  Hypothesis property tests (TiC identity, alpha monotonicity, probability
+  bounds, currency-scale invariance). Golden workbook file for the COST
+  fixture. Makefile (setup|test|lint|run|batch|serve|demo); `make demo` is
+  offline from committed fixtures. ruff + black clean; mypy strict with
+  staged per-module overrides on the legacy pandas modules (the override
+  list is the debt register). constraints.txt is the exact-pin lockfile;
+  pandas deliberately stays a range because CI tests both majors.
+- **CI:** ci.yml supersedes tests.yml -- lint job, tests on py3.11/3.12 x
+  pandas 2/3 with a >=85% coverage gate on model/tables/diagnostics
+  (currently 91%), and an acceptance job that reproduces the methodology
+  anchors (Tables 12-14 columns, alpha_FH, CCM*) and the DEFAULT_YEARS
+  window-invariance result offline from fixtures, with a guard that those
+  tests run rather than skip.
+- **OUTPUT IDENTITY CHECK (the gate for this whole change):** the 150-name
+  universe was run offline from the same cache at the pre-move commit
+  (482f28f, in a detached worktree) and at the new HEAD. Asset (150x35),
+  Ratings (150x9) and validation (150x24) sheets compared column-by-column:
+  numerics at rtol 1e-12, strings exactly. **IDENTICAL.** Only provenance
+  differs (workbook README sheet stamp/SHA; the new manifest file).
+- **Aside:** the first push of this series was rejected by our own DEVLOG
+  pre-push hook because a git-2.15 incompatibility (`worktree remove`)
+  aborted the chain that wrote this entry. The gate caught it. That is the
+  gate doing its job, and this machine's git predating `worktree remove` is
+  now a known quirk (use `rm -rf` + `git worktree prune`).
+- **Validation:** `python3 -m pytest -q` -> 346 passed at every commit in
+  the series; `make lint` clean; `make demo` offline; identity check above.
+- **Follow-ups:** annotate legacy modules and shrink the mypy override list;
+  split drift.py/merton.py if the files grow; phases 11/12.
+
 ### 2026-07-26 - Validation study: the model against sourced agency ratings
 
 - **Scope:** `docs/analysis/` (sourced ratings file, study script, four SVGs,
