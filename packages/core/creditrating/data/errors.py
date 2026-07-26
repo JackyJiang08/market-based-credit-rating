@@ -73,15 +73,23 @@ class SourceUnavailableError(DataSourceError):
 # Vendors signal these in prose rather than in types, so classification is
 # necessarily textual. Ordered most specific first.
 _RATE_LIMIT_PATTERNS = (
-    r"\b429\b", r"too\s+many\s+requests", r"rate\s*limit", r"\bthrottl",
-    r"temporarily\s+blocked", r"\bquota\b",
+    r"\b429\b",
+    r"too\s+many\s+requests",
+    r"rate\s*limit",
+    r"\bthrottl",
+    r"temporarily\s+blocked",
+    r"\bquota\b",
 )
 _DELISTED_PATTERNS = (
-    r"delisted", r"no\s+longer\s+(?:traded|listed)", r"symbol\s+may\s+be\s+delisted",
-    r"\b404\b", r"not\s+found",
+    r"delisted",
+    r"no\s+longer\s+(?:traded|listed)",
+    r"symbol\s+may\s+be\s+delisted",
+    r"\b404\b",
+    r"not\s+found",
 )
 _NO_DATA_PATTERNS = (
-    r"no\s+(?:price\s+)?data\s+found", r"empty\s+(?:data|response)",
+    r"no\s+(?:price\s+)?data\s+found",
+    r"empty\s+(?:data|response)",
     r"no\s+timezone\s+found",
 )
 

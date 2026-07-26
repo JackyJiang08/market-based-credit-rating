@@ -18,7 +18,6 @@ import os
 import numpy as np
 import pandas as pd
 import pytest
-
 from creditrating.data import alignment
 from creditrating.model import config as sig_config
 from creditrating.model import conversion, em
@@ -27,13 +26,14 @@ from creditrating.model import tic as measures
 # Tolerances. sigma_A and A are asserted tightly: a window-invariant
 # construction should reproduce them to within EM's own convergence tolerance
 # and the arithmetic of a different-length cumprod. The rating must be identical.
-SIGMA_TOL = 5e-4          # absolute, on a quantity of order 0.15-0.55
-ASSET_REL_TOL = 1e-6      # relative, on the asset value A
-DRIFT_TOL = 5e-3          # absolute; the drift genuinely uses more data
+SIGMA_TOL = 5e-4  # absolute, on a quantity of order 0.15-0.55
+ASSET_REL_TOL = 1e-6  # relative, on the asset value A
+DRIFT_TOL = 5e-3  # absolute; the drift genuinely uses more data
 
 
-def _synthetic_prices(n: int = 1600, seed: int = 7,
-                      div_every: int = 63, div_amount: float = 0.9):
+def _synthetic_prices(
+    n: int = 1600, seed: int = 7, div_every: int = 63, div_amount: float = 0.9
+):
     """A deterministic price path with regular dividends."""
     rng = np.random.default_rng(seed)
     idx = pd.bdate_range("2019-01-01", periods=n)
@@ -48,8 +48,9 @@ def _synthetic_prices(n: int = 1600, seed: int = 7,
 def test_total_return_close_is_anchored_at_the_valuation_date():
     close, div = _synthetic_prices()
     out = alignment.total_return_close(close, div)
-    assert out.iloc[-1] == pytest.approx(close.iloc[-1], rel=1e-12), \
-        "the last value must be the real market price"
+    assert out.iloc[-1] == pytest.approx(
+        close.iloc[-1], rel=1e-12
+    ), "the last value must be the real market price"
 
 
 @pytest.mark.parametrize("start", [0, 200, 500, 900])
@@ -59,7 +60,7 @@ def test_total_return_returns_are_invariant_to_the_window_start(start):
     full = alignment.total_return_close(close, div)
     part = alignment.total_return_close(close.iloc[start:], div.iloc[start:])
 
-    r_full = np.log(full / full.shift(1)).iloc[start + 1:]
+    r_full = np.log(full / full.shift(1)).iloc[start + 1 :]
     r_part = np.log(part / part.shift(1)).iloc[1:]
     assert np.allclose(r_full.to_numpy(), r_part.to_numpy(), atol=1e-12)
 
@@ -67,12 +68,13 @@ def test_total_return_returns_are_invariant_to_the_window_start(start):
 def test_old_additive_construction_was_not_invariant():
     """Pins the defect, so the regression cannot be reintroduced quietly."""
     close, div = _synthetic_prices()
-    old_full = (close + div.cumsum())
-    old_part = (close.iloc[500:] + div.iloc[500:].cumsum())
+    old_full = close + div.cumsum()
+    old_part = close.iloc[500:] + div.iloc[500:].cumsum()
     r_full = np.log(old_full / old_full.shift(1)).iloc[501:]
     r_part = np.log(old_part / old_part.shift(1)).iloc[1:]
-    assert not np.allclose(r_full.to_numpy(), r_part.to_numpy(), atol=1e-9), \
-        "premise: the additive construction depended on the window start"
+    assert not np.allclose(
+        r_full.to_numpy(), r_part.to_numpy(), atol=1e-9
+    ), "premise: the additive construction depended on the window start"
 
 
 def test_missing_dividends_are_not_treated_as_zero():
@@ -93,8 +95,9 @@ def test_absent_dividend_column_yields_nan_not_a_price_return_series():
     prices = pd.DataFrame({"Close": np.linspace(100, 120, 40)}, index=idx)
     panel = alignment.build_panel(prices, 1000.0, pd.DataFrame(), None)
     assert panel["Dividends"].isna().all()
-    assert panel["DivAddBackClose"].isna().all(), \
-        "no dividend column means unknown total return, not zero dividends"
+    assert (
+        panel["DivAddBackClose"].isna().all()
+    ), "no dividend column means unknown total return, not zero dividends"
     assert panel["MarketCap_E"].isna().all(), "and no equity series to fit"
 
 
@@ -103,12 +106,14 @@ CACHED = "data_cleaning/data"
 TICKERS = ["COST", "KO", "DELL", "ORCL", "PNC", "WMT", "INTU", "AMZN", "T", "KHC"]
 has_cache = pytest.mark.skipif(
     not os.path.isdir(CACHED),
-    reason="no cached panels; run `python -m mdt batch config/companies.yaml`")
+    reason="no cached panels; run `python -m mdt batch config/companies.yaml`",
+)
 
 
 def _panel(ticker: str) -> pd.DataFrame:
-    return pd.read_csv(f"{CACHED}/{ticker}/aligned_panel.csv",
-                       index_col=0, parse_dates=True).sort_index()
+    return pd.read_csv(
+        f"{CACHED}/{ticker}/aligned_panel.csv", index_col=0, parse_dates=True
+    ).sort_index()
 
 
 def _fit(panel: pd.DataFrame, years: int):
@@ -150,11 +155,16 @@ def test_sigma_and_asset_are_invariant_to_the_download_window(ticker):
     assets = {y: f[0].asset_last for y, f in fits.items()}
 
     lo, hi = min(sigmas.values()), max(sigmas.values())
-    assert hi - lo < SIGMA_TOL, f"{ticker}: sigma_A moved {hi - lo:.2e} across windows {sigmas}"
+    assert (
+        hi - lo < SIGMA_TOL
+    ), f"{ticker}: sigma_A moved {hi - lo:.2e} across windows {sigmas}"
 
     a_lo, a_hi = min(assets.values()), max(assets.values())
-    assert (a_hi - a_lo) / a_hi < ASSET_REL_TOL, \
+    assert (
+        a_hi - a_lo
+    ) / a_hi < ASSET_REL_TOL, (
         f"{ticker}: A moved {(a_hi - a_lo) / a_hi:.2e} relative across windows"
+    )
 
 
 @has_cache
@@ -191,15 +201,19 @@ def test_rating_is_invariant_once_the_drift_span_is_saturated(ticker):
             label = "NOT_APPLICABLE"
         else:
             look = conversion.ttc_pd(tables, m.ccm, m.mu, pit_pd=m.pit_pd)
-            label = (conversion.sp_rating(tables, look.value)
-                     if math.isfinite(look.value) else look.basis.value)
+            label = (
+                conversion.sp_rating(tables, look.value)
+                if math.isfinite(look.value)
+                else look.basis.value
+            )
         by_span.setdefault(span, set()).add(label)
 
     saturated = {span: labels for span, labels in by_span.items() if len(labels) > 0}
     for span, labels in saturated.items():
         assert len(labels) == 1, (
             f"{ticker}: at an identical drift span of {span}y the rating still "
-            f"depends on the download window: {labels}")
+            f"depends on the download window: {labels}"
+        )
 
     # And at least one span must be shared by two window lengths, otherwise the
     # test asserted nothing.
@@ -231,7 +245,8 @@ def test_drift_span_saturates_and_then_stops_changing_the_drift(ticker):
         if abs(spans[b] - spans[a]) < 1e-9:
             assert drifts[b] == pytest.approx(drifts[a], abs=DRIFT_TOL), (
                 f"{ticker}: identical drift span {spans[a]:.2f}y but the drift "
-                f"moved {drifts[b] - drifts[a]:+.4f}")
+                f"moved {drifts[b] - drifts[a]:+.4f}"
+            )
 
 
 # --- Bootstrap must mirror the estimator it claims to describe ---------------
@@ -244,7 +259,6 @@ def test_bootstrap_sigma_is_centred_on_the_pipeline_sigma():
     narrower one, since it would have ~5x the observations.
     """
     import numpy as np
-
     from creditrating.diagnostics import uncertainty as bs
 
     rng = np.random.default_rng(11)
@@ -253,16 +267,18 @@ def test_bootstrap_sigma_is_centred_on_the_pipeline_sigma():
     recent = rng.normal(0.0002, 0.016, size=300)
     u = np.concatenate([early, recent])
 
-    pipeline_sigma = float(np.std(u[-sig_config.EM_WINDOW_DAYS:], ddof=1)
-                           * np.sqrt(sig_config.TRADING_DAYS_PER_YEAR))
-    full_span_sigma = float(np.std(u, ddof=1)
-                            * np.sqrt(sig_config.TRADING_DAYS_PER_YEAR))
+    pipeline_sigma = float(
+        np.std(u[-sig_config.EM_WINDOW_DAYS :], ddof=1)
+        * np.sqrt(sig_config.TRADING_DAYS_PER_YEAR)
+    )
+    full_span_sigma = float(np.std(u, ddof=1) * np.sqrt(sig_config.TRADING_DAYS_PER_YEAR))
     assert full_span_sigma < 0.75 * pipeline_sigma, "premise: the two differ a lot"
 
     b = bs.run("TEST", u, 1.0e11, 1.0e10, None, n_replicates=300)
     median = b.quantiles("sigma_A")[0.5]
-    assert median == pytest.approx(pipeline_sigma, rel=0.15), \
-        f"bootstrap centred on {median:.4f}, pipeline uses {pipeline_sigma:.4f}"
+    assert median == pytest.approx(
+        pipeline_sigma, rel=0.15
+    ), f"bootstrap centred on {median:.4f}, pipeline uses {pipeline_sigma:.4f}"
     assert abs(median - pipeline_sigma) < abs(median - full_span_sigma)
 
 
@@ -274,7 +290,6 @@ def test_bootstrap_records_drift_free_quantities_for_defective_replicates():
     report an interval narrower than the truth.
     """
     import numpy as np
-
     from creditrating.diagnostics import uncertainty as bs
 
     rng = np.random.default_rng(5)

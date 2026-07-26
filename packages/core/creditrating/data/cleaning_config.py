@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 
+from creditrating._paths import REPO_ROOT as PROJECT_ROOT
+
 BALANCE_SHEET_MAP: dict[str, tuple[str, ...]] = {
     "Total Debt": ("Total Debt",),
     "Total Liabilities": (
@@ -17,14 +19,8 @@ BALANCE_SHEET_MAP: dict[str, tuple[str, ...]] = {
         "Short Term Debt",
         "Short Long Term Debt",
     ),
-    "Short-term / Current Liabilities": (
-        "Current Liabilities",
-        "Total Current Liabilities",
-    ),
-    "Long-term Debt": (
-        "Long Term Debt And Capital Lease Obligation",
-        "Long Term Debt",
-    ),
+    "Short-term / Current Liabilities": ("Current Liabilities", "Total Current Liabilities",),
+    "Long-term Debt": ("Long Term Debt And Capital Lease Obligation", "Long Term Debt",),
     "Long-term Liabilities": (
         "Total Non Current Liabilities Net Minority Interest",
         "Total Non Current Liabilities",
@@ -37,8 +33,11 @@ BALANCE_SHEET_MAP: dict[str, tuple[str, ...]] = {
 # it is absent the ex-deposits variant is reported as not computable rather
 # than silently equal to total liabilities.
 DEPOSIT_ROWS: tuple[str, ...] = (
-    "Total Deposits", "Deposits", "Customer Deposits",
-    "Deposits From Customers", "Interest Bearing Deposits Liability",
+    "Total Deposits",
+    "Deposits",
+    "Customer Deposits",
+    "Deposits From Customers",
+    "Interest Bearing Deposits Liability",
 )
 
 # Which default-point definition the pipeline rates on:
@@ -79,6 +78,6 @@ RATE_PERCENT_SUSPICIOUS_MAX = 0.5
 # alignment. Owned by the cleaning layer that builds the daily panel.
 HORIZON_YEARS = 1.0
 
-from creditrating._paths import REPO_ROOT as PROJECT_ROOT  # noqa: E501
+
 CLEAN_DATA_DIR = os.path.join(PROJECT_ROOT, "data_cleaning", "data")
 RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "raw_data_architecture", "data")

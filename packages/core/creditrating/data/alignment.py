@@ -88,11 +88,13 @@ def total_return_close(close: pd.Series, dividends: pd.Series) -> pd.Series:
     return out
 
 
-def build_panel(prices: pd.DataFrame,
-                reference_shares: float | None,
-                balance: pd.DataFrame,
-                risk_free: pd.Series | None,
-                available_at: dict | None = None) -> pd.DataFrame:
+def build_panel(
+    prices: pd.DataFrame,
+    reference_shares: float | None,
+    balance: pd.DataFrame,
+    risk_free: pd.Series | None,
+    available_at: dict | None = None,
+) -> pd.DataFrame:
     """Construct the aligned daily panel for one company.
 
     Columns
@@ -166,7 +168,8 @@ def build_panel(prices: pd.DataFrame,
         term["PeriodEnd"] = term["Date"]
         if available_at:
             term["Date"] = term["PeriodEnd"].map(
-                lambda d: available_at.get(pd.Timestamp(d), pd.NaT))
+                lambda d: available_at.get(pd.Timestamp(d), pd.NaT)
+            )
             term = term[term["Date"].notna()]
         # merge_asof's output `Date` is the LEFT (panel) date, so carry the
         # statement's own availability across as its own column.
@@ -181,8 +184,7 @@ def build_panel(prices: pd.DataFrame,
             panel["Horizon_T"] = config.HORIZON_YEARS
             return panel
         left = panel.reset_index()[["Date"]].sort_values("Date")
-        merged = pd.merge_asof(left, term.sort_values("Date"),
-                               on="Date", direction="backward")
+        merged = pd.merge_asof(left, term.sort_values("Date"), on="Date", direction="backward")
         merged = merged.set_index("Date")
         panel["ShortTermDebt"] = merged["ShortTermDebt"]
         panel["LongTermDebt"] = merged["LongTermDebt"]
@@ -192,12 +194,12 @@ def build_panel(prices: pd.DataFrame,
         panel["StatementAvailableAt"] = merged["AvailableAt"]
         # Field provenance (#16) rides the same as-of join so the validation
         # sheet can say which line item supplied each debt leg on each row.
-        for prov in ("ShortTermDebtSource", "LongTermDebtSource",
-                     "DebtSourceContradictory"):
+        for prov in ("ShortTermDebtSource", "LongTermDebtSource", "DebtSourceContradictory"):
             if prov in merged:
                 panel[prov] = merged[prov]
         panel["DefaultPointDebt_D"] = transforms.default_point_debt(
-            panel["ShortTermDebt"], panel["LongTermDebt"])
+            panel["ShortTermDebt"], panel["LongTermDebt"]
+        )
     else:
         panel["ShortTermDebt"] = np.nan
         panel["LongTermDebt"] = np.nan
@@ -222,7 +224,8 @@ def build_panel(prices: pd.DataFrame,
                     f"risk-free rate outside the plausible band after unit "
                     f"conversion: [{lo:.6f}, {hi:.6f}] not within "
                     f"[{config.RATE_MIN}, {config.RATE_MAX}]. The source may "
-                    f"have changed units.")
+                    f"have changed units."
+                )
             # The band above catches a series arriving 100x too large. The
             # opposite error -- a series already in decimals, divided again --
             # cannot be caught by a band, because 0.05 / 100 = 0.05% is itself
@@ -235,10 +238,11 @@ def build_panel(prices: pd.DataFrame,
                     "risk-free series peaks at %.4f%% before conversion, which "
                     "is low for a percent-quoted series -- check the source has "
                     "not switched to decimals (values would then be 100x too "
-                    "small)", raw_max)
+                    "small)",
+                    raw_max,
+                )
         left = panel.reset_index()[["Date"]].sort_values("Date")
-        merged = pd.merge_asof(left, rf.sort_values("Date"),
-                               on="Date", direction="backward")
+        merged = pd.merge_asof(left, rf.sort_values("Date"), on="Date", direction="backward")
         panel["RiskFree_R"] = merged.set_index("Date")["RiskFree_R"]
     else:
         panel["RiskFree_R"] = np.nan

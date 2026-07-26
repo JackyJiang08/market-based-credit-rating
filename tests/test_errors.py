@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import pytest
 import requests
-
 from creditrating.data import errors
 
 
@@ -37,27 +36,33 @@ def test_http_404_is_delisted():
     assert err.status is errors.DataStatus.DELISTED
 
 
-@pytest.mark.parametrize("message", [
-    "Too Many Requests", "429 Client Error", "rate limit exceeded",
-    "You are being throttled", "quota exceeded",
-])
+@pytest.mark.parametrize(
+    "message",
+    [
+        "Too Many Requests",
+        "429 Client Error",
+        "rate limit exceeded",
+        "You are being throttled",
+        "quota exceeded",
+    ],
+)
 def test_rate_limit_recognised_from_the_message(message):
-    assert isinstance(errors.classify(RuntimeError(message)),
-                      errors.RateLimitedError)
+    assert isinstance(errors.classify(RuntimeError(message)), errors.RateLimitedError)
 
 
-@pytest.mark.parametrize("message", [
-    "XYZ: possibly delisted; no timezone found",
-    "symbol may be delisted",
-    "ticker no longer traded",
-])
+@pytest.mark.parametrize(
+    "message",
+    [
+        "XYZ: possibly delisted; no timezone found",
+        "symbol may be delisted",
+        "ticker no longer traded",
+    ],
+)
 def test_delisting_recognised_from_the_message(message):
     assert isinstance(errors.classify(RuntimeError(message)), errors.DelistedError)
 
 
-@pytest.mark.parametrize("message", [
-    "no price data found for this range", "empty response",
-])
+@pytest.mark.parametrize("message", ["no price data found for this range", "empty response",])
 def test_empty_result_recognised_from_the_message(message):
     assert isinstance(errors.classify(RuntimeError(message)), errors.NoDataError)
 
@@ -160,9 +165,7 @@ def test_retry_decorator_returns_on_success(monkeypatch):
 # ===========================================================================
 def test_risk_free_rate_outside_the_plausible_band_raises():
     """A units change at the source must fail loudly, not scale everything."""
-    import numpy as np
     import pandas as pd
-
     from creditrating.data.alignment import build_panel
 
     idx = pd.bdate_range("2024-01-02", periods=40)
@@ -188,7 +191,6 @@ def test_already_decimal_rate_warns_because_it_cannot_be_caught_by_a_band(caplog
     import logging
 
     import pandas as pd
-
     from creditrating.data.alignment import build_panel
 
     idx = pd.bdate_range("2024-01-02", periods=40)
@@ -197,22 +199,20 @@ def test_already_decimal_rate_warns_because_it_cannot_be_caught_by_a_band(caplog
 
     with caplog.at_level(logging.WARNING):
         panel = build_panel(prices, 1000.0, pd.DataFrame(), already_decimal)
-    assert "may already be in decimals" in caplog.text or \
-        "switched to decimals" in caplog.text
+    assert "may already be in decimals" in caplog.text or "switched to decimals" in caplog.text
     assert panel["RiskFree_R"].notna().any()
 
 
 def test_missing_adj_close_is_nan_not_silently_the_close():
-    import numpy as np
     import pandas as pd
-
     from creditrating.data.alignment import build_panel
 
     idx = pd.bdate_range("2024-01-02", periods=20)
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
     panel = build_panel(prices, 1000.0, pd.DataFrame(), None)
-    assert panel["AdjClose"].isna().all(), \
-        "Adj Close and Close differ across a split; do not substitute"
+    assert (
+        panel["AdjClose"].isna().all()
+    ), "Adj Close and Close differ across a split; do not substitute"
 
 
 def test_reference_shares_reports_which_method_it_used():

@@ -22,18 +22,24 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 LOG = logging.getLogger(__name__)
 
 
-def check_company(c: "CompanyData") -> list[str]:
+def check_company(c: CompanyData) -> list[str]:
     """Every domain-invariant violation for one finished company."""
     problems: list[str] = []
 
     if c.sigma_A is not None and c.asset_value is not None:
         try:
             AssetEstimates(
-                ticker=c.ticker, asset_value=c.asset_value,
-                default_point=(c.panel["DefaultPointDebt_D"].dropna().iloc[-1]
-                               if c.panel is not None and not c.panel.empty
-                               and "DefaultPointDebt_D" in c.panel else 1e-9),
-                sigma_a=c.sigma_A, eta_a=c.eta_A or 0.0,
+                ticker=c.ticker,
+                asset_value=c.asset_value,
+                default_point=(
+                    c.panel["DefaultPointDebt_D"].dropna().iloc[-1]
+                    if c.panel is not None
+                    and not c.panel.empty
+                    and "DefaultPointDebt_D" in c.panel
+                    else 1e-9
+                ),
+                sigma_a=c.sigma_A,
+                eta_a=c.eta_A or 0.0,
                 em_iterations=c.em_iters or 1,
                 em_converged=bool(c.em_converged),
             )
@@ -43,7 +49,9 @@ def check_company(c: "CompanyData") -> list[str]:
     if c.risk_score is not None:
         try:
             RiskMeasures(
-                ticker=c.ticker, risk_score=c.risk_score, dd=c.dd or 0.0,
+                ticker=c.ticker,
+                risk_score=c.risk_score,
+                dd=c.dd or 0.0,
                 edf=c.edf if c.edf is not None else 0.0,
                 pit_pd=c.pit_pd if c.pit_pd is not None else 0.0,
                 ttc_pd=c.ttc_pd if c.ttc_pd == c.ttc_pd else None,
@@ -52,17 +60,21 @@ def check_company(c: "CompanyData") -> list[str]:
             problems.append(f"{c.ticker}: {exc.errors()[0]['msg']}")
 
     try:
-        RatingResult(ticker=c.ticker, letter=c.sp_rating,
-                     basis=c.rating_basis, determination=c.rating_determination,
-                     interval_low=c.rating_interval_low,
-                     interval_high=c.rating_interval_high)
+        RatingResult(
+            ticker=c.ticker,
+            letter=c.sp_rating,
+            basis=c.rating_basis,
+            determination=c.rating_determination,
+            interval_low=c.rating_interval_low,
+            interval_high=c.rating_interval_high,
+        )
     except ValidationError as exc:
         problems.append(f"{c.ticker}: {exc.errors()[0]['msg']}")
 
     return problems
 
 
-def check_batch(companies: list["CompanyData"]) -> list[str]:
+def check_batch(companies: list[CompanyData]) -> list[str]:
     """Violations across a batch; logs each one loudly, returns them all."""
     problems: list[str] = []
     for c in companies:

@@ -6,21 +6,23 @@ from __future__ import annotations
 import math
 
 import pytest
+from creditrating.model import tic as measures
 from scipy.special import log_ndtr
 from scipy.stats import invgauss
 
-from creditrating.model import tic as measures
-
 
 # --- PIT PD (Eq. 13) vs paper Tables 13 (CCM=1.5) and 14 (CCM=5) -------------
-@pytest.mark.parametrize("mu, ccm, expected", [
-    (1.0, 1.5, 0.6940),
-    (5.0, 1.5, 0.1260),
-    (10.0, 1.5, 0.0190),
-    (1.0, 5.0, 0.7770),
-    (5.0, 5.0, 0.3840),
-    (10.0, 5.0, 0.1910),
-])
+@pytest.mark.parametrize(
+    "mu, ccm, expected",
+    [
+        (1.0, 1.5, 0.6940),
+        (5.0, 1.5, 0.1260),
+        (10.0, 1.5, 0.0190),
+        (1.0, 5.0, 0.7770),
+        (5.0, 5.0, 0.3840),
+        (10.0, 5.0, 0.1910),
+    ],
+)
 def test_pit_pd_matches_paper_tables(mu, ccm, expected):
     assert measures.pit_pd_first_hitting(mu, ccm) == pytest.approx(expected, abs=5e-4)
 
@@ -29,9 +31,9 @@ def test_pit_pd_matches_paper_tables(mu, ccm, expected):
 def test_compute_hand_values():
     m = measures.compute(sigma_A=0.30, asset=200.0, debt=100.0, eta_A=0.10)
 
-    ln_ad = math.log(2.0)                       # 0.693147
+    ln_ad = math.log(2.0)  # 0.693147
     assert m.ln_A_D == pytest.approx(ln_ad)
-    assert m.drift == pytest.approx(0.10 - 0.5 * 0.30 ** 2)   # 0.055
+    assert m.drift == pytest.approx(0.10 - 0.5 * 0.30 ** 2)  # 0.055
 
     # TiC = sigma^2 / ln^2(A/D); RiskScore = 100*TiC (eta-independent).
     assert m.tic == pytest.approx(0.09 / ln_ad ** 2)
@@ -51,8 +53,8 @@ def test_compute_hand_values():
 def test_tic_is_eta_independent():
     a = measures.compute(0.30, 200.0, 100.0, eta_A=0.10)
     b = measures.compute(0.30, 200.0, 100.0, eta_A=-0.40)
-    assert a.tic == pytest.approx(b.tic)            # Q=1 rating ignores drift
-    assert a.dd != pytest.approx(b.dd)              # DD does depend on drift
+    assert a.tic == pytest.approx(b.tic)  # Q=1 rating ignores drift
+    assert a.dd != pytest.approx(b.dd)  # DD does depend on drift
 
 
 def test_lambda_ccm_relation_matches_agency():
@@ -146,7 +148,7 @@ def test_defective_regime_never_returns_the_absolute_value():
     """The exact defect #3 was opened for: |drift| gave a finite, wrong mu."""
     m = measures.compute(sigma_A=0.30, asset=200.0, debt=100.0, eta_A=-0.055)
     ln_ad = math.log(2.0)
-    would_have_been = ln_ad / abs(m.drift)          # the old abs() result
+    would_have_been = ln_ad / abs(m.drift)  # the old abs() result
     assert math.isfinite(would_have_been), "premise: abs() produced a finite mu"
     assert math.isnan(m.mu), "must not substitute |drift|"
 

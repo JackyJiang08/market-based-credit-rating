@@ -9,12 +9,22 @@ from __future__ import annotations
 
 import os
 
+from creditrating._paths import REPO_ROOT as PROJECT_ROOT
+
 # --------------------------------------------------------------------------- #
 # Company universe (the 10-company batch)
 # --------------------------------------------------------------------------- #
 DEFAULT_TICKERS: tuple[str, ...] = (
-    "COST", "KO", "DELL", "ORCL", "PNC",
-    "WMT", "INTU", "AMZN", "T", "KHC",
+    "COST",
+    "KO",
+    "DELL",
+    "ORCL",
+    "PNC",
+    "WMT",
+    "INTU",
+    "AMZN",
+    "T",
+    "KHC",
 )
 
 # --------------------------------------------------------------------------- #
@@ -38,7 +48,7 @@ REQUEST_TIMEOUT = 20
 # --------------------------------------------------------------------------- #
 # Paths
 # --------------------------------------------------------------------------- #
-from creditrating._paths import REPO_ROOT as PROJECT_ROOT  # noqa: E501
+
 RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "raw_data_architecture", "data")
 
 # Trailing window for prices and financials. Must cover

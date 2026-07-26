@@ -9,17 +9,18 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import pytest
-
 from creditrating.data.alignment import build_panel
 
 
 def _balance_sheet() -> pd.DataFrame:
     """yfinance-style balance sheet: rows = line items, cols = statement dates."""
     q1, q2 = pd.Timestamp("2024-03-31"), pd.Timestamp("2024-06-30")
-    return pd.DataFrame({
-        q1: {"Total Debt": 300.0, "Current Debt": 100.0, "Long Term Debt": 200.0},
-        q2: {"Total Debt": 360.0, "Current Debt": 120.0, "Long Term Debt": 240.0},
-    })
+    return pd.DataFrame(
+        {
+            q1: {"Total Debt": 300.0, "Current Debt": 100.0, "Long Term Debt": 200.0},
+            q2: {"Total Debt": 360.0, "Current Debt": 120.0, "Long Term Debt": 240.0},
+        }
+    )
 
 
 def _prices(dividend_date: str | None = None, dividend: float = 0.0) -> pd.DataFrame:
@@ -32,8 +33,9 @@ def _prices(dividend_date: str | None = None, dividend: float = 0.0) -> pd.DataF
 
 def _rates() -> pd.Series:
     # Percent units (build_panel divides by 100).
-    return pd.Series([5.0, 5.2],
-                     index=[pd.Timestamp("2024-01-01"), pd.Timestamp("2024-05-15")])
+    return pd.Series(
+        [5.0, 5.2], index=[pd.Timestamp("2024-01-01"), pd.Timestamp("2024-05-15")]
+    )
 
 
 def test_debt_uses_prior_statement_not_future():
@@ -94,7 +96,8 @@ def test_dividend_add_back_credits_the_distribution_to_total_return():
     for panel in (plain, with_div):
         last = panel.index[-1]
         assert panel.loc[last, "MarketCap_E"] == pytest.approx(
-            panel.loc[last, "RawMarketCap"], rel=1e-12)
+            panel.loc[last, "RawMarketCap"], rel=1e-12
+        )
 
     # A distribution adds to the total return earned over the period, so the
     # pre-dividend level needed to reach the same spot value is lower.
@@ -114,24 +117,28 @@ def test_dividend_add_back_credits_the_distribution_to_total_return():
 # ===========================================================================
 def _q_balance(period_ends, st=100.0, lt=200.0):
     import pandas as _pd
+
     return _pd.DataFrame(
         {pe: [st, lt, st + lt] for pe in period_ends},
-        index=["Current Debt", "Long Term Debt", "Total Debt"])
+        index=["Current Debt", "Long Term Debt", "Total Debt"],
+    )
 
 
 def test_available_at_is_period_end_plus_the_filing_lag():
-    from creditrating.data import cleaning_config as clean_config
     from creditrating.data import cleaning as transforms
+    from creditrating.data import cleaning_config as clean_config
 
     q = _q_balance(["2024-03-31"])
     a = _q_balance(["2023-12-31"])
     mapping = transforms.statement_available_at(q, a)
 
-    assert mapping[pd.Timestamp("2024-03-31")] == \
-        pd.Timestamp("2024-03-31") + pd.Timedelta(days=clean_config.QUARTERLY_FILING_LAG_DAYS)
+    assert mapping[pd.Timestamp("2024-03-31")] == pd.Timestamp("2024-03-31") + pd.Timedelta(
+        days=clean_config.QUARTERLY_FILING_LAG_DAYS
+    )
     # Annual-only period ends get the longer 10-K lag.
-    assert mapping[pd.Timestamp("2023-12-31")] == \
-        pd.Timestamp("2023-12-31") + pd.Timedelta(days=clean_config.ANNUAL_FILING_LAG_DAYS)
+    assert mapping[pd.Timestamp("2023-12-31")] == pd.Timestamp("2023-12-31") + pd.Timedelta(
+        days=clean_config.ANNUAL_FILING_LAG_DAYS
+    )
 
 
 def test_statement_is_invisible_between_period_end_and_filing():
@@ -142,14 +149,15 @@ def test_statement_is_invisible_between_period_end_and_filing():
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
     q = _q_balance(["2024-03-31"], st=100.0, lt=200.0)
     mapping = transforms.statement_available_at(q, pd.DataFrame())
-    available = mapping[pd.Timestamp("2024-03-31")]          # 2024-05-15
+    available = mapping[pd.Timestamp("2024-03-31")]  # 2024-05-15
 
     panel = build_panel(prices, 1000.0, q, None, available_at=mapping)
 
     # Period end has passed but the filing has not: the statement is invisible.
     for day in ("2024-04-01", "2024-04-15", "2024-05-14"):
-        assert np.isnan(panel.loc[pd.Timestamp(day), "DefaultPointDebt_D"]), \
-            f"{day} saw a statement that was not yet public"
+        assert np.isnan(
+            panel.loc[pd.Timestamp(day), "DefaultPointDebt_D"]
+        ), f"{day} saw a statement that was not yet public"
 
     # From the filing date onward it is visible.
     after = panel.loc[panel.index >= available, "DefaultPointDebt_D"].dropna()
@@ -183,8 +191,13 @@ def test_panel_exposes_the_timing_audit_fields():
     idx = pd.bdate_range("2024-01-01", "2024-12-31")
     prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
     q = _q_balance(["2024-03-31"])
-    panel = build_panel(prices, 1000.0, q, None,
-                        available_at=transforms.statement_available_at(q, pd.DataFrame()))
+    panel = build_panel(
+        prices,
+        1000.0,
+        q,
+        None,
+        available_at=transforms.statement_available_at(q, pd.DataFrame()),
+    )
     assert "StatementPeriodEnd" in panel.columns
     assert "StatementAvailableAt" in panel.columns
 
@@ -198,10 +211,16 @@ def test_period_end_join_would_have_leaked():
     q = _q_balance(["2024-03-31"])
 
     leaky = build_panel(prices, 1000.0, q, None, available_at=None)
-    correct = build_panel(prices, 1000.0, q, None,
-                          available_at=transforms.statement_available_at(q, pd.DataFrame()))
+    correct = build_panel(
+        prices,
+        1000.0,
+        q,
+        None,
+        available_at=transforms.statement_available_at(q, pd.DataFrame()),
+    )
 
-    day = pd.Timestamp("2024-04-15")           # after period end, before filing
-    assert not np.isnan(leaky.loc[day, "DefaultPointDebt_D"]), \
-        "premise: joining on period end exposes the statement early"
+    day = pd.Timestamp("2024-04-15")  # after period end, before filing
+    assert not np.isnan(
+        leaky.loc[day, "DefaultPointDebt_D"]
+    ), "premise: joining on period end exposes the statement early"
     assert np.isnan(correct.loc[day, "DefaultPointDebt_D"])

@@ -12,9 +12,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import pytest
-
-from creditrating.data import cleaning_config as clean_config
 from creditrating.data import cleaning as transforms
+from creditrating.data import cleaning_config as clean_config
 
 
 def _balance(rows: dict[str, list[float]], periods: list[str]) -> pd.DataFrame:
@@ -23,8 +22,10 @@ def _balance(rows: dict[str, list[float]], periods: list[str]) -> pd.DataFrame:
 
 # --- split_term_debt: the happy path ----------------------------------------
 def test_split_uses_reported_short_and_long_term_debt():
-    bal = _balance({"Current Debt": [100.0], "Long Term Debt": [900.0],
-                    "Total Debt": [1000.0]}, ["2026-03-31"])
+    bal = _balance(
+        {"Current Debt": [100.0], "Long Term Debt": [900.0], "Total Debt": [1000.0]},
+        ["2026-03-31"],
+    )
     out = transforms.split_term_debt(bal)
     assert out["ShortTermDebt"].iloc[0] == 100.0
     assert out["LongTermDebt"].iloc[0] == 900.0
@@ -37,12 +38,15 @@ def test_long_term_prefers_the_lease_inclusive_row():
     the single largest input difference against the peer implementation --
     90,814M on AMZN. Pinning it means the choice cannot be changed silently.
     """
-    bal = _balance({
-        "Current Debt": [100.0],
-        "Long Term Debt And Capital Lease Obligation": [900.0],
-        "Long Term Debt": [600.0],
-        "Total Debt": [1000.0],
-    }, ["2026-03-31"])
+    bal = _balance(
+        {
+            "Current Debt": [100.0],
+            "Long Term Debt And Capital Lease Obligation": [900.0],
+            "Long Term Debt": [600.0],
+            "Total Debt": [1000.0],
+        },
+        ["2026-03-31"],
+    )
     out = transforms.split_term_debt(bal)
     assert out["LongTermDebt"].iloc[0] == 900.0, "must include capital leases"
 
@@ -55,8 +59,7 @@ def test_missing_short_term_falls_back_to_total_minus_long():
     so this yields ST = 0 and D = 0.5 * 66,666 -- 36% below the peer's split.
     The fallback is defensible; going unnoticed is not.
     """
-    bal = _balance({"Long Term Debt": [66666.0], "Total Debt": [66666.0]},
-                   ["2026-03-31"])
+    bal = _balance({"Long Term Debt": [66666.0], "Total Debt": [66666.0]}, ["2026-03-31"])
     out = transforms.split_term_debt(bal)
     assert out["ShortTermDebt"].iloc[0] == 0.0
     assert out["LongTermDebt"].iloc[0] == 66666.0
@@ -66,8 +69,7 @@ def test_missing_short_term_falls_back_to_total_minus_long():
 
 
 def test_missing_long_term_falls_back_to_total_minus_short():
-    bal = _balance({"Current Debt": [250.0], "Total Debt": [1000.0]},
-                   ["2026-03-31"])
+    bal = _balance({"Current Debt": [250.0], "Total Debt": [1000.0]}, ["2026-03-31"])
     out = transforms.split_term_debt(bal)
     assert out["ShortTermDebt"].iloc[0] == 250.0
     assert out["LongTermDebt"].iloc[0] == 750.0
@@ -75,8 +77,7 @@ def test_missing_long_term_falls_back_to_total_minus_short():
 
 def test_fallbacks_never_produce_negative_debt():
     """Total below the reported leg would give a negative complement."""
-    bal = _balance({"Long Term Debt": [900.0], "Total Debt": [400.0]},
-                   ["2026-03-31"])
+    bal = _balance({"Long Term Debt": [900.0], "Total Debt": [400.0]}, ["2026-03-31"])
     out = transforms.split_term_debt(bal)
     assert out["ShortTermDebt"].iloc[0] == 0.0, "clipped at zero, not negative"
 

@@ -13,13 +13,16 @@ from datetime import datetime
 
 try:
     import yfinance as yf
+
     _YF_VERSION = getattr(yf, "__version__", "?")
 except Exception as _exc:  # pragma: no cover - probe must never be fatal
     # An unknown package version in a provenance record is a gap in the record,
     # so say so rather than writing "?" and moving on.
     logging.getLogger(__name__).warning(
         "yfinance version could not be determined (%s); run provenance will "
-        "record it as unknown", _exc)
+        "record it as unknown",
+        _exc,
+    )
     _YF_VERSION = "unknown"
 
 # Captured once at import so every record in a single run shares one stamp.
@@ -71,23 +74,37 @@ def write_manifest(run_id: str, cfg, companies, outputs_dir: str) -> str:
         hashes["_rates/rates.parquet"] = _sha(rates_p)
 
     try:
-        sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
-                             cwd=REPO_ROOT, capture_output=True, text=True,
-                             timeout=5).stdout.strip() or "unknown"
+        sha = (
+            subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            ).stdout.strip()
+            or "unknown"
+        )
     except Exception:  # noqa: BLE001 - provenance is best-effort
         sha = "unknown"
 
-    dates = [c.panel.index[-1].date().isoformat() for c in companies
-             if c.panel is not None and not c.panel.empty]
+    dates = [
+        c.panel.index[-1].date().isoformat()
+        for c in companies
+        if c.panel is not None and not c.panel.empty
+    ]
     manifest = {
         "run_id": run_id,
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "package_version": __version__,
         "git_sha": sha,
         "data_vintage_latest_priced_day": max(dates) if dates else None,
-        "config": {"tickers": list(cfg.tickers), "years": cfg.years,
-                   "workers": cfg.workers, "run_bootstrap": cfg.run_bootstrap,
-                   "run_credit_model": cfg.run_credit_model},
+        "config": {
+            "tickers": list(cfg.tickers),
+            "years": cfg.years,
+            "workers": cfg.workers,
+            "run_bootstrap": cfg.run_bootstrap,
+            "run_credit_model": cfg.run_credit_model,
+        },
         "companies_succeeded": len(companies),
         "input_hashes_sha256_16": hashes,
     }

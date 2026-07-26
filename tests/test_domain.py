@@ -3,15 +3,20 @@
 from __future__ import annotations
 
 import pytest
+from creditrating.domain import AssetEstimates, CompanyInputs, RatingResult, RiskMeasures
 from pydantic import ValidationError
-
-from creditrating.domain import (AssetEstimates, CompanyInputs, RatingResult,
-                                 RiskMeasures)
 
 
 def _est(**kw):
-    base = dict(ticker="TST", asset_value=2.0e11, default_point=3.0e10,
-                sigma_a=0.25, eta_a=0.08, em_iterations=3, em_converged=True)
+    base = dict(
+        ticker="TST",
+        asset_value=2.0e11,
+        default_point=3.0e10,
+        sigma_a=0.25,
+        eta_a=0.08,
+        em_iterations=3,
+        em_converged=True,
+    )
     base.update(kw)
     return AssetEstimates(**base)
 
@@ -48,8 +53,9 @@ def test_probabilities_stay_in_the_unit_interval(field, bad):
 def test_a_letter_never_appears_bare():
     with pytest.raises(ValidationError, match="bare letter"):
         RatingResult(ticker="TST", letter="AAA")
-    ok = RatingResult(ticker="TST", letter="AAA", basis="ANALYTICAL",
-                      determination="PINNED_AT_SCALE_TOP")
+    ok = RatingResult(
+        ticker="TST", letter="AAA", basis="ANALYTICAL", determination="PINNED_AT_SCALE_TOP"
+    )
     assert ok.letter == "AAA"
 
 
@@ -59,8 +65,13 @@ def test_no_letter_needs_no_basis():
 
 def test_company_inputs_reject_nonpositive_equity():
     with pytest.raises(ValidationError):
-        CompanyInputs(ticker="TST", equity_value=0.0, default_point=1.0,
-                      risk_free_rate=0.04, prices_observations=100)
+        CompanyInputs(
+            ticker="TST",
+            equity_value=0.0,
+            default_point=1.0,
+            risk_free_rate=0.04,
+            prices_observations=100,
+        )
 
 
 def test_checks_flag_nothing_on_the_offline_fixture():

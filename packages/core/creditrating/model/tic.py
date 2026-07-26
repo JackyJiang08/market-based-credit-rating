@@ -38,8 +38,7 @@ class DriftRegime(enum.Enum):
     DEFECTIVE = "DEFECTIVE"
 
 
-def is_weakly_identified(drift: float, drift_se: float,
-                         threshold: float = None) -> bool:
+def is_weakly_identified(drift: float, drift_se: float, threshold: float = None) -> bool:
     """Is the drift statistically indistinguishable from zero?
 
     `|t| = |drift| / SE` below the threshold means `mu = ln(A/D)/drift` and
@@ -64,20 +63,20 @@ def drift_regime(drift: float) -> DriftRegime:
 @dataclass
 class CreditMeasures:
     sigma_A: float
-    asset: float          # A on the last trading day
-    debt: float           # default-point debt D
-    eta_A: float          # asset return (drift)
-    ln_A_D: float         # ln(A/D)
-    drift: float          # eta_A - sigma_A^2/2  (signed)
-    mu: float             # Life Expectancy E[tau]        (Eq. 11)
-    ccm: float            # Credit Corrosion Measure       (Eq. 11)
-    tic: float            # Time-Consistent rating (Q=1)   (Eq. 12)
-    risk_score: float     # 100 * TiC                      (Eq. 5)
-    lam: float            # default peak lambda            (Eq. 3/6)
-    dd: float             # distance to default            (Eq. 14)
-    edf: float            # Phi(-DD)                        (Eq. 14)
-    pit_pd: float         # 1-year PIT PD                  (Eq. 13)
-    regime: "DriftRegime" = DriftRegime.VALID   # Prop. 4.4.1 precondition
+    asset: float  # A on the last trading day
+    debt: float  # default-point debt D
+    eta_A: float  # asset return (drift)
+    ln_A_D: float  # ln(A/D)
+    drift: float  # eta_A - sigma_A^2/2  (signed)
+    mu: float  # Life Expectancy E[tau]        (Eq. 11)
+    ccm: float  # Credit Corrosion Measure       (Eq. 11)
+    tic: float  # Time-Consistent rating (Q=1)   (Eq. 12)
+    risk_score: float  # 100 * TiC                      (Eq. 5)
+    lam: float  # default peak lambda            (Eq. 3/6)
+    dd: float  # distance to default            (Eq. 14)
+    edf: float  # Phi(-DD)                        (Eq. 14)
+    pit_pd: float  # 1-year PIT PD                  (Eq. 13)
+    regime: DriftRegime = DriftRegime.VALID  # Prop. 4.4.1 precondition
 
 
 def pit_pd_first_hitting(mu: float, ccm: float, horizon: float = 1.0) -> float:
@@ -111,21 +110,21 @@ def pit_pd_first_hitting(mu: float, ccm: float, horizon: float = 1.0) -> float:
     log_term2 = 2.0 / ccm + log_ndtr(-a * (s_t_mu + s_mu_t))
     log_pd = logsumexp([log_term1, log_term2])
     if not np.isfinite(log_pd):
-        raise ValueError(
-            f"non-finite log PD at mu={mu!r}, ccm={ccm!r}, horizon={horizon!r}")
+        raise ValueError(f"non-finite log PD at mu={mu!r}, ccm={ccm!r}, horizon={horizon!r}")
 
     pd = float(np.exp(log_pd))
     return float(min(max(pd, 0.0), 1.0))
 
 
-def compute(sigma_A: float, asset: float, debt: float, eta_A: float,
-            horizon: float = 1.0) -> CreditMeasures:
+def compute(
+    sigma_A: float, asset: float, debt: float, eta_A: float, horizon: float = 1.0
+) -> CreditMeasures:
     """Compute all first-passage credit measures for one company."""
     if not (asset > debt > 0):
         raise ValueError(f"require A ({asset:.3g}) > D ({debt:.3g}) > 0")
 
     ln_ad = math.log(asset / debt)
-    drift = eta_A - 0.5 * sigma_A ** 2          # signed, exactly as Eq. (11) uses it
+    drift = eta_A - 0.5 * sigma_A ** 2  # signed, exactly as Eq. (11) uses it
 
     # Prop. 4.4.1 assumes `eta - sigma_A^2/2 > 0`. When it does not hold the
     # first-passage time is defective -- default occurs almost surely and
@@ -162,6 +161,19 @@ def compute(sigma_A: float, asset: float, debt: float, eta_A: float,
     pit = pit_pd_first_hitting(mu, ccm, horizon)
 
     return CreditMeasures(
-        sigma_A=sigma_A, asset=asset, debt=debt, eta_A=eta_A, ln_A_D=ln_ad,
-        drift=drift, mu=mu, ccm=ccm, tic=tic, risk_score=risk_score, lam=lam,
-        dd=dd, edf=edf, pit_pd=pit, regime=regime)
+        sigma_A=sigma_A,
+        asset=asset,
+        debt=debt,
+        eta_A=eta_A,
+        ln_A_D=ln_ad,
+        drift=drift,
+        mu=mu,
+        ccm=ccm,
+        tic=tic,
+        risk_score=risk_score,
+        lam=lam,
+        dd=dd,
+        edf=edf,
+        pit_pd=pit,
+        regime=regime,
+    )

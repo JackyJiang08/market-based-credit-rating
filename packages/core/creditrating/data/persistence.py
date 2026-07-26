@@ -29,8 +29,12 @@ def _write(df: pd.DataFrame, directory: str, name: str, index: bool = True) -> N
     except (OSError, ImportError, ValueError) as exc:
         # CSV is canonical so this is not fatal, but DEBUG meant nobody ever
         # saw it. A run that silently produced half its artifacts looked clean.
-        LOG.warning("xlsx NOT written for %s/%s (%s); CSV is available",
-                    os.path.basename(directory), name, exc)
+        LOG.warning(
+            "xlsx NOT written for %s/%s (%s); CSV is available",
+            os.path.basename(directory),
+            name,
+            exc,
+        )
 
 
 def save_company(data: CompanyData) -> dict[str, str]:
@@ -47,7 +51,9 @@ def save_company(data: CompanyData) -> dict[str, str]:
     _write(data.panel, clean_dir, "aligned_panel")
     _write(data.debt_schedule, clean_dir, "debt_schedule")
 
-    LOG.info("  saved raw -> %s | clean -> %s",
-             os.path.relpath(raw_dir, config.PROJECT_ROOT),
-             os.path.relpath(clean_dir, config.PROJECT_ROOT))
+    LOG.info(
+        "  saved raw -> %s | clean -> %s",
+        os.path.relpath(raw_dir, config.PROJECT_ROOT),
+        os.path.relpath(clean_dir, config.PROJECT_ROOT),
+    )
     return {"raw": raw_dir, "clean": clean_dir}

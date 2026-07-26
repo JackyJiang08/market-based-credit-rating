@@ -11,13 +11,11 @@ from __future__ import annotations
 import os
 
 import pytest
-
-from creditrating.data.pipeline import RunConfig, fetch_company
 from creditrating.data import cache
 from creditrating.data import providers as sources
+from creditrating.data.pipeline import RunConfig, fetch_company
 
-FIXTURE_PRESENT = os.path.exists(
-    os.path.join(cache.cache_dir(), "COST", "prices.parquet"))
+FIXTURE_PRESENT = os.path.exists(os.path.join(cache.cache_dir(), "COST", "prices.parquet"))
 
 
 @pytest.mark.skipif(not FIXTURE_PRESENT, reason="cache fixtures not present")
@@ -35,8 +33,7 @@ def test_cost_runs_end_to_end_from_fixtures_with_no_network(monkeypatch):
     rates = cache.load_rates()
     assert rates is not None and not rates.empty
 
-    c = fetch_company("COST", RunConfig(tickers=["COST"], run_bootstrap=False),
-                      rates)
+    c = fetch_company("COST", RunConfig(tickers=["COST"], run_bootstrap=False), rates)
     assert c is not None
     assert c.data_status == "OK"
     assert not c.panel.empty

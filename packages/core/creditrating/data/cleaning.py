@@ -26,8 +26,9 @@ def pick_row(frame: pd.DataFrame, candidates: Iterable[str]) -> Optional[pd.Seri
     return row
 
 
-def pick_row_named(frame: pd.DataFrame, candidates: Iterable[str]
-                   ) -> tuple[Optional[pd.Series], Optional[str]]:
+def pick_row_named(
+    frame: pd.DataFrame, candidates: Iterable[str]
+) -> tuple[Optional[pd.Series], Optional[str]]:
     """As `pick_row`, but also return which candidate label matched.
 
     Two companies in the same batch can have the same metric sourced from
@@ -82,8 +83,9 @@ def build_debt_schedule(balance: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def reference_shares(market_cap: Optional[float], last_close: Optional[float],
-                     fallback: Optional[float]) -> tuple[Optional[float], str]:
+def reference_shares(
+    market_cap: Optional[float], last_close: Optional[float], fallback: Optional[float]
+) -> tuple[Optional[float], str]:
     """Shares outstanding via the one-day method, and how it was obtained.
 
     Pick one day (the latest), shares = market cap / price, then hold this
@@ -121,13 +123,17 @@ def split_term_debt(balance: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(columns=["ShortTermDebt", "LongTermDebt"])
 
     total, f_total = pick_row_named(balance, config.BALANCE_SHEET_MAP["Total Debt"])
-    short, f_short = pick_row_named(balance, config.BALANCE_SHEET_MAP["Short-term / Current Debt"])
+    short, f_short = pick_row_named(
+        balance, config.BALANCE_SHEET_MAP["Short-term / Current Debt"]
+    )
     long_, f_long = pick_row_named(balance, config.BALANCE_SHEET_MAP["Long-term Debt"])
 
     periods = balance.columns
     st = short.reindex(periods) if short is not None else pd.Series(index=periods, dtype=float)
     lt = long_.reindex(periods) if long_ is not None else pd.Series(index=periods, dtype=float)
-    tot = total.reindex(periods) if total is not None else pd.Series(index=periods, dtype=float)
+    tot = (
+        total.reindex(periods) if total is not None else pd.Series(index=periods, dtype=float)
+    )
 
     # Complements, BEFORE clipping, so a contradictory source is visible rather
     # than silently flattened to zero (#16). `Total < Long-term` means the two
@@ -145,25 +151,28 @@ def split_term_debt(balance: pd.DataFrame) -> pd.DataFrame:
     st = st.where(st.notna(), st_complement.clip(lower=0))
     lt = lt.where(lt.notna(), lt_complement.clip(lower=0))
 
-    out = pd.DataFrame({
-        "ShortTermDebt": st,
-        "LongTermDebt": lt,
-        # Provenance, per period. Which line item supplied each leg, whether it
-        # was imputed from the complement, and whether that complement was
-        # negative (i.e. the source contradicts itself).
-        "ShortTermDebtSource": np.where(st_imputed, "imputed:Total-LongTerm",
-                                        f_short or "missing"),
-        "LongTermDebtSource": np.where(lt_imputed, "imputed:Total-ShortTerm",
-                                       f_long or "missing"),
-        "TotalDebtSource": f_total or "missing",
-        "DebtSourceContradictory": (st_contradictory | lt_contradictory),
-    })
+    out = pd.DataFrame(
+        {
+            "ShortTermDebt": st,
+            "LongTermDebt": lt,
+            # Provenance, per period. Which line item supplied each leg, whether it
+            # was imputed from the complement, and whether that complement was
+            # negative (i.e. the source contradicts itself).
+            "ShortTermDebtSource": np.where(
+                st_imputed, "imputed:Total-LongTerm", f_short or "missing"
+            ),
+            "LongTermDebtSource": np.where(
+                lt_imputed, "imputed:Total-ShortTerm", f_long or "missing"
+            ),
+            "TotalDebtSource": f_total or "missing",
+            "DebtSourceContradictory": (st_contradictory | lt_contradictory),
+        }
+    )
     out.index = pd.to_datetime(out.index)
     return out.sort_index()
 
 
-def union_balance_sheets(quarterly: pd.DataFrame,
-                         annual: pd.DataFrame) -> pd.DataFrame:
+def union_balance_sheets(quarterly: pd.DataFrame, annual: pd.DataFrame) -> pd.DataFrame:
     """Union two balance sheets on their period-end columns, quarterly winning.
 
     Both frames are line items x period-end columns. Where a period end appears
@@ -188,8 +197,7 @@ def union_balance_sheets(quarterly: pd.DataFrame,
     return merged[sorted(merged.columns, reverse=True)]
 
 
-def statement_available_at(quarterly: pd.DataFrame,
-                           annual: pd.DataFrame) -> dict:
+def statement_available_at(quarterly: pd.DataFrame, annual: pd.DataFrame) -> dict:
     """Map each statement period end to the date it is assumed to be public.
 
     `period_end` is when the accounting period closed; `available_at` is the
@@ -209,8 +217,11 @@ def statement_available_at(quarterly: pd.DataFrame,
         period_end = pd.to_datetime(col, errors="coerce")
         if pd.isna(period_end):
             continue
-        lag = (config.QUARTERLY_FILING_LAG_DAYS if col in q_cols
-               else config.ANNUAL_FILING_LAG_DAYS)
+        lag = (
+            config.QUARTERLY_FILING_LAG_DAYS
+            if col in q_cols
+            else config.ANNUAL_FILING_LAG_DAYS
+        )
         out[period_end] = period_end + pd.Timedelta(days=lag)
     return out
 
@@ -227,17 +238,18 @@ def default_point_debt(short_term: pd.Series, long_term: pd.Series) -> pd.Series
     a later observation, forbidden by docs/TIMING_PROTOCOL.md §2.
     """
     both_missing = short_term.isna() & long_term.isna()
-    d = (config.SHORT_TERM_DEBT_WEIGHT * short_term.fillna(0)
-         + config.LONG_TERM_DEBT_WEIGHT * long_term.fillna(0))
+    d = config.SHORT_TERM_DEBT_WEIGHT * short_term.fillna(
+        0
+    ) + config.LONG_TERM_DEBT_WEIGHT * long_term.fillna(0)
     return d.where(~both_missing)
 
 
 # --------------------------------------------------------------------------- #
 # Default-point variants (financial firms)
 # --------------------------------------------------------------------------- #
-def default_point_variants(balance: pd.DataFrame,
-                           short_term: pd.Series,
-                           long_term: pd.Series) -> dict:
+def default_point_variants(
+    balance: pd.DataFrame, short_term: pd.Series, long_term: pd.Series
+) -> dict:
     """Every default-point definition, side by side, per period.
 
     The shipped convention `ST + 0.5*LT` looks at *debt*. For a deposit-funded

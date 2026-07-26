@@ -69,7 +69,7 @@ class BootstrapResult:
     edf: np.ndarray
     pit_pd: np.ndarray
     ttc_pd: np.ndarray
-    notch: np.ndarray                  # index into the S&P label list
+    notch: np.ndarray  # index into the S&P label list
     labels: list[str] = field(default_factory=list)
 
     # Point estimates from the unresampled data, for reference.
@@ -79,8 +79,7 @@ class BootstrapResult:
     # Share of replicates in which Prop. 4.4.1 fails.
     defective_fraction: float = float("nan")
 
-    def relative_width(self, name: str, lo: float = 0.05,
-                       hi: float = 0.95) -> float:
+    def relative_width(self, name: str, lo: float = 0.05, hi: float = 0.95) -> float:
         """Interval width as a fraction of the quantity's own median.
 
         Dimensionless, so RiskScore (order 1-10) and PIT PD (order 1e-30) can be
@@ -99,8 +98,9 @@ class BootstrapResult:
             return {q: float("nan") for q in qs}
         return {q: float(np.quantile(finite, q)) for q in qs}
 
-    def notch_interval(self, lo: float = 0.05, hi: float = 0.95
-                       ) -> tuple[Optional[str], Optional[str], int]:
+    def notch_interval(
+        self, lo: float = 0.05, hi: float = 0.95
+    ) -> tuple[Optional[str], Optional[str], int]:
         """(best label, worst label, width in notches) over the interval.
 
         Width counts the labels spanned inclusive, so an interval that resolves
@@ -127,28 +127,31 @@ def block_length_for(n: int) -> int:
     return max(2, int(round(n ** (1.0 / 3.0))))
 
 
-def moving_block_resample(x: np.ndarray, rng: np.random.Generator,
-                          block_length: int) -> np.ndarray:
+def moving_block_resample(
+    x: np.ndarray, rng: np.random.Generator, block_length: int
+) -> np.ndarray:
     """One moving-block resample of `x`, same length as `x`."""
     n = x.size
     L = min(block_length, n)
     n_blocks = int(math.ceil(n / L))
     starts = rng.integers(0, n - L + 1, size=n_blocks)
-    return np.concatenate([x[s:s + L] for s in starts])[:n]
+    return np.concatenate([x[s : s + L] for s in starts])[:n]
 
 
-def run(ticker: str,
-        asset_returns: np.ndarray,
-        asset_value: float,
-        debt: float,
-        tables: Optional[ConversionTables] = None,
-        *,
-        n_replicates: int = DEFAULT_REPLICATES,
-        block_length: Optional[int] = None,
-        seed: int = DEFAULT_SEED,
-        trading_days: int = config.TRADING_DAYS_PER_YEAR,
-        vol_window: int = config.EM_WINDOW_DAYS,
-        horizon: float = config.HORIZON_YEARS) -> BootstrapResult:
+def run(
+    ticker: str,
+    asset_returns: np.ndarray,
+    asset_value: float,
+    debt: float,
+    tables: Optional[ConversionTables] = None,
+    *,
+    n_replicates: int = DEFAULT_REPLICATES,
+    block_length: Optional[int] = None,
+    seed: int = DEFAULT_SEED,
+    trading_days: int = config.TRADING_DAYS_PER_YEAR,
+    vol_window: int = config.EM_WINDOW_DAYS,
+    horizon: float = config.HORIZON_YEARS,
+) -> BootstrapResult:
     """Propagate estimation uncertainty through the whole measure chain.
 
     The two parameters are estimated on **different windows**, exactly as
@@ -177,9 +180,23 @@ def run(ticker: str,
     rng = np.random.default_rng(seed)
 
     nan = float("nan")
-    out = {k: np.full(n_replicates, nan) for k in
-           ("sigma_A", "eta_A", "drift", "mu", "ccm", "risk_score", "tic",
-            "dd", "edf", "pit_pd", "ttc_pd", "notch")}
+    out = {
+        k: np.full(n_replicates, nan)
+        for k in (
+            "sigma_A",
+            "eta_A",
+            "drift",
+            "mu",
+            "ccm",
+            "risk_score",
+            "tic",
+            "dd",
+            "edf",
+            "pit_pd",
+            "ttc_pd",
+            "notch",
+        )
+    }
     labels = list(tables.sp_labels) if tables is not None else []
     defective = 0
 
@@ -190,8 +207,9 @@ def run(ticker: str,
         # so every slice of it is the same regime-mixture, and a company whose
         # recent volatility differs from its five-year volatility would be
         # bootstrapped around the wrong centre.
-        sigma = float(np.std(moving_block_resample(u_vol, rng, L_vol), ddof=1)
-                      * math.sqrt(trading_days))
+        sigma = float(
+            np.std(moving_block_resample(u_vol, rng, L_vol), ddof=1) * math.sqrt(trading_days)
+        )
         drift = float(np.mean(moving_block_resample(u, rng, L)) * trading_days)
         if not np.isfinite(sigma) or sigma <= 0:
             continue
@@ -251,8 +269,13 @@ def run(ticker: str,
     point_se = point_sigma / math.sqrt(span_years) if span_years > 0 else nan
 
     return BootstrapResult(
-        ticker=ticker, n_replicates=n_replicates, block_length=L,
-        n_observations=n, labels=labels,
-        point_drift=point_drift, point_drift_se=point_se,
+        ticker=ticker,
+        n_replicates=n_replicates,
+        block_length=L,
+        n_observations=n,
+        labels=labels,
+        point_drift=point_drift,
+        point_drift_se=point_se,
         defective_fraction=defective / n_replicates,
-        **out)
+        **out,
+    )

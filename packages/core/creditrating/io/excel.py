@@ -16,11 +16,10 @@ import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from ..data.company import CompanyData
-from ..data import provider_config as raw_config
 from ..data import provenance as lineage
+from ..data import provider_config as raw_config
+from ..data.company import CompanyData
 from ..model import config as signal_config
-
 from . import config, records
 
 LOG = logging.getLogger(__name__)
@@ -41,8 +40,9 @@ def _format_sheet(worksheet, *, freeze: str = "B2") -> None:
         cell.alignment = Alignment(horizontal="center")
     for col_cells in worksheet.columns:
         letter = get_column_letter(col_cells[0].column)
-        longest = max((len(str(c.value)) for c in col_cells if c.value is not None),
-                      default=10)
+        longest = max(
+            (len(str(c.value)) for c in col_cells if c.value is not None), default=10
+        )
         worksheet.column_dimensions[letter].width = min(max(longest + 2, 12), 48)
 
 
@@ -65,56 +65,108 @@ def _pct(x: Optional[float]) -> str:
 def write_company_workbook(data: CompanyData, years: int) -> str:
     path = os.path.join(config.OUTPUT_DIR, f"{data.ticker}_data.xlsx")
 
-    summary = pd.DataFrame({
-        "Field": [
-            "Ticker", "Company", "Sector", "Industry", "Currency",
-            "Market Cap", "Market Cap (raw)",
-            "Shares Outstanding (traded class)",
-            "Shares Outstanding (reference, mktcap/price)",
-            "Last Closing Price", "Dividend Rate (annual)", "Dividend Yield",
-            "Financials Window",
-            "Extracted (as-of)", "Equity Source", "Rates Source",
-        ],
-        "Value": [
-            data.ticker, data.name, data.sector, data.industry, data.currency,
-            fmt_market_cap(data.market_cap), data.market_cap,
-            data.shares_traded_class, data.reference_shares,
-            data.last_close, data.dividend_rate,
-            f"{data.dividend_yield:.2f}%" if data.dividend_yield else "N/A",
-            f"{years}y",
-            data.as_of, lineage.EQUITY_SOURCE, lineage.RATES_SOURCE,
-        ],
-    })
+    summary = pd.DataFrame(
+        {
+            "Field": [
+                "Ticker",
+                "Company",
+                "Sector",
+                "Industry",
+                "Currency",
+                "Market Cap",
+                "Market Cap (raw)",
+                "Shares Outstanding (traded class)",
+                "Shares Outstanding (reference, mktcap/price)",
+                "Last Closing Price",
+                "Dividend Rate (annual)",
+                "Dividend Yield",
+                "Financials Window",
+                "Extracted (as-of)",
+                "Equity Source",
+                "Rates Source",
+            ],
+            "Value": [
+                data.ticker,
+                data.name,
+                data.sector,
+                data.industry,
+                data.currency,
+                fmt_market_cap(data.market_cap),
+                data.market_cap,
+                data.shares_traded_class,
+                data.reference_shares,
+                data.last_close,
+                data.dividend_rate,
+                f"{data.dividend_yield:.2f}%" if data.dividend_yield else "N/A",
+                f"{years}y",
+                data.as_of,
+                lineage.EQUITY_SOURCE,
+                lineage.RATES_SOURCE,
+            ],
+        }
+    )
 
     rating_df = pd.DataFrame()
     if data.sigma_A is not None:
         # Projected from the shared record (dashboard.records) so this sheet
         # cannot disagree with the deliverable Asset sheet.
         r = records.credit_record(data)
-        rating_df = pd.DataFrame({
-            "Field": [
-                "Equity E (latest)", "Default-point Debt D", "Risk-free r (1Y)",
-                "Horizon T (years)", "Asset Volatility sigma_A", "Asset Value A",
-                "Asset Return eta_A", "R (eta - sigma^2/2)", "CCM",
-                "mu (life expectancy)", "lambda (default peak)", "TiC",
-                "TiC Risk Score", "Distance to Default", "EDF", "PIT PD",
-                "TTC PD", "S&P Rating", "Rating Basis", "Outlook (PIT - TTC)",
-                "Drift regime", "Drift SE", "Drift span (years)",
-                "EM iters / converged",
-            ],
-            "Value": [
-                r["equity"], r["default_point_debt"], _pct(r["interest_rate"]),
-                signal_config.HORIZON_YEARS, _pct(r["sigma_A"]), r["asset_value"],
-                _pct(r["eta_A"]), _pct(r["drift"]), _round(r["ccm"]),
-                _round(r["mu"], 2), _round(r["lam"], 4), _round(r["tic"]),
-                _round(r["risk_score"], 2), _round(r["dd"], 2), _pct(r["edf"]),
-                _pct(r["pit_pd"]), _pct(r["ttc_pd"]), r["sp_rating"] or "N/A",
-                r["rating_basis"] or "N/A", _pct(r["outlook"]),
-                r["drift_regime"] or "N/A", _pct(r["drift_se"]),
-                _round(r["drift_span_years"], 2),
-                f"{r['em_iters']} / {r['em_converged']}",
-            ],
-        })
+        rating_df = pd.DataFrame(
+            {
+                "Field": [
+                    "Equity E (latest)",
+                    "Default-point Debt D",
+                    "Risk-free r (1Y)",
+                    "Horizon T (years)",
+                    "Asset Volatility sigma_A",
+                    "Asset Value A",
+                    "Asset Return eta_A",
+                    "R (eta - sigma^2/2)",
+                    "CCM",
+                    "mu (life expectancy)",
+                    "lambda (default peak)",
+                    "TiC",
+                    "TiC Risk Score",
+                    "Distance to Default",
+                    "EDF",
+                    "PIT PD",
+                    "TTC PD",
+                    "S&P Rating",
+                    "Rating Basis",
+                    "Outlook (PIT - TTC)",
+                    "Drift regime",
+                    "Drift SE",
+                    "Drift span (years)",
+                    "EM iters / converged",
+                ],
+                "Value": [
+                    r["equity"],
+                    r["default_point_debt"],
+                    _pct(r["interest_rate"]),
+                    signal_config.HORIZON_YEARS,
+                    _pct(r["sigma_A"]),
+                    r["asset_value"],
+                    _pct(r["eta_A"]),
+                    _pct(r["drift"]),
+                    _round(r["ccm"]),
+                    _round(r["mu"], 2),
+                    _round(r["lam"], 4),
+                    _round(r["tic"]),
+                    _round(r["risk_score"], 2),
+                    _round(r["dd"], 2),
+                    _pct(r["edf"]),
+                    _pct(r["pit_pd"]),
+                    _pct(r["ttc_pd"]),
+                    r["sp_rating"] or "N/A",
+                    r["rating_basis"] or "N/A",
+                    _pct(r["outlook"]),
+                    r["drift_regime"] or "N/A",
+                    _pct(r["drift_se"]),
+                    _round(r["drift_span_years"], 2),
+                    f"{r['em_iters']} / {r['em_converged']}",
+                ],
+            }
+        )
 
     sheets: list[tuple[str, pd.DataFrame, bool]] = [
         ("Summary", summary, False),
@@ -161,17 +213,22 @@ def _round(x: Optional[float], nd: int = 4) -> Optional[float]:
 def write_master_workbook(companies: list[CompanyData], rates: pd.DataFrame) -> str:
     path = os.path.join(config.OUTPUT_DIR, "_MASTER_summary.xlsx")
 
-    summary = pd.DataFrame([{
-        "Ticker": c.ticker,
-        "Company": c.name,
-        "Sector": c.sector,
-        "Market Cap": fmt_market_cap(c.market_cap),
-        "Market Cap (raw)": c.market_cap,
-        "Reference Shares": c.reference_shares,
-        "Last Close": c.last_close,
-        "Dividend Rate": c.dividend_rate,
-        "Dividend Yield (%)": c.dividend_yield,
-    } for c in companies])
+    summary = pd.DataFrame(
+        [
+            {
+                "Ticker": c.ticker,
+                "Company": c.name,
+                "Sector": c.sector,
+                "Market Cap": fmt_market_cap(c.market_cap),
+                "Market Cap (raw)": c.market_cap,
+                "Reference Shares": c.reference_shares,
+                "Last Close": c.last_close,
+                "Dividend Rate": c.dividend_rate,
+                "Dividend Yield (%)": c.dividend_yield,
+            }
+            for c in companies
+        ]
+    )
 
     debt_rows = []
     for c in companies:
@@ -188,25 +245,27 @@ def write_master_workbook(companies: list[CompanyData], rates: pd.DataFrame) -> 
         if c.sigma_A is None:
             continue
         r = records.credit_record(c)
-        rating_rows.append({
-            "Ticker": r["symbol"],
-            "sigma_A": r["sigma_A"],
-            "eta_A": r["eta_A"],
-            "AssetValue_A": r["asset_value"],
-            "DefaultPointDebt_D": r["default_point_debt"],
-            "CCM": r["ccm"],
-            "mu": r["mu"],
-            "lambda": r["lam"],
-            "TiC_Risk_Score": r["risk_score"],
-            "DD": r["dd"],
-            "EDF": r["edf"],
-            "PIT_PD": r["pit_pd"],
-            "TTC_PD": r["ttc_pd"],
-            "SP_Rating": r["sp_rating"],
-            "Rating_Basis": r["rating_basis"],
-            "Outlook": r["outlook"],
-            "Drift_Regime": r["drift_regime"],
-        })
+        rating_rows.append(
+            {
+                "Ticker": r["symbol"],
+                "sigma_A": r["sigma_A"],
+                "eta_A": r["eta_A"],
+                "AssetValue_A": r["asset_value"],
+                "DefaultPointDebt_D": r["default_point_debt"],
+                "CCM": r["ccm"],
+                "mu": r["mu"],
+                "lambda": r["lam"],
+                "TiC_Risk_Score": r["risk_score"],
+                "DD": r["dd"],
+                "EDF": r["edf"],
+                "PIT_PD": r["pit_pd"],
+                "TTC_PD": r["ttc_pd"],
+                "SP_Rating": r["sp_rating"],
+                "Rating_Basis": r["rating_basis"],
+                "Outlook": r["outlook"],
+                "Drift_Regime": r["drift_regime"],
+            }
+        )
     ratings_df = pd.DataFrame(rating_rows)
 
     rates_display = pd.DataFrame()

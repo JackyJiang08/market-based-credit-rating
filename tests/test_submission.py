@@ -11,7 +11,6 @@ import math
 
 import pandas as pd
 import pytest
-
 from creditrating.data.company import CompanyData
 from creditrating.io import records
 from creditrating.io import workbook as submission
@@ -21,23 +20,67 @@ from creditrating.io import workbook as submission
 # last two are deliberate additions (see dashboard/records.py). Do not edit to
 # make a test pass -- edit only when the deliverable's contract really changes.
 GOLDEN_ASSET_SCHEMA = (
-    "Company", "Symbol", "Shares Outstanding", "Last Date", "Last Price",
-    "Last Statement Date", "Debt/Short Term", "Debt/Long Term", "Total Debt",
-    "Interest Rate", "sigma", "A", "R", "eta", "CCM", "mu", "TiC Risk Score",
-    "DD", "EDF", "PIT PD", "TTC PD", "SP Rating", "Outlook",
-    "lambda", "Rating Basis", "Rating Determination", "Firm Type",
-    "Model Applicable", "Applicability Reason",
-    "Drift SE", "Drift t", "Weakly Identified",
-    "Rating Interval Low", "Rating Interval High", "Rating Interval Notches",
+    "Company",
+    "Symbol",
+    "Shares Outstanding",
+    "Last Date",
+    "Last Price",
+    "Last Statement Date",
+    "Debt/Short Term",
+    "Debt/Long Term",
+    "Total Debt",
+    "Interest Rate",
+    "sigma",
+    "A",
+    "R",
+    "eta",
+    "CCM",
+    "mu",
+    "TiC Risk Score",
+    "DD",
+    "EDF",
+    "PIT PD",
+    "TTC PD",
+    "SP Rating",
+    "Outlook",
+    "lambda",
+    "Rating Basis",
+    "Rating Determination",
+    "Firm Type",
+    "Model Applicable",
+    "Applicability Reason",
+    "Drift SE",
+    "Drift t",
+    "Weakly Identified",
+    "Rating Interval Low",
+    "Rating Interval High",
+    "Rating Interval Notches",
 )
 
 GOLDEN_VALIDATION_SCHEMA = (
-    "Symbol", "Data Status", "EM converged", "EM iters", "sigma_A",
-    "Drift regime", "Drift SE", "Drift t", "Drift span (y)", "Rating basis",
-    "TTC at floor", "At scale top", "Off-grid", "Rating determination",
-    "S&P RiskScore", "Bootstrap defective %", "sigma 5%", "sigma 95%",
-    "Rating interval", "Convention span (notches)",
-    "Debt field provenance", "Statement available at", "Availability method",
+    "Symbol",
+    "Data Status",
+    "EM converged",
+    "EM iters",
+    "sigma_A",
+    "Drift regime",
+    "Drift SE",
+    "Drift t",
+    "Drift span (y)",
+    "Rating basis",
+    "TTC at floor",
+    "At scale top",
+    "Off-grid",
+    "Rating determination",
+    "S&P RiskScore",
+    "Bootstrap defective %",
+    "sigma 5%",
+    "sigma 95%",
+    "Rating interval",
+    "Convention span (notches)",
+    "Debt field provenance",
+    "Statement available at",
+    "Availability method",
     "Warnings",
 )
 
@@ -45,9 +88,15 @@ GOLDEN_VALIDATION_SCHEMA = (
 def _minimal_company() -> CompanyData:
     idx = pd.bdate_range("2024-01-02", periods=60)
     panel = pd.DataFrame(
-        {"ShortTermDebt": 100.0, "LongTermDebt": 200.0, "RiskFree_R": 0.04,
-         "DefaultPointDebt_D": 200.0, "MarketCap_E": 5.0e4},
-        index=idx)
+        {
+            "ShortTermDebt": 100.0,
+            "LongTermDebt": 200.0,
+            "RiskFree_R": 0.04,
+            "DefaultPointDebt_D": 200.0,
+            "MarketCap_E": 5.0e4,
+        },
+        index=idx,
+    )
     c = CompanyData(ticker="TST", name="Test Co")
     c.panel = panel
     c.debt_schedule = pd.DataFrame({"2024-06-30": [300.0]}, index=["Total Debt"])
@@ -136,8 +185,7 @@ def test_asset_row_values(tmp_path, monkeypatch):
     assert validation.loc[0, "Drift regime"] == "VALID"
 
 
-def test_unrated_company_leaves_the_rating_cells_empty_and_says_why(tmp_path,
-                                                                   monkeypatch):
+def test_unrated_company_leaves_the_rating_cells_empty_and_says_why(tmp_path, monkeypatch):
     """An OFF_GRID company must be blank in the rating cells, not zero-filled."""
     monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
     c = _minimal_company()
@@ -168,8 +216,16 @@ def test_all_writers_project_from_the_same_record():
 
     # The shared record is the only place these are assembled.
     r = records.credit_record(_minimal_company())
-    for key in ("asset_value", "risk_score", "lam", "ccm", "mu", "drift",
-                "rating_basis", "drift_regime"):
+    for key in (
+        "asset_value",
+        "risk_score",
+        "lam",
+        "ccm",
+        "mu",
+        "drift",
+        "rating_basis",
+        "drift_regime",
+    ):
         assert key in r
 
 
@@ -196,8 +252,7 @@ def test_default_filename_is_utc_iso_and_never_overwrites(tmp_path, monkeypatch)
         submission.write_submission([_minimal_company()], filename=name)
 
 
-def test_ratings_sheet_leads_with_riskscore_and_never_a_bare_letter(tmp_path,
-                                                                    monkeypatch):
+def test_ratings_sheet_leads_with_riskscore_and_never_a_bare_letter(tmp_path, monkeypatch):
     """The presentation rule: RiskScore-ordered, letter with interval attached."""
     monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
     safe = _minimal_company()
@@ -224,8 +279,10 @@ def test_ratings_sheet_explains_a_missing_letter(tmp_path, monkeypatch):
     gated.rating_determination = "MODEL_NOT_APPLICABLE"
     path = submission.write_submission([gated])
     ratings = pd.read_excel(path, "Ratings")
-    assert ratings.loc[0, "Rating (with interval)"] == \
-        "MODEL_NOT_APPLICABLE (BANK_DEPOSIT_FUNDED)"
+    assert (
+        ratings.loc[0, "Rating (with interval)"]
+        == "MODEL_NOT_APPLICABLE (BANK_DEPOSIT_FUNDED)"
+    )
 
 
 def test_validation_carries_the_freeze_diagnostics(tmp_path, monkeypatch):
@@ -248,10 +305,16 @@ def test_readme_records_provenance_and_conventions(tmp_path, monkeypatch):
     readme = pd.read_excel(path, "README")
     fields = set(readme["Field"].dropna())
 
-    for required in ("Model version", "Git commit",
-                     "Data vintage (latest priced day)", "Equity series",
-                     "Statement alignment", "Default point D",
-                     "Weakly Identified", "Rating Interval"):
+    for required in (
+        "Model version",
+        "Git commit",
+        "Data vintage (latest priced day)",
+        "Equity series",
+        "Statement alignment",
+        "Default point D",
+        "Weakly Identified",
+        "Rating Interval",
+    ):
         assert required in fields, f"README is missing {required!r}"
 
     text = " ".join(str(v) for v in readme["Value"].dropna())

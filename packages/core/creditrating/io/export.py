@@ -11,9 +11,8 @@ import os
 
 import pandas as pd
 
-from ..data.company import CompanyData
 from ..data import provenance as lineage
-
+from ..data.company import CompanyData
 from . import config, records
 
 LOG = logging.getLogger(__name__)
@@ -56,11 +55,16 @@ def build_long_table(companies: list[CompanyData], rates: pd.DataFrame) -> pd.Da
             "DividendRate": c.dividend_rate,
             "DividendYield": c.dividend_yield,
         }
-        parts.append(pd.DataFrame(
-            [(c.ticker, c.as_of, "company_info", c.as_of[:10], k, v)
-             for k, v in snapshot.items() if v is not None],
-            columns=LONG_COLUMNS,
-        ))
+        parts.append(
+            pd.DataFrame(
+                [
+                    (c.ticker, c.as_of, "company_info", c.as_of[:10], k, v)
+                    for k, v in snapshot.items()
+                    if v is not None
+                ],
+                columns=LONG_COLUMNS,
+            )
+        )
         parts.append(_melt_timeseries(c.prices, c.ticker, c.as_of, "price"))
         parts.append(_melt_timeseries(c.panel, c.ticker, c.as_of, "aligned_panel"))
         parts.append(_melt_timeseries(c.dividends, c.ticker, c.as_of, "dividend"))
@@ -77,24 +81,41 @@ def build_long_table(companies: list[CompanyData], rates: pd.DataFrame) -> pd.Da
             # Value to numeric and drops what does not convert.
             r = records.credit_record(c)
             measures = {
-                "sigma_A": r["sigma_A"], "eta_A": r["eta_A"],
-                "AssetValue_A": r["asset_value"], "R": r["drift"],
-                "CCM": r["ccm"], "mu": r["mu"], "TiC": r["tic"],
-                "RiskScore": r["risk_score"], "lambda": r["lam"],
-                "DD": r["dd"], "EDF": r["edf"], "PIT_PD": r["pit_pd"],
-                "TTC_PD": r["ttc_pd"], "Outlook": r["outlook"],
+                "sigma_A": r["sigma_A"],
+                "eta_A": r["eta_A"],
+                "AssetValue_A": r["asset_value"],
+                "R": r["drift"],
+                "CCM": r["ccm"],
+                "mu": r["mu"],
+                "TiC": r["tic"],
+                "RiskScore": r["risk_score"],
+                "lambda": r["lam"],
+                "DD": r["dd"],
+                "EDF": r["edf"],
+                "PIT_PD": r["pit_pd"],
+                "TTC_PD": r["ttc_pd"],
+                "Outlook": r["outlook"],
             }
-            parts.append(pd.DataFrame(
-                [(c.ticker, c.as_of, "credit_measures", c.as_of[:10], k, v)
-                 for k, v in measures.items() if v is not None],
-                columns=LONG_COLUMNS,
-            ))
+            parts.append(
+                pd.DataFrame(
+                    [
+                        (c.ticker, c.as_of, "credit_measures", c.as_of[:10], k, v)
+                        for k, v in measures.items()
+                        if v is not None
+                    ],
+                    columns=LONG_COLUMNS,
+                )
+            )
 
     if rates is not None and not rates.empty:
         r = rates.rename(columns={"Date": "Period"}).copy()
         r["Period"] = pd.to_datetime(r["Period"]).dt.strftime("%Y-%m-%d")
         r_long = r.melt(id_vars="Period", var_name="Metric", value_name="Value")
-        r_long["Ticker"], r_long["AsOf"], r_long["Category"] = "MACRO", lineage.RUN_TIMESTAMP, "rate"
+        r_long["Ticker"], r_long["AsOf"], r_long["Category"] = (
+            "MACRO",
+            lineage.RUN_TIMESTAMP,
+            "rate",
+        )
         parts.append(r_long[LONG_COLUMNS])
 
     if not parts:
@@ -119,5 +140,6 @@ def write_long_table(long_df: pd.DataFrame) -> None:
     except (OSError, ImportError, ValueError) as exc:
         # An artifact the caller asked for does not exist. CSV is still there,
         # but that is a degraded result, not an informational note.
-        LOG.warning("parquet NOT written to %s (%s); only CSV is available",
-                    config.OUTPUT_DIR, exc)
+        LOG.warning(
+            "parquet NOT written to %s (%s); only CSV is available", config.OUTPUT_DIR, exc
+        )

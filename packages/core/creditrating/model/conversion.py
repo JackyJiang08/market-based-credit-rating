@@ -37,21 +37,26 @@ the model. Those are flagged ``at_floor`` rather than presented as measurements.
 from __future__ import annotations
 
 import enum
+import logging
 import math
-import os
 from dataclasses import dataclass
 
-import logging
-
 import numpy as np
-import pandas as pd
 from scipy.optimize import brentq
 from scipy.special import log_ndtr, logsumexp
 from scipy.stats import norm
 
+# Re-exported on purpose: the pipeline, diagnostics, and tests import the
+# tables API from this module.
+from ..tables.loader import (  # noqa: F401
+    CACHE_DIR,
+    DEFAULT_XLSX,
+    ConversionTables,
+    load_tables,
+)
+
 LOG = logging.getLogger(__name__)
 
-from creditrating._paths import REPO_ROOT as _PROJECT_ROOT  # noqa: E501
 
 # Analytical constants (paper Prop. 4.5.2-4.5.3, Section 5.3).
 CML = math.e ** 1.35
@@ -68,12 +73,6 @@ Q_MOODYS = 0.7462
 # RiskScore back into a probability. Ascending in both columns.
 SP_TTC_RISK_SCORES = np.array([2.7, 3.5, 5.2, 9.9, 22.2, 50.7, 154.8])
 SP_TTC_PD1 = np.array([0.0001, 0.0003, 0.0007, 0.0023, 0.0088, 0.0441, 0.3359])
-
-
-# Re-exported on purpose: the pipeline, diagnostics, and tests import the
-# tables API from this module.
-from ..tables.loader import (CACHE_DIR, DEFAULT_XLSX,  # noqa: F401
-                             ConversionTables, load_tables)
 
 
 class RatingDetermination(enum.Enum):
@@ -116,8 +115,9 @@ class RatingDetermination(enum.Enum):
     NOT_RATED = "NOT_RATED"
 
 
-def classify_determination(basis: "RatingBasis | None", at_floor: bool | None,
-                           risk_score: float | None = None) -> RatingDetermination:
+def classify_determination(
+    basis: RatingBasis | None, at_floor: bool | None, risk_score: float | None = None
+) -> RatingDetermination:
     """Classify a rating by what decided it."""
     if basis is None or basis in (RatingBasis.OFF_GRID, RatingBasis.NOT_APPLICABLE):
         return RatingDetermination.NOT_RATED
@@ -127,8 +127,9 @@ def classify_determination(basis: "RatingBasis | None", at_floor: bool | None,
         if at_floor:
             return RatingDetermination.PINNED_AT_SCALE_TOP
         return RatingDetermination.SCALE_RESOLVED
-    return (RatingDetermination.PINNED_AT_FLOOR if at_floor
-            else RatingDetermination.SCALE_RESOLVED)
+    return (
+        RatingDetermination.PINNED_AT_FLOOR if at_floor else RatingDetermination.SCALE_RESOLVED
+    )
 
 
 class RatingBasis(enum.Enum):
@@ -158,14 +159,15 @@ class RatingBasis(enum.Enum):
 @dataclass
 class GridLookup:
     value: float
-    off_grid: bool                # True if (CCM, mu) was clamped to an edge
+    off_grid: bool  # True if (CCM, mu) was clamped to an edge
     basis: RatingBasis = RatingBasis.GRID_INTERIOR
-    at_floor: bool = False        # value sits at the edge of what the route expresses
-    risk_score: float = float("nan")   # analytical route only: Eq. (27) output
+    at_floor: bool = False  # value sits at the edge of what the route expresses
+    risk_score: float = float("nan")  # analytical route only: Eq. (27) output
 
 
-def _bilinear(grid: np.ndarray, xaxis: np.ndarray, yaxis: np.ndarray,
-              x: float, y: float) -> GridLookup:
+def _bilinear(
+    grid: np.ndarray, xaxis: np.ndarray, yaxis: np.ndarray, x: float, y: float
+) -> GridLookup:
     """Bilinear interpolation with edge clamping; flags out-of-range inputs."""
     xc = float(np.clip(x, xaxis[0], xaxis[-1]))
     yc = float(np.clip(y, yaxis[0], yaxis[-1]))
@@ -176,13 +178,18 @@ def _bilinear(grid: np.ndarray, xaxis: np.ndarray, yaxis: np.ndarray,
     y0, y1 = yaxis[j], yaxis[j + 1]
     tx = 0.0 if x1 == x0 else (xc - x0) / (x1 - x0)
     ty = 0.0 if y1 == y0 else (yc - y0) / (y1 - y0)
-    v = ((1 - tx) * (1 - ty) * grid[i, j] + tx * (1 - ty) * grid[i + 1, j]
-         + (1 - tx) * ty * grid[i, j + 1] + tx * ty * grid[i + 1, j + 1])
+    v = (
+        (1 - tx) * (1 - ty) * grid[i, j]
+        + tx * (1 - ty) * grid[i + 1, j]
+        + (1 - tx) * ty * grid[i, j + 1]
+        + tx * ty * grid[i + 1, j + 1]
+    )
     return GridLookup(float(v), off)
 
 
-def ttc_pd(tables: ConversionTables, ccm: float, mu: float,
-           pit_pd: float | None = None) -> GridLookup:
+def ttc_pd(
+    tables: ConversionTables, ccm: float, mu: float, pit_pd: float | None = None
+) -> GridLookup:
     """Through-The-Cycle PD by (CCM, mu), with the basis it was reached on.
 
     Inside the grid the lookup is authoritative and the analytical route is the
@@ -216,8 +223,13 @@ def ttc_pd(tables: ConversionTables, ccm: float, mu: float,
 
     # For an analytical rating "at floor" means the *scale* ran out, not the
     # grid: the RiskScore fell below Table 8's best grade.
-    return GridLookup(analytical.ttc_pd, True, RatingBasis.ANALYTICAL,
-                      analytical.at_scale_floor, analytical.risk_score)
+    return GridLookup(
+        analytical.ttc_pd,
+        True,
+        RatingBasis.ANALYTICAL,
+        analytical.at_scale_floor,
+        analytical.risk_score,
+    )
 
 
 # Width of the grid's floor region, as a multiple of the floor itself. The
@@ -279,8 +291,7 @@ def alpha_first_hitting(ccm: float) -> float:
     at all -- it raised OverflowError outright for CCM below ~0.00276.
     """
     a = SQRT_CML
-    log_alpha = logsumexp([log_ndtr(a / ccm - 1 / a),
-                           2.0 / ccm + log_ndtr(-a / ccm - 1 / a)])
+    log_alpha = logsumexp([log_ndtr(a / ccm - 1 / a), 2.0 / ccm + log_ndtr(-a / ccm - 1 / a)])
     if not np.isfinite(log_alpha):
         raise ValueError(f"non-finite log alpha at ccm={ccm!r}")
     return float(np.exp(log_alpha))
@@ -295,8 +306,7 @@ def alpha_lognormal(ccm: float, q: float) -> float:
     Verified through the paper's anchors -- do not "simplify" it.
     """
     L = math.log(ccm + 1.0)
-    return float(norm.cdf((1.35 - (1.0 / q) * math.log(ccm) + L / 2.0)
-                          / math.sqrt(L)))
+    return float(norm.cdf((1.35 - (1.0 / q) * math.log(ccm) + L / 2.0) / math.sqrt(L)))
 
 
 def alpha_sp(ccm: float) -> float:
@@ -323,8 +333,7 @@ def tic_lognormal(pd_value: float, ccm: float, q: float) -> float:
     if not (0.0 < pd_value < 1.0) or not (ccm > 0.0) or not np.isfinite(ccm):
         return float("nan")
     L = math.log(ccm + 1.0)
-    ln_tic = (q * norm.ppf(pd_value) * math.sqrt(L) - (q / 2.0) * L
-              + math.log(ccm))
+    ln_tic = q * norm.ppf(pd_value) * math.sqrt(L) - (q / 2.0) * L + math.log(ccm)
     return float(math.exp(ln_tic))
 
 
@@ -344,9 +353,9 @@ def ttc_pd_from_risk_score(risk_score: float) -> float:
     """
     if risk_score is None or not np.isfinite(risk_score) or risk_score <= 0:
         return float("nan")
-    return float(np.exp(np.interp(math.log(risk_score),
-                                  np.log(SP_TTC_RISK_SCORES),
-                                  np.log(SP_TTC_PD1))))
+    return float(
+        np.exp(np.interp(math.log(risk_score), np.log(SP_TTC_RISK_SCORES), np.log(SP_TTC_PD1)))
+    )
 
 
 def no_arb_ccm_star(ccm_first_hitting: float) -> float:
@@ -383,8 +392,9 @@ def _solve_ccm_star(target_alpha: float) -> float:
         # can express. Saturated alpha (a firm the model reads as essentially
         # default-free at one year) lands here.
         return float("nan")
-    return float(brentq(lambda c: alpha_sp(c) - target_alpha,
-                        _CCM_STAR_LO, _CCM_STAR_HI, maxiter=200))
+    return float(
+        brentq(lambda c: alpha_sp(c) - target_alpha, _CCM_STAR_LO, _CCM_STAR_HI, maxiter=200)
+    )
 
 
 def no_arb_ccm_star_from_agency(ccm_source: float, q_source: float) -> float:
@@ -399,13 +409,13 @@ def no_arb_ccm_star_from_agency(ccm_source: float, q_source: float) -> float:
 class AnalyticalRating:
     """A rating produced without touching the lookup grid."""
 
-    ccm_star: float          # Eq. (26): the S&P CCM at matched confidence
-    risk_score: float        # Eq. (27): 100 * TiC_SP(PD_FH, CCM*)
-    ttc_pd: float            # Table 8 scale applied to the RiskScore
-    alpha: float             # the matched capital confidence level
-    at_scale_floor: bool = False   # RiskScore below the Table 8 scale's lowest
-                                   # grade, so the TTC PD is the scale's floor
-                                   # rather than a resolved value
+    ccm_star: float  # Eq. (26): the S&P CCM at matched confidence
+    risk_score: float  # Eq. (27): 100 * TiC_SP(PD_FH, CCM*)
+    ttc_pd: float  # Table 8 scale applied to the RiskScore
+    alpha: float  # the matched capital confidence level
+    at_scale_floor: bool = False  # RiskScore below the Table 8 scale's lowest
+    # grade, so the TTC PD is the scale's floor
+    # rather than a resolved value
 
 
 def no_arb_convert(pit_pd: float, ccm_first_hitting: float) -> AnalyticalRating:
@@ -417,8 +427,7 @@ def no_arb_convert(pit_pd: float, ccm_first_hitting: float) -> AnalyticalRating:
     `CCM in [0.1, 540]` domain.
     """
     nan = float("nan")
-    if not (np.isfinite(pit_pd) and np.isfinite(ccm_first_hitting)) \
-            or ccm_first_hitting <= 0:
+    if not (np.isfinite(pit_pd) and np.isfinite(ccm_first_hitting)) or ccm_first_hitting <= 0:
         return AnalyticalRating(nan, nan, nan, nan)
 
     alpha = alpha_first_hitting(ccm_first_hitting)
@@ -426,8 +435,13 @@ def no_arb_convert(pit_pd: float, ccm_first_hitting: float) -> AnalyticalRating:
     if not np.isfinite(ccm_star):
         return AnalyticalRating(nan, nan, nan, alpha)
     rs = risk_score_sp(pit_pd, ccm_star)
-    return AnalyticalRating(ccm_star, rs, ttc_pd_from_risk_score(rs), alpha,
-                            at_scale_floor=is_scale_floor_determined(rs))
+    return AnalyticalRating(
+        ccm_star,
+        rs,
+        ttc_pd_from_risk_score(rs),
+        alpha,
+        at_scale_floor=is_scale_floor_determined(rs),
+    )
 
 
 def is_scale_floor_determined(risk_score: float) -> bool:
@@ -438,5 +452,4 @@ def is_scale_floor_determined(risk_score: float) -> bool:
     published scale stops, exactly as a grid-floor rating is determined by where
     the table stops.
     """
-    return bool(np.isfinite(risk_score)
-                and risk_score <= float(SP_TTC_RISK_SCORES[0]))
+    return bool(np.isfinite(risk_score) and risk_score <= float(SP_TTC_RISK_SCORES[0]))

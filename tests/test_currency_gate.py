@@ -11,10 +11,9 @@ from __future__ import annotations
 import os
 
 import pytest
-
-from creditrating.data.pipeline import RunConfig, fetch_company
 from creditrating.data import cache
 from creditrating.data import providers as sources
+from creditrating.data.pipeline import RunConfig, fetch_company
 
 TM_FIXTURE = os.path.exists(os.path.join(cache.cache_dir(), "TM", "info.json"))
 
@@ -31,8 +30,7 @@ def test_tm_is_gated_for_currency_mismatch_not_crashed(monkeypatch):
     monkeypatch.delenv("MDT_CACHE_OFF", raising=False)
 
     rates = cache.load_rates()
-    c = fetch_company("TM", RunConfig(tickers=["TM"], run_bootstrap=False),
-                      rates)
+    c = fetch_company("TM", RunConfig(tickers=["TM"], run_bootstrap=False), rates)
     assert c.financial_currency == "JPY" and c.currency == "USD"
     assert c.model_applicable is False
     assert c.applicability_reason == "REPORTING_CURRENCY_MISMATCH"
@@ -50,8 +48,7 @@ def test_matching_currencies_do_not_gate():
     c = CompanyData(ticker="XX")
     c.currency, c.financial_currency = "USD", "USD"
     # The gate logic lives in workflow; replicate its predicate exactly.
-    fires = bool(c.currency and c.financial_currency
-                 and c.currency != c.financial_currency)
+    fires = bool(c.currency and c.financial_currency and c.currency != c.financial_currency)
     assert not fires
 
 
@@ -61,6 +58,5 @@ def test_missing_financial_currency_does_not_gate():
 
     c = CompanyData(ticker="XX")
     c.currency, c.financial_currency = "USD", ""
-    fires = bool(c.currency and c.financial_currency
-                 and c.currency != c.financial_currency)
+    fires = bool(c.currency and c.financial_currency and c.currency != c.financial_currency)
     assert not fires

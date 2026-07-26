@@ -38,15 +38,15 @@ class EMError(RuntimeError):
 
 @dataclass
 class EMResult:
-    sigma_A: float                 # annualized asset volatility (vol window)
-    eta_A: float                   # annualized real-world asset return (drift window)
-    drift: float                   # eta_A - sigma_A^2/2  (= mean annual log-return)
-    drift_se: float                # SE of the drift estimate = sigma_A/sqrt(years)
-    drift_span_years: float        # calendar span the drift was estimated over
-    asset_last: float              # A on the last trading day (A_0 for the model)
-    debt_last: float               # default-point debt D on the last trading day
-    equity_last: float             # equity E on the last trading day
-    asset_values: pd.Series        # full inverted asset path A_t
+    sigma_A: float  # annualized asset volatility (vol window)
+    eta_A: float  # annualized real-world asset return (drift window)
+    drift: float  # eta_A - sigma_A^2/2  (= mean annual log-return)
+    drift_se: float  # SE of the drift estimate = sigma_A/sqrt(years)
+    drift_span_years: float  # calendar span the drift was estimated over
+    asset_last: float  # A on the last trading day (A_0 for the model)
+    debt_last: float  # default-point debt D on the last trading day
+    equity_last: float  # equity E on the last trading day
+    asset_values: pd.Series  # full inverted asset path A_t
     n_iter: int
     converged: bool
     warnings: list[str] = field(default_factory=list)
@@ -55,8 +55,9 @@ class EMResult:
 # --------------------------------------------------------------------------- #
 # Black-Scholes equity value g(A) and its bisection inverse
 # --------------------------------------------------------------------------- #
-def _bs_equity(A: np.ndarray, D: np.ndarray, r: np.ndarray,
-               sigma: float, T: float) -> np.ndarray:
+def _bs_equity(
+    A: np.ndarray, D: np.ndarray, r: np.ndarray, sigma: float, T: float
+) -> np.ndarray:
     """g(A): Black-Scholes value of equity as a call on assets A struck at D."""
     A = np.asarray(A, dtype=float)
     sqrtT = np.sqrt(T)
@@ -68,16 +69,21 @@ def _bs_equity(A: np.ndarray, D: np.ndarray, r: np.ndarray,
     return np.where(np.isfinite(val), val, np.maximum(A - D * np.exp(-r * T), 0.0))
 
 
-def _invert_assets(E: np.ndarray, D: np.ndarray, r: np.ndarray,
-                   sigma: float, T: float,
-                   n_bisect: int = config.BISECTION_STEPS) -> np.ndarray:
+def _invert_assets(
+    E: np.ndarray,
+    D: np.ndarray,
+    r: np.ndarray,
+    sigma: float,
+    T: float,
+    n_bisect: int = config.BISECTION_STEPS,
+) -> np.ndarray:
     """Vectorized bisection: solve g(A) = E for A on every day at once.
 
     g is increasing in A and g(A) < A, so A lies in (E, hi]; expand hi until it
     brackets the root, then bisect.
     """
     E = np.asarray(E, dtype=float)
-    lo = E.copy()                                  # g(E) < E  =>  f(lo) < 0
+    lo = E.copy()  # g(E) < E  =>  f(lo) < 0
     hi = E + D * np.exp(-r * T) + 1.0
     for _ in range(config.BRACKET_MAX_DOUBLINGS):  # grow hi until g(hi) >= E
         need = _bs_equity(hi, D, r, sigma, T) < E
@@ -92,7 +98,8 @@ def _invert_assets(E: np.ndarray, D: np.ndarray, r: np.ndarray,
         raise EMError(
             f"asset inversion failed to bracket the root on {unbracketed} of "
             f"{E.size} day(s) after {config.BRACKET_MAX_DOUBLINGS} doublings "
-            f"(sigma={sigma:.4f}). Refusing to bisect an interval with no root.")
+            f"(sigma={sigma:.4f}). Refusing to bisect an interval with no root."
+        )
     for _ in range(n_bisect):
         mid = 0.5 * (lo + hi)
         val = _bs_equity(mid, D, r, sigma, T)
@@ -104,12 +111,17 @@ def _invert_assets(E: np.ndarray, D: np.ndarray, r: np.ndarray,
 # --------------------------------------------------------------------------- #
 # EM driver
 # --------------------------------------------------------------------------- #
-def estimate(equity: pd.Series, debt: pd.Series, rate: pd.Series,
-             *, horizon: float = config.HORIZON_YEARS,
-             trading_days: int = config.TRADING_DAYS_PER_YEAR,
-             max_iter: int = config.EM_MAX_ITER,
-             tol: float = config.EM_TOL,
-             vol_window: int = config.EM_WINDOW_DAYS) -> EMResult:
+def estimate(
+    equity: pd.Series,
+    debt: pd.Series,
+    rate: pd.Series,
+    *,
+    horizon: float = config.HORIZON_YEARS,
+    trading_days: int = config.TRADING_DAYS_PER_YEAR,
+    max_iter: int = config.EM_MAX_ITER,
+    tol: float = config.EM_TOL,
+    vol_window: int = config.EM_WINDOW_DAYS,
+) -> EMResult:
     """Estimate (sigma_A, eta_A, asset path) from a daily equity/debt/rate series.
 
     Inputs are aligned daily series. Pass the **full drift window** (see
@@ -138,7 +150,8 @@ def estimate(equity: pd.Series, debt: pd.Series, rate: pd.Series,
     if len(vol_df) < config.MIN_OBSERVATIONS:
         raise EMError(
             f"insufficient clean observations ({len(vol_df)}) in the volatility "
-            f"window for EM.")
+            f"window for EM."
+        )
 
     E = vol_df["E"].to_numpy(float)
     D = vol_df["D"].to_numpy(float)
@@ -149,7 +162,7 @@ def estimate(equity: pd.Series, debt: pd.Series, rate: pd.Series,
     sigma = float(np.nanstd(eq_ret, ddof=1) * np.sqrt(trading_days))
     if not np.isfinite(sigma) or sigma <= 0:
         sigma = 0.3
-    sigma *= E[-1] / (E[-1] + D[-1])               # asset vol < equity vol
+    sigma *= E[-1] / (E[-1] + D[-1])  # asset vol < equity vol
     sigma = float(np.clip(sigma, 0.02, 2.0))
 
     converged, n_iter = False, max_iter
@@ -167,15 +180,21 @@ def estimate(equity: pd.Series, debt: pd.Series, rate: pd.Series,
     if not converged:
         raise EMError(
             f"EM did not converge within {max_iter} iterations "
-            f"(last sigma={sigma:.4f}). Data may be too short/illiquid.")
+            f"(last sigma={sigma:.4f}). Data may be too short/illiquid."
+        )
 
     # Final asset path over the FULL span, inverted with the converged sigma.
     # The drift is the mean log-return of that longer path; sigma stays the
     # trailing-window estimate.
-    A = _invert_assets(df["E"].to_numpy(float), df["D"].to_numpy(float),
-                       df["r"].to_numpy(float), sigma, horizon)
+    A = _invert_assets(
+        df["E"].to_numpy(float),
+        df["D"].to_numpy(float),
+        df["r"].to_numpy(float),
+        sigma,
+        horizon,
+    )
     u = np.diff(np.log(A))
-    drift = float(np.mean(u) * trading_days)        # = eta_A - sigma^2/2
+    drift = float(np.mean(u) * trading_days)  # = eta_A - sigma^2/2
     eta_A = drift + 0.5 * sigma ** 2
 
     # Standard error of the drift estimate: sigma_A / sqrt(span in years).
@@ -184,12 +203,17 @@ def estimate(equity: pd.Series, debt: pd.Series, rate: pd.Series,
     drift_se = float(sigma / math.sqrt(span_years)) if span_years > 0 else float("inf")
 
     result = EMResult(
-        sigma_A=sigma, eta_A=eta_A, drift=drift, drift_se=drift_se,
+        sigma_A=sigma,
+        eta_A=eta_A,
+        drift=drift,
+        drift_se=drift_se,
         drift_span_years=span_years,
-        asset_last=float(A[-1]), debt_last=float(df["D"].to_numpy(float)[-1]),
+        asset_last=float(A[-1]),
+        debt_last=float(df["D"].to_numpy(float)[-1]),
         equity_last=float(df["E"].to_numpy(float)[-1]),
         asset_values=pd.Series(A, index=df.index, name="AssetValue"),
-        n_iter=n_iter, converged=True,
+        n_iter=n_iter,
+        converged=True,
     )
     _sanity_checks(result)
     return result
@@ -199,15 +223,20 @@ def _sanity_checks(res: EMResult) -> None:
     """Assert hard invariants; log soft warnings. Never silently pass."""
     # Hard invariant: assets must exceed the default point and the equity value.
     if not (res.asset_last > res.debt_last):
-        raise EMError(f"A ({res.asset_last:.3g}) <= D ({res.debt_last:.3g}); "
-                      "the inversion is wrong.")
+        raise EMError(
+            f"A ({res.asset_last:.3g}) <= D ({res.debt_last:.3g}); " "the inversion is wrong."
+        )
     if not (res.asset_last > res.equity_last):
-        raise EMError(f"A ({res.asset_last:.3g}) <= E ({res.equity_last:.3g}); "
-                      "assets must exceed equity.")
+        raise EMError(
+            f"A ({res.asset_last:.3g}) <= E ({res.equity_last:.3g}); "
+            "assets must exceed equity."
+        )
     # Soft warnings.
     if not (config.SIGMA_A_WARN_LOW <= res.sigma_A <= config.SIGMA_A_WARN_HIGH):
-        msg = (f"sigma_A={res.sigma_A:.1%} outside typical "
-               f"[{config.SIGMA_A_WARN_LOW:.0%}, {config.SIGMA_A_WARN_HIGH:.0%}]")
+        msg = (
+            f"sigma_A={res.sigma_A:.1%} outside typical "
+            f"[{config.SIGMA_A_WARN_LOW:.0%}, {config.SIGMA_A_WARN_HIGH:.0%}]"
+        )
         res.warnings.append(msg)
         LOG.warning("  %s", msg)
     if res.n_iter > 10:

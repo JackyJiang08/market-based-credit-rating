@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 import pytest
-
-from creditrating.data import sectors
 from creditrating.data import cleaning as transforms
+from creditrating.data import sectors
 
 
 # --- classification ---------------------------------------------------------
@@ -15,14 +13,17 @@ def test_manual_override_beats_inference():
     assert sectors.classify("PNC", "Technology", "Software") is sectors.FirmType.BANK
 
 
-@pytest.mark.parametrize("industry, expected", [
-    ("Banks - Regional", sectors.FirmType.BANK),
-    ("Banks—Diversified", sectors.FirmType.BANK),
-    ("Capital Markets", sectors.FirmType.BANK),
-    ("Insurance - Property & Casualty", sectors.FirmType.INSURER),
-    ("Reinsurance", sectors.FirmType.INSURER),
-    ("REIT - Industrial", sectors.FirmType.REIT),
-])
+@pytest.mark.parametrize(
+    "industry, expected",
+    [
+        ("Banks - Regional", sectors.FirmType.BANK),
+        ("Banks—Diversified", sectors.FirmType.BANK),
+        ("Capital Markets", sectors.FirmType.BANK),
+        ("Insurance - Property & Casualty", sectors.FirmType.INSURER),
+        ("Reinsurance", sectors.FirmType.INSURER),
+        ("REIT - Industrial", sectors.FirmType.REIT),
+    ],
+)
 def test_industry_drives_classification(industry, expected):
     assert sectors.classify("XXXX", "Financial Services", industry) is expected
 
@@ -58,8 +59,10 @@ def test_deposit_funded_credit_services_names_stay_gated(ticker):
 
 
 def test_ordinary_company_is_nonfinancial():
-    assert sectors.classify("COST", "Consumer Defensive",
-                            "Discount Stores") is sectors.FirmType.NONFINANCIAL
+    assert (
+        sectors.classify("COST", "Consumer Defensive", "Discount Stores")
+        is sectors.FirmType.NONFINANCIAL
+    )
 
 
 def test_missing_metadata_is_unknown_and_still_rated():
@@ -69,11 +72,14 @@ def test_missing_metadata_is_unknown_and_still_rated():
 
 
 # --- the gate ---------------------------------------------------------------
-@pytest.mark.parametrize("ft, code", [
-    (sectors.FirmType.BANK, "BANK_DEPOSIT_FUNDED"),
-    (sectors.FirmType.INSURER, "INSURER_RESERVE_LIABILITIES"),
-    (sectors.FirmType.REIT, "REIT_ASSET_STRUCTURE"),
-])
+@pytest.mark.parametrize(
+    "ft, code",
+    [
+        (sectors.FirmType.BANK, "BANK_DEPOSIT_FUNDED"),
+        (sectors.FirmType.INSURER, "INSURER_RESERVE_LIABILITIES"),
+        (sectors.FirmType.REIT, "REIT_ASSET_STRUCTURE"),
+    ],
+)
 def test_gated_types_are_not_applicable_with_a_machine_readable_reason(ft, code):
     status, reason = sectors.applicability(ft)
     assert status is sectors.Applicability.NOT_APPLICABLE
@@ -116,12 +122,9 @@ def test_assets_exactly_at_the_w1_barrier_are_gated():
     assert reason == "ASSETS_BELOW_TOTAL_DEBT"
 
 
-@pytest.mark.parametrize("a, d", [
-    (None, 100e9),
-    (100e9, None),
-    (float("nan"), 100e9),
-    (100e9, float("nan")),
-])
+@pytest.mark.parametrize(
+    "a, d", [(None, 100e9), (100e9, None), (float("nan"), 100e9), (100e9, float("nan")),]
+)
 def test_missing_market_inputs_do_not_gate(a, d):
     """Same philosophy as UNKNOWN firm types: absent data is not evidence."""
     status, reason = sectors.market_applicability(a, d)
@@ -137,22 +140,23 @@ def test_reason_codes_are_stable_identifiers_not_prose():
 
 # --- PNC under each default-point variant (#16, ADR 0003) -------------------
 def _pnc_balance():
-    return pd.DataFrame({
-        "2026-03-31": {
-            "Total Debt": 66_666e6,
-            "Long Term Debt": 66_666e6,
-            "Total Liabilities Net Minority Interest": 539_352e6,
-            "Total Assets": 603_028e6,
-            "Stockholders Equity": 63_627e6,
+    return pd.DataFrame(
+        {
+            "2026-03-31": {
+                "Total Debt": 66_666e6,
+                "Long Term Debt": 66_666e6,
+                "Total Liabilities Net Minority Interest": 539_352e6,
+                "Total Assets": 603_028e6,
+                "Stockholders Equity": 63_627e6,
+            }
         }
-    })
+    )
 
 
 def test_pnc_default_point_variants_differ_by_an_order_of_magnitude():
     bal = _pnc_balance()
     term = transforms.split_term_debt(bal)
-    v = transforms.default_point_variants(bal, term["ShortTermDebt"],
-                                          term["LongTermDebt"])
+    v = transforms.default_point_variants(bal, term["ShortTermDebt"], term["LongTermDebt"])
     standard = v["standard"].dropna().iloc[-1]
     total_liab = v["total_liabilities"].dropna().iloc[-1]
 
@@ -165,8 +169,7 @@ def test_pnc_ex_deposits_variant_is_absent_when_the_source_has_no_deposits():
     """Not computable is reported as absent, never as equal to total liabilities."""
     bal = _pnc_balance()
     term = transforms.split_term_debt(bal)
-    v = transforms.default_point_variants(bal, term["ShortTermDebt"],
-                                          term["LongTermDebt"])
+    v = transforms.default_point_variants(bal, term["ShortTermDebt"], term["LongTermDebt"])
     assert "total_liabilities_ex_deposits" not in v
 
 
@@ -174,19 +177,20 @@ def test_ex_deposits_variant_computes_when_deposits_are_present():
     bal = _pnc_balance()
     bal.loc["Total Deposits"] = {"2026-03-31": 420_000e6}
     term = transforms.split_term_debt(bal)
-    v = transforms.default_point_variants(bal, term["ShortTermDebt"],
-                                          term["LongTermDebt"])
+    v = transforms.default_point_variants(bal, term["ShortTermDebt"], term["LongTermDebt"])
     assert "total_liabilities_ex_deposits" in v
-    assert v["total_liabilities_ex_deposits"].dropna().iloc[-1] == \
-        pytest.approx(539_352e6 - 420_000e6)
+    assert v["total_liabilities_ex_deposits"].dropna().iloc[-1] == pytest.approx(
+        539_352e6 - 420_000e6
+    )
 
 
 def test_pnc_is_gated_under_every_variant():
     """The flag does not depend on which default point is chosen."""
     bal = _pnc_balance()
     term = transforms.split_term_debt(bal)
-    variants = transforms.default_point_variants(bal, term["ShortTermDebt"],
-                                                 term["LongTermDebt"])
+    variants = transforms.default_point_variants(
+        bal, term["ShortTermDebt"], term["LongTermDebt"]
+    )
     ft = sectors.classify("PNC", "Financial Services", "Banks - Regional")
     for _name in variants:
         status, reason = sectors.applicability(ft)
@@ -209,8 +213,9 @@ def test_contradictory_source_is_flagged_not_silently_clipped():
     """Total < Long-term means the rows disagree; that must be visible."""
     bal = pd.DataFrame({"2026-03-31": {"Total Debt": 400e6, "Long Term Debt": 900e6}})
     term = transforms.split_term_debt(bal)
-    assert bool(term["DebtSourceContradictory"].iloc[0]), \
-        "a negative complement means the source contradicts itself"
+    assert bool(
+        term["DebtSourceContradictory"].iloc[0]
+    ), "a negative complement means the source contradicts itself"
     assert term["ShortTermDebt"].iloc[0] == 0.0, "still clipped, but flagged"
 
 

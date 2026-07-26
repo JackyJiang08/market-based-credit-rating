@@ -38,11 +38,12 @@ from typing import Optional
 
 import pandas as pd
 
+from creditrating._paths import REPO_ROOT as _ROOT
+
 LOG = logging.getLogger(__name__)
 
-from creditrating._paths import REPO_ROOT as _ROOT  # noqa: E501
-STATEMENT_KEYS = ("q_income", "q_balance", "q_cashflow",
-                  "a_income", "a_balance", "a_cashflow")
+
+STATEMENT_KEYS = ("q_income", "q_balance", "q_cashflow", "a_income", "a_balance", "a_cashflow")
 
 
 CANONICAL_DATETIME_UNIT = "ns"
@@ -88,8 +89,10 @@ def _tdir(ticker: str) -> str:
 
 
 def _write_meta(path: str) -> None:
-    meta = {"fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "source": "yahoo/fred"}
+    meta = {
+        "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "source": "yahoo/fred",
+    }
     with open(os.path.join(path, "meta.json"), "w", encoding="utf-8") as fh:
         json.dump(meta, fh)
 
@@ -98,13 +101,19 @@ def _warn_if_stale(path: str, label: str) -> None:
     try:
         with open(os.path.join(path, "meta.json"), encoding="utf-8") as fh:
             fetched = json.load(fh)["fetched_at"]
-        age_days = (datetime.now(timezone.utc)
-                    - datetime.strptime(fetched, "%Y-%m-%dT%H:%M:%SZ")
-                    .replace(tzinfo=timezone.utc)).days
+        age_days = (
+            datetime.now(timezone.utc)
+            - datetime.strptime(fetched, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        ).days
         if age_days >= 1:
-            LOG.warning("%s: cache entry is %dd old (fetched %s) -- a mixed-"
-                        "vintage batch is possible; MDT_CACHE_REFRESH=1 forces "
-                        "one vintage", label, age_days, fetched)
+            LOG.warning(
+                "%s: cache entry is %dd old (fetched %s) -- a mixed-"
+                "vintage batch is possible; MDT_CACHE_REFRESH=1 forces "
+                "one vintage",
+                label,
+                age_days,
+                fetched,
+            )
     except (OSError, KeyError, ValueError):
         pass
 
@@ -174,8 +183,7 @@ def load_statements(ticker: str) -> Optional[dict[str, pd.DataFrame]]:
 def save_statements(ticker: str, stmts: dict[str, pd.DataFrame]) -> None:
     if not enabled() or not stmts:
         return
-    frames = {k: v for k, v in stmts.items()
-              if v is not None and not v.empty}
+    frames = {k: v for k, v in stmts.items() if v is not None and not v.empty}
     if not frames:
         return
     d = _tdir(ticker)

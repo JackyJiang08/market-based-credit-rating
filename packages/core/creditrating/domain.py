@@ -46,11 +46,12 @@ class AssetEstimates(BaseModel):
     em_converged: bool
 
     @model_validator(mode="after")
-    def _asset_clears_barrier(self) -> "AssetEstimates":
+    def _asset_clears_barrier(self) -> AssetEstimates:
         if self.asset_value <= self.default_point:
             raise ValueError(
                 f"A ({self.asset_value:.4g}) <= D ({self.default_point:.4g}): "
-                "the inversion's own precondition fails")
+                "the inversion's own precondition fails"
+            )
         return self
 
 
@@ -76,10 +77,11 @@ class RatingResult(BaseModel):
     interval_high: Optional[str] = None
 
     @model_validator(mode="after")
-    def _letter_never_bare(self) -> "RatingResult":
+    def _letter_never_bare(self) -> RatingResult:
         if self.letter is not None:
             if not self.basis or not self.determination:
                 raise ValueError(
                     f"{self.ticker}: a letter ({self.letter}) must carry its "
-                    "basis and determination -- a bare letter is unpublishable")
+                    "basis and determination -- a bare letter is unpublishable"
+                )
         return self

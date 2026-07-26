@@ -89,8 +89,9 @@ _FINANCIAL_SECTORS = ("financial services", "financial", "financials")
 _REAL_ESTATE_SECTORS = ("real estate",)
 
 
-def classify(ticker: str, sector: Optional[str] = None,
-             industry: Optional[str] = None) -> FirmType:
+def classify(
+    ticker: str, sector: Optional[str] = None, industry: Optional[str] = None
+) -> FirmType:
     """Classify a firm from its ticker override, then sector and industry.
 
     Order matters: an explicit override beats inference, and industry beats
@@ -142,9 +143,9 @@ def applicability(firm_type: FirmType) -> tuple[Applicability, Optional[str]]:
     return Applicability.APPLICABLE, None
 
 
-def market_applicability(asset_value: Optional[float],
-                         total_debt: Optional[float]
-                         ) -> tuple[Applicability, Optional[str]]:
+def market_applicability(
+    asset_value: Optional[float], total_debt: Optional[float]
+) -> tuple[Applicability, Optional[str]]:
     """Market-based capital-structure test, run after the EM step.
 
     `A > D` alone is vacuous as a gate -- the EM inverter raises on it -- so the
@@ -169,26 +170,21 @@ def market_applicability(asset_value: Optional[float],
 
 
 REASON_TEXT = {
-    "BANK_DEPOSIT_FUNDED":
-        "Deposits dominate the liability side and are a funding input, not a "
-        "default trigger. The regulatory failure point is a capital ratio, not "
-        "asset value crossing a debt barrier.",
-    "INSURER_RESERVE_LIABILITIES":
-        "Policy reserves are the dominant liability and are contingent, not "
-        "fixed claims with a payment date.",
-    "REIT_ASSET_STRUCTURE":
-        "Asset value is property-appraisal driven and the capital structure is "
-        "shaped by distribution requirements rather than default risk.",
-    "REPORTING_CURRENCY_MISMATCH":
-        "The statements report in a different currency than the listed price "
-        "(an ADR filing in its home currency). Equity and the debt barrier "
-        "would enter the inversion in different units, so EM and the measures "
-        "are skipped entirely rather than published unit-corrupt. No FX "
-        "conversion is attempted: a converted statement at a chosen rate "
-        "would be a fabricated input.",
-    "ASSETS_BELOW_TOTAL_DEBT":
-        "Market-implied asset value does not clear the default barrier under "
-        "the most conservative debt convention (ST + 1.0*LT). Inside that band "
-        "the rating would depend on the arbitrary long-term debt weight rather "
-        "than on the firm.",
+    "BANK_DEPOSIT_FUNDED": "Deposits dominate the liability side and are a funding input, not a "
+    "default trigger. The regulatory failure point is a capital ratio, not "
+    "asset value crossing a debt barrier.",
+    "INSURER_RESERVE_LIABILITIES": "Policy reserves are the dominant liability and are contingent, not "
+    "fixed claims with a payment date.",
+    "REIT_ASSET_STRUCTURE": "Asset value is property-appraisal driven and the capital structure is "
+    "shaped by distribution requirements rather than default risk.",
+    "REPORTING_CURRENCY_MISMATCH": "The statements report in a different currency than the listed price "
+    "(an ADR filing in its home currency). Equity and the debt barrier "
+    "would enter the inversion in different units, so EM and the measures "
+    "are skipped entirely rather than published unit-corrupt. No FX "
+    "conversion is attempted: a converted statement at a chosen rate "
+    "would be a fabricated input.",
+    "ASSETS_BELOW_TOTAL_DEBT": "Market-implied asset value does not clear the default barrier under "
+    "the most conservative debt convention (ST + 1.0*LT). Inside that band "
+    "the rating would depend on the arbitrary long-term debt weight rather "
+    "than on the firm.",
 }

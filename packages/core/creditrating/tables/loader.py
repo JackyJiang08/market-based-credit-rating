@@ -15,6 +15,7 @@ import os
 from dataclasses import dataclass
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
 from .._paths import REPO_ROOT as _PROJECT_ROOT
@@ -27,21 +28,20 @@ CACHE_DIR = os.path.join(_PROJECT_ROOT, "local", "tables")
 
 @dataclass
 class ConversionTables:
-    ccm_axis: np.ndarray          # grid rows, ascending
-    mu_axis: np.ndarray           # grid columns, ascending
-    ttc_grid: np.ndarray          # TTC (S&P-equivalent) PD by [CCM, mu]
-    pit_grid: np.ndarray          # PIT PD by [CCM, mu] (cross-check)
-    sp_labels: list[str]          # S&P letters, best -> worst
-    sp_thresholds: np.ndarray     # ascending lower-bound PD per label
+    ccm_axis: npt.NDArray[np.float64]  # grid rows, ascending
+    mu_axis: npt.NDArray[np.float64]  # grid columns, ascending
+    ttc_grid: npt.NDArray[np.float64]  # TTC (S&P-equivalent) PD by [CCM, mu]
+    pit_grid: npt.NDArray[np.float64]  # PIT PD by [CCM, mu] (cross-check)
+    sp_labels: list[str]  # S&P letters, best -> worst
+    sp_thresholds: npt.NDArray[np.float64]  # ascending lower-bound PD per label
 
 
+def _axis(series: pd.Series[object]) -> npt.NDArray[np.float64]:
+    return np.asarray(pd.to_numeric(series, errors="coerce").to_numpy(), dtype=np.float64)
 
-def _axis(series: pd.Series) -> np.ndarray:
-    return pd.to_numeric(series, errors="coerce").to_numpy()
 
-
-def _grid(block: pd.DataFrame) -> np.ndarray:
-    return block.apply(pd.to_numeric, errors="coerce").to_numpy()
+def _grid(block: pd.DataFrame) -> npt.NDArray[np.float64]:
+    return np.asarray(block.apply(pd.to_numeric, errors="coerce").to_numpy(), dtype=np.float64)
 
 
 @functools.lru_cache(maxsize=1)
@@ -51,13 +51,16 @@ def load_tables(xlsx_path: str = DEFAULT_XLSX) -> ConversionTables:
         raise FileNotFoundError(
             f"Conversion workbook not found at {xlsx_path}. It is proprietary "
             "reference data kept out of git; place it under local/ to enable "
-            "the grid route.")
+            "the grid route."
+        )
     xl = pd.ExcelFile(xlsx_path)
 
-    def parse_grid(sheet: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def parse_grid(
+        sheet: str,
+    ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         raw = pd.read_excel(xl, sheet, header=None)
-        ccm_axis = _axis(raw.iloc[2:, 0])      # rows = CCM
-        mu_axis = _axis(raw.iloc[1, 1:])       # cols = mu
+        ccm_axis = _axis(raw.iloc[2:, 0])  # rows = CCM
+        mu_axis = _axis(raw.iloc[1, 1:])  # cols = mu
         grid = _grid(raw.iloc[2:, 1:])
         return ccm_axis, mu_axis, grid
 
@@ -72,8 +75,7 @@ def load_tables(xlsx_path: str = DEFAULT_XLSX) -> ConversionTables:
             labels.append(label.strip())
             thresholds.append(float(thr))
 
-    tables = ConversionTables(ccm_axis, mu_axis, ttc, pit,
-                              labels, np.asarray(thresholds))
+    tables = ConversionTables(ccm_axis, mu_axis, ttc, pit, labels, np.asarray(thresholds))
     _cache_csv(tables)
     return tables
 
@@ -81,11 +83,12 @@ def load_tables(xlsx_path: str = DEFAULT_XLSX) -> ConversionTables:
 def _cache_csv(tables: ConversionTables) -> None:
     try:
         os.makedirs(CACHE_DIR, exist_ok=True)
-        pd.DataFrame(tables.ttc_grid, index=tables.ccm_axis,
-                     columns=tables.mu_axis).to_csv(os.path.join(CACHE_DIR, "ttc.csv"))
-        pd.DataFrame({"SP": tables.sp_labels,
-                      "PD_threshold": tables.sp_thresholds}).to_csv(
-            os.path.join(CACHE_DIR, "sp_thresholds.csv"), index=False)
+        pd.DataFrame(tables.ttc_grid, index=tables.ccm_axis, columns=tables.mu_axis).to_csv(
+            os.path.join(CACHE_DIR, "ttc.csv")
+        )
+        pd.DataFrame({"SP": tables.sp_labels, "PD_threshold": tables.sp_thresholds}).to_csv(
+            os.path.join(CACHE_DIR, "sp_thresholds.csv"), index=False
+        )
     except OSError as exc:
         # Caching is best-effort, but a read-only disk or a permissions problem
         # should not be invisible -- it was silently swallowed before.

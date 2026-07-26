@@ -18,8 +18,7 @@ import requests
 import yfinance as yf
 
 from . import provider_config as config
-from .errors import (DataSourceError, RateLimitedError,
-                     SourceUnavailableError, classify)
+from .errors import DataSourceError, RateLimitedError, SourceUnavailableError, classify
 
 LOG = logging.getLogger(__name__)
 
@@ -33,6 +32,7 @@ RETRYABLE = (RateLimitedError, SourceUnavailableError)
 # --------------------------------------------------------------------------- #
 def with_retry(label: str) -> Callable:
     """Decorate a network call to retry with exponential backoff."""
+
     def decorator(fn: Callable) -> Callable:
         @wraps(fn)
         def wrapper(*args, **kwargs):
@@ -51,12 +51,20 @@ def with_retry(label: str) -> Callable:
                     if attempt == config.MAX_RETRIES:
                         break
                     wait = config.BACKOFF_BASE_SECONDS * (2 ** (attempt - 1))
-                    LOG.warning("%s failed (attempt %d/%d): %s -- retry in %.0fs",
-                                label, attempt, config.MAX_RETRIES, last, wait)
+                    LOG.warning(
+                        "%s failed (attempt %d/%d): %s -- retry in %.0fs",
+                        label,
+                        attempt,
+                        config.MAX_RETRIES,
+                        last,
+                        wait,
+                    )
                     time.sleep(wait)
             LOG.error("%s permanently failed: %s", label, last)
             raise last  # type: ignore[misc]
+
         return wrapper
+
     return decorator
 
 
@@ -75,8 +83,9 @@ def looks_like_symbol(query: str) -> bool:
     symbol still fails loudly in acquisition with a per-company status.
     """
     q = (query or "").strip().upper()
-    return (bool(q) and " " not in q and len(q) <= 6
-            and all(c.isalnum() or c in ".-" for c in q))
+    return (
+        bool(q) and " " not in q and len(q) <= 6 and all(c.isalnum() or c in ".-" for c in q)
+    )
 
 
 def resolve_ticker(query: str) -> str:
@@ -95,7 +104,8 @@ def resolve_ticker(query: str) -> str:
     # as a symbol. Keeping this tight avoids mis-firing on words like "Costco".
     candidate = q.upper()
     looks_like_symbol = (
-        " " not in q and len(candidate) <= 5
+        " " not in q
+        and len(candidate) <= 5
         and all(c.isalnum() or c in ".-" for c in candidate)
     )
     if looks_like_symbol:
@@ -110,8 +120,11 @@ def resolve_ticker(query: str) -> str:
             # else entirely. Only an actual lookup miss may fall through.
             if isinstance(err, RateLimitedError):
                 raise err from exc
-            LOG.debug("symbol probe for %s failed (%s); trying name search",
-                      candidate, err.status.value)
+            LOG.debug(
+                "symbol probe for %s failed (%s); trying name search",
+                candidate,
+                err.status.value,
+            )
 
     try:
         quotes = getattr(yf.Search(q, max_results=10), "quotes", []) or []
@@ -121,7 +134,8 @@ def resolve_ticker(query: str) -> str:
     equities = [x for x in quotes if x.get("quoteType") == "EQUITY" and x.get("symbol")]
     if not equities:
         raise TickerResolutionError(
-            f"No equity match for '{query}'. Try the exact ticker symbol.")
+            f"No equity match for '{query}'. Try the exact ticker symbol."
+        )
 
     def _norm(s: str) -> str:
         return "".join(str(s).lower().split())
@@ -148,11 +162,15 @@ def resolve_ticker(query: str) -> str:
     if len(resolved_set) > 1:
         listing = ", ".join(
             f"{str(x['symbol']).upper()} ({x.get('shortname') or x.get('longname')})"
-            for x in equities if str(x["symbol"]).upper() in resolved_set)
+            for x in equities
+            if str(x["symbol"]).upper() in resolved_set
+        )
         raise TickerResolutionError(
-            f"'{query}' is ambiguous ({listing}). Use the exact ticker symbol.")
+            f"'{query}' is ambiguous ({listing}). Use the exact ticker symbol."
+        )
     raise TickerResolutionError(
-        f"No confident equity match for '{query}'. Use the exact ticker symbol.")
+        f"No confident equity match for '{query}'. Use the exact ticker symbol."
+    )
 
 
 @with_retry("Ticker.info")
@@ -163,8 +181,7 @@ def get_info(tk: yf.Ticker) -> dict:
 @with_retry("Ticker.history")
 def get_history(tk: yf.Ticker, start: datetime) -> pd.DataFrame:
     """Daily OHLC + Adj Close + dividend/split actions from `start` onward."""
-    return tk.history(start=start.strftime("%Y-%m-%d"),
-                      auto_adjust=False, actions=True)
+    return tk.history(start=start.strftime("%Y-%m-%d"), auto_adjust=False, actions=True)
 
 
 @with_retry("Ticker.statements")
@@ -194,17 +211,21 @@ def fetch_fred_series(series_id: str, start: datetime, end: datetime) -> pd.Data
     df = pd.read_csv(StringIO(resp.text))
     # Locate the date column by name rather than by position: a layout change
     # at the source would otherwise silently mislabel a column.
-    named = [c for c in df.columns
-             if str(c).strip().lower() in ("observation_date", "date")]
+    named = [c for c in df.columns if str(c).strip().lower() in ("observation_date", "date")]
     if named:
         date_col = named[0]
     elif len(df.columns) >= 2:
         date_col = df.columns[0]
-        LOG.warning("FRED %s: no recognised date column in %s; falling back to "
-                    "the first column %r", series_id, list(df.columns), date_col)
+        LOG.warning(
+            "FRED %s: no recognised date column in %s; falling back to " "the first column %r",
+            series_id,
+            list(df.columns),
+            date_col,
+        )
     else:
         raise SourceUnavailableError(
-            f"FRED {series_id}: unexpected CSV layout {list(df.columns)}")
+            f"FRED {series_id}: unexpected CSV layout {list(df.columns)}"
+        )
     df = df.rename(columns={date_col: "Date"})
     df["Date"] = pd.to_datetime(df["Date"])
     df[series_id] = pd.to_numeric(df[series_id], errors="coerce")
