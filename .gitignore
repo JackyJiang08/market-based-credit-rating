@@ -41,6 +41,7 @@ CLAUDE.local.md
 .DS_Store
 
 # Python
+.coverage
 __pycache__/
 *.py[cod]
 .venv/

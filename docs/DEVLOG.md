@@ -35,6 +35,22 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - CI coverage measurement
+
+- **Scope:** `.github/workflows/tests.yml`, `.gitignore`. No code.
+- **Summary:** the tests workflow now installs `pytest-cov`, runs the suite
+  with coverage over the four layers plus `mdt`, prints term-missing to the
+  log, and writes the totals to the Actions run summary. Local measurement:
+  **61% total** (model layers 90-95%; the network acquisition modules are the
+  low end, as expected for an offline suite). A coverage **badge is skipped**:
+  every hosted-badge route (Codecov, gist-backed shields) needs an external
+  service or a token secret, which is not "straightforward" -- the number
+  lives on each run's summary page instead. `.coverage` added to .gitignore.
+- **Breaking changes:** None.
+- **Validation:** `python3 -m pytest -q --cov=...` -> 304 passed, 61% total,
+  run before this push. Workflow YAML is exercised on this push itself.
+- **Follow-ups:** none.
+
 ### 2026-07-26 - Presentation pass 1: IP spot-check, CLI rating table, warning fix
 
 - **Scope:** `mdt/__main__.py`, `dashboard/submission.py` (one line),

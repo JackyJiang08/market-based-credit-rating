@@ -19,7 +19,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run the offline suite
+          pip install -r requirements.txt pytest-cov
+      - name: Run the offline suite with coverage
         # local/ is absent on CI, so the proprietary-grid tests skip by design.
-        run: python -m pytest -q
+        run: |
+          python -m pytest -q \
+            --cov=raw_data_architecture --cov=data_cleaning \
+            --cov=signal_construction --cov=dashboard --cov=mdt \
+            --cov-report=term-missing:skip-covered
+      - name: Coverage summary
+        # Surfaces the total on the run's summary page. No external service --
+        # a hosted coverage badge would need one, so the badge is skipped.
+        run: |
+          echo '## Coverage' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          python -m coverage report --skip-covered | tail -15 >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
