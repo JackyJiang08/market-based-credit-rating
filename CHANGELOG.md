@@ -72,3 +72,11 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   `DELISTED` / `SOURCE_ERROR`). Retries are limited to throttling and transport
   failures — a delisted symbol is no longer retried four times. An unrecognised
   failure becomes `SOURCE_ERROR`, never `NO_DATA`.
+- **#11** Implemented the rating half of Eq. (24) (`tic_lognormal`) and Eq. (27)
+  (`no_arb_convert`), added `Q_MOODYS`, and wired the analytical no-arbitrage route
+  into the live conversion path. Inside the grid the lookup is authoritative and the
+  analytical route is the oracle checking it; outside the grid the analytical route
+  produces the rating, labelled `ANALYTICAL`. COST, KO and WMT move from OFF_GRID to
+  ANALYTICAL and are rated AAA. Regression tests reproduce Tables 12, 13 and 14.
+  Also fixed `no_arb_ccm_star` returning its solver bracket edge when α saturates,
+  and made `at_floor` mean scale-floor for analytical ratings rather than grid-floor.

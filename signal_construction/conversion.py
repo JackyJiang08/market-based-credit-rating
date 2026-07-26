@@ -1,26 +1,37 @@
 """PIT -> TTC -> S&P conversion (TiC paper Section 5).
 
-Two consistent routes are provided:
+Two routes, with a clear division of labour.
 
-1. **Lookup** against the conversion workbook (``TiC_TTC_conversion
-   .xlsx``): the ``TTC`` grid gives the no-regulatory-arbitrage Through-The-Cycle
-   PD by ``(CCM, mu)`` and the ``SP`` sheet maps a PD to an S&P letter. These
-   grids are proprietary and are read from the git-ignored ``local/``
-   tree at runtime; nothing proprietary is committed.
+1. **Lookup** against the conversion workbook (``TiC_TTC_conversion.xlsx``): the
+   ``TTC`` grid gives the no-regulatory-arbitrage Through-The-Cycle PD by
+   ``(CCM, mu)`` and the ``SP`` sheet maps a PD to a letter. The grids are
+   proprietary, read from the git-ignored ``local/`` tree at runtime; nothing
+   proprietary is committed. Authoritative **inside** its domain,
+   ``CCM in [0.1, 540] x mu in [1, 160]``.
 
-2. **Analytical no-arbitrage conversion**, step 1 only (Prop. 5.2.1 Eq. 26):
-   match the capital confidence level ``alpha`` between the first-hitting and
-   S&P systems (Eq. 22, CML=e^1.35, theta=1, S&P Q=0.625913) to solve ``CCM*``.
-   Verified to reproduce the paper (alpha_FH(1.5)=0.91906, CCM*=1.35373).
+2. **Analytical no-arbitrage conversion** (Prop. 5.2.1), in two steps:
+     Eq. (26)  solve ``CL_SP(CCM*) = CL_FH(CCM)`` so both systems demand the
+               same capital confidence level;
+     Eq. (27)  substitute the source PD and ``CCM*`` into the S&P TiC formula,
+               the rating half of Eq. (24), to get the S&P RiskScore.
+   The RiskScore is mapped back to a TTC PD through the published S&P
+   Through-The-Cycle scale (Table 8, Prop. 5.1). This route needs no table and
+   is defined for every ``CCM > 0``.
 
-The lookup route is the only route that produces a rating. The analytical route
-is a **verification check against the paper's published anchors, and nothing
-more**: it is not reachable from the rating path and it does not extend past the
-grid edges. Turning ``CCM*`` into a rating requires Eq. (27),
-``RS_B = TiC_B(PD_A, CCM*)``, which in turn requires the S&P rating half of
-Eq. (24); neither is implemented (issue #11). Until they are, a point outside the
-grid has no rating and is reported as ``OFF_GRID`` (issue #12) rather than being
-clamped to an edge cell.
+Inside the grid the lookup wins and the analytical route is the **oracle** that
+checks it; a regression test asserts they agree to within one letter notch.
+Outside the grid there is nothing to look up, so the analytical route produces
+the rating and it is labelled ``ANALYTICAL``.
+
+Verified against the paper: ``alpha_FH(1.5)=0.91906`` and ``alpha_FH(5.0)=0.72749``;
+``CCM*=1.35373`` and ``2.22928``; every row of the S&P RiskScore column of
+Tables 13 and 14 to within 0.01; Table 12's alpha and ``CCM*`` columns for all
+seven agency grades.
+
+**Known limit.** The Table 8 scale has seven grades. Below its best grade
+(RiskScore 2.7) and inside its worst band (CCC/C) it cannot resolve notches, so
+a rating there is determined by where the published scale stops rather than by
+the model. Those are flagged ``at_floor`` rather than presented as measurements.
 """
 
 from __future__ import annotations
@@ -44,7 +55,18 @@ CACHE_DIR = os.path.join(_PROJECT_ROOT, "local", "tables")
 # Analytical constants (paper Prop. 4.5.2-4.5.3, Section 5.3).
 CML = math.e ** 1.35
 SQRT_CML = math.sqrt(CML)
+
+# Constants of Rating System Q (Prop. 4.2). Prop. 4.2 quotes S&P as 0.626 and
+# Moody's as 0.746; Section 5.3 uses the precise values below.
 Q_SP = 0.625913
+Q_MOODYS = 0.7462
+
+# S&P's Through-The-Cycle scale (paper Table 8, Prop. 5.1): the RiskScore of each
+# letter grade and the TTC one-year default probability that goes with it. This
+# is the published agency scale, and it is what turns an analytically converted
+# RiskScore back into a probability. Ascending in both columns.
+SP_TTC_RISK_SCORES = np.array([2.7, 3.5, 5.2, 9.9, 22.2, 50.7, 154.8])
+SP_TTC_PD1 = np.array([0.0001, 0.0003, 0.0007, 0.0023, 0.0088, 0.0441, 0.3359])
 
 
 # --------------------------------------------------------------------------- #
@@ -66,10 +88,9 @@ class RatingBasis(enum.Enum):
     GRID_INTERIOR   (CCM, mu) fell inside the lookup grid; the TTC PD is an
                     interpolation between real grid cells and the letter is
                     model-determined.
-    ANALYTICAL      the lookup grid did not cover the point and the analytical
-                    no-arbitrage route (Prop. 5.2.1) supplied the rating.
-                    Requires Eq. (27), which is not implemented -- see #11.
-                    No result currently carries this basis.
+    ANALYTICAL      the lookup grid did not cover the point, so the analytical
+                    no-arbitrage route (Prop. 5.2.1, Eq. 26 then Eq. 27)
+                    supplied the rating. No table was consulted.
     OFF_GRID        (CCM, mu) fell outside the grid and no analytical route was
                     available. **No letter is reported.** The previous behaviour
                     clamped to the nearest edge and published the resulting
@@ -106,8 +127,9 @@ def load_tables(xlsx_path: str = DEFAULT_XLSX) -> ConversionTables:
     """Parse the conversion workbook and cache CSV copies under local/tables."""
     if not os.path.exists(xlsx_path):
         raise FileNotFoundError(
-            f"Conversion workbook not found at {xlsx_path}. It is proprietary PFPA data "
-            "kept out of git; place it under local/ to enable TTC/S&P mapping.")
+            f"Conversion workbook not found at {xlsx_path}. It is proprietary "
+            "reference data kept out of git; place it under local/ to enable "
+            "the grid route.")
     xl = pd.ExcelFile(xlsx_path)
 
     def parse_grid(sheet: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -163,28 +185,43 @@ def _bilinear(grid: np.ndarray, xaxis: np.ndarray, yaxis: np.ndarray,
     return GridLookup(float(v), off)
 
 
-def ttc_pd(tables: ConversionTables, ccm: float, mu: float) -> GridLookup:
-    """No-arbitrage Through-The-Cycle PD by (CCM, mu), with its rating basis.
+def ttc_pd(tables: ConversionTables, ccm: float, mu: float,
+           pit_pd: float | None = None) -> GridLookup:
+    """Through-The-Cycle PD by (CCM, mu), with the basis it was reached on.
 
-    A point outside the grid is reported as ``OFF_GRID`` with a NaN value. The
-    clamped edge value is deliberately **not** returned as a rating: for every
-    off-grid company in the current universe the clamped cell sits on the grid's
-    2bp TTC floor, so publishing it meant the grid boundary chose the letter.
+    Inside the grid the lookup is authoritative and the analytical route is the
+    oracle that checks it. Outside the grid there is nothing to look up, so the
+    analytical route (Prop. 5.2.1, Eq. 26 then Eq. 27) produces the rating --
+    which is defined for every `CCM > 0` and needs no table. The clamped edge
+    value is never returned: for every off-grid company in this universe the
+    clamped cell sits on the 2bp floor, so publishing it let the grid boundary
+    choose the letter.
+
+    `pit_pd` is required for the analytical route (it is the `PD_A` of Eq. 27).
+    Without it an off-grid point stays OFF_GRID.
     """
     # A defective drift regime leaves (CCM, mu) undefined; nothing to look up.
     if not (np.isfinite(ccm) and np.isfinite(mu)):
         return GridLookup(float("nan"), False, RatingBasis.NOT_APPLICABLE, False)
 
     look = _bilinear(tables.ttc_grid, tables.ccm_axis, tables.mu_axis, ccm, mu)
-    if look.off_grid:
-        # Prop. 5.2.1's analytical route would belong here, but it needs Eq. (27)
-        # to turn CCM* into a rating and that is not implemented (#11). Until it
-        # is, an off-grid point has no defensible rating.
+    if not look.off_grid:
+        look.basis = RatingBasis.GRID_INTERIOR
+        look.at_floor = is_floor_determined(tables, look.value)
+        return look
+
+    # --- outside the grid: convert analytically -----------------------------
+    if pit_pd is None or not np.isfinite(pit_pd):
         return GridLookup(float("nan"), True, RatingBasis.OFF_GRID, False)
 
-    look.basis = RatingBasis.GRID_INTERIOR
-    look.at_floor = is_floor_determined(tables, look.value)
-    return look
+    analytical = no_arb_convert(pit_pd, ccm)
+    if not np.isfinite(analytical.ttc_pd):
+        return GridLookup(float("nan"), True, RatingBasis.OFF_GRID, False)
+
+    # For an analytical rating "at floor" means the *scale* ran out, not the
+    # grid: the RiskScore fell below Table 8's best grade.
+    return GridLookup(analytical.ttc_pd, True, RatingBasis.ANALYTICAL,
+                      analytical.at_scale_floor)
 
 
 # Width of the grid's floor region, as a multiple of the floor itself. The
@@ -253,21 +290,157 @@ def alpha_first_hitting(ccm: float) -> float:
     return float(np.exp(log_alpha))
 
 
+def alpha_lognormal(ccm: float, q: float) -> float:
+    """Capital confidence level for a log-normal rating system (Eq. 22).
+
+    The exponent `theta` of Eq. (22) is `1/Q` for an agency system, so the
+    coefficient on `ln CCM` is `1/q`, not `q`. In the PDF this renders as a
+    stacked fraction that reads like `0.625913 * ln CCM`; it is its reciprocal.
+    Verified through the paper's anchors -- do not "simplify" it.
+    """
+    L = math.log(ccm + 1.0)
+    return float(norm.cdf((1.35 - (1.0 / q) * math.log(ccm) + L / 2.0)
+                          / math.sqrt(L)))
+
+
 def alpha_sp(ccm: float) -> float:
     """Capital confidence level under the S&P log-normal system (Eq. 22)."""
+    return alpha_lognormal(ccm, Q_SP)
+
+
+def alpha_moodys(ccm: float) -> float:
+    """Capital confidence level under the Moody's log-normal system (Eq. 22)."""
+    return alpha_lognormal(ccm, Q_MOODYS)
+
+
+def tic_lognormal(pd_value: float, ccm: float, q: float) -> float:
+    """The rating half of Eq. (24): TiC of a log-normal agency system.
+
+        ln(TiC) = Q * Phi^-1(PD) * sqrt(ln(CCM+1))
+                  - (Q/2) * ln(CCM+1) + ln(CCM)
+
+    Substituting a *source* system's PD together with the matched `CCM*` is
+    Eq. (27), the second half of the no-arbitrage conversion. Verified against
+    the paper: reproduces every row of the `S&P` RiskScore column of Tables 13
+    and 14 to within 0.005, and Table 12 to within 0.01.
+    """
+    if not (0.0 < pd_value < 1.0) or not (ccm > 0.0) or not np.isfinite(ccm):
+        return float("nan")
     L = math.log(ccm + 1.0)
-    return float(norm.cdf((1.35 - (1.0 / Q_SP) * math.log(ccm) + L / 2.0)
-                          / math.sqrt(L)))
+    ln_tic = (q * norm.ppf(pd_value) * math.sqrt(L) - (q / 2.0) * L
+              + math.log(ccm))
+    return float(math.exp(ln_tic))
+
+
+def risk_score_sp(pd_value: float, ccm_star: float) -> float:
+    """S&P RiskScore = 100 * TiC_SP (Eq. 5 applied to Eq. 24)."""
+    return 100.0 * tic_lognormal(pd_value, ccm_star, Q_SP)
+
+
+def ttc_pd_from_risk_score(risk_score: float) -> float:
+    """Map an S&P RiskScore back to a TTC PD using the Table 8 scale.
+
+    Log-log monotone interpolation over the seven published grades. Agreement
+    with the `S&P TTC` column of Tables 13/14 is within 0.25pp from AAA through
+    B; it widens to ~4pp inside the CCC/C band, where the published column uses
+    a finer notching than the paper prints. Values outside the scale are held at
+    its endpoints rather than extrapolated.
+    """
+    if risk_score is None or not np.isfinite(risk_score) or risk_score <= 0:
+        return float("nan")
+    return float(np.exp(np.interp(math.log(risk_score),
+                                  np.log(SP_TTC_RISK_SCORES),
+                                  np.log(SP_TTC_PD1))))
 
 
 def no_arb_ccm_star(ccm_first_hitting: float) -> float:
     """S&P CCM* matching the first-hitting confidence level (Prop. 5.2.1 Eq. 26).
 
-    Verified: no_arb_ccm_star(1.5) = 1.35373 (paper Section 5.3).
+    Step 1 of the two-step conversion: solve `CL_SP(CCM*) = CL_FH(CCM)` so both
+    systems demand the same capital confidence level, which is what makes the
+    conversion free of regulatory arbitrage.
 
-    **Not on the rating path.** This is step 1 of the two-step conversion; step 2
-    (Eq. 27) is not implemented, so this cannot produce a rating on its own. Its
-    only caller is the test that pins the paper's anchor. See #11.
+    Verified: no_arb_ccm_star(1.5) = 1.35373 and no_arb_ccm_star(5.0) = 2.22928
+    (paper Section 5.3).
     """
     target = alpha_first_hitting(ccm_first_hitting)
-    return float(brentq(lambda c: alpha_sp(c) - target, 1e-4, 1e4, maxiter=200))
+    return _solve_ccm_star(target)
+
+
+# Bracket for the CCM* root search. alpha is decreasing in CCM (Eq. 22 part 3)
+# and tends to 1 as CCM -> 0, so a source system whose alpha has saturated at
+# 1.0 in float64 has no identifiable CCM*: any small enough CCM satisfies it.
+# Returning the bracket edge in that case would be a fabricated number.
+_CCM_STAR_LO, _CCM_STAR_HI = 1e-8, 1e4
+
+
+def _solve_ccm_star(target_alpha: float) -> float:
+    """Solve CL_SP(CCM*) = target_alpha, or NaN if the target is unreachable."""
+    if not np.isfinite(target_alpha):
+        return float("nan")
+    lo = alpha_sp(_CCM_STAR_LO) - target_alpha
+    hi = alpha_sp(_CCM_STAR_HI) - target_alpha
+    if lo == 0.0:
+        return _CCM_STAR_LO
+    if lo * hi > 0:
+        # No sign change: the confidence level is outside what the S&P system
+        # can express. Saturated alpha (a firm the model reads as essentially
+        # default-free at one year) lands here.
+        return float("nan")
+    return float(brentq(lambda c: alpha_sp(c) - target_alpha,
+                        _CCM_STAR_LO, _CCM_STAR_HI, maxiter=200))
+
+
+def no_arb_ccm_star_from_agency(ccm_source: float, q_source: float) -> float:
+    """CCM* converting one log-normal agency system into S&P's (Eq. 26).
+
+    The Moody's -> S&P direction of Prop. 5.2.2 / Table 12.
+    """
+    return _solve_ccm_star(alpha_lognormal(ccm_source, q_source))
+
+
+@dataclass
+class AnalyticalRating:
+    """A rating produced without touching the lookup grid."""
+
+    ccm_star: float          # Eq. (26): the S&P CCM at matched confidence
+    risk_score: float        # Eq. (27): 100 * TiC_SP(PD_FH, CCM*)
+    ttc_pd: float            # Table 8 scale applied to the RiskScore
+    alpha: float             # the matched capital confidence level
+    at_scale_floor: bool = False   # RiskScore below the Table 8 scale's lowest
+                                   # grade, so the TTC PD is the scale's floor
+                                   # rather than a resolved value
+
+
+def no_arb_convert(pit_pd: float, ccm_first_hitting: float) -> AnalyticalRating:
+    """The full Prop. 5.2.1 conversion, Eq. (26) then Eq. (27).
+
+    Takes a first-passage rating -- its PIT PD from Eq. (13) and its CCM from
+    Eq. (11) -- and returns the S&P-equivalent rating with no lookup grid
+    involved, so it is defined wherever `CCM > 0`, including outside the grid's
+    `CCM in [0.1, 540]` domain.
+    """
+    nan = float("nan")
+    if not (np.isfinite(pit_pd) and np.isfinite(ccm_first_hitting)) \
+            or ccm_first_hitting <= 0:
+        return AnalyticalRating(nan, nan, nan, nan)
+
+    alpha = alpha_first_hitting(ccm_first_hitting)
+    ccm_star = _solve_ccm_star(alpha)
+    if not np.isfinite(ccm_star):
+        return AnalyticalRating(nan, nan, nan, alpha)
+    rs = risk_score_sp(pit_pd, ccm_star)
+    return AnalyticalRating(ccm_star, rs, ttc_pd_from_risk_score(rs), alpha,
+                            at_scale_floor=is_scale_floor_determined(rs))
+
+
+def is_scale_floor_determined(risk_score: float) -> bool:
+    """Is this RiskScore below the Table 8 scale's best grade?
+
+    Below RiskScore 2.7 the scale has nothing left to say: every such firm maps
+    to the AAA anchor's 0.01%. The rating is then determined by where the
+    published scale stops, exactly as a grid-floor rating is determined by where
+    the table stops.
+    """
+    return bool(np.isfinite(risk_score)
+                and risk_score <= float(SP_TTC_RISK_SCORES[0]))

@@ -173,3 +173,199 @@ def test_alpha_is_decreasing_in_ccm():
     assert all(a > b for a, b in zip(vals, vals[1:]))
     vals = [conversion.alpha_sp(c) for c in (0.5, 1.0, 1.5, 5.0, 50.0)]
     assert all(a > b for a, b in zip(vals, vals[1:]))
+
+
+# ===========================================================================
+# #11: the analytical no-arbitrage conversion, Eq. (24) rating half + Eq. (27)
+# ===========================================================================
+
+# --- Table 12: Moody's -> S&P (Prop. 5.2.2) ---------------------------------
+# Columns: grade, Moody's CCM, published alpha, published CCM*, published S&P
+# RiskScore, and the log-normal PD the paper uses (Table 11, not the observed
+# PD1 -- the paper states "we use the log-normal default probability in the
+# conversion").
+TABLE_12 = [
+    ("Aaa",   0.57, 0.9998,  0.60,   2.81, 0.0000001),
+    ("Aa",    0.72, 0.9975,  0.75,   3.78, 0.0000015),
+    ("A",     1.01, 0.9782,  1.01,   5.72, 0.0000180),
+    ("Baa",   1.79, 0.8581,  1.63,  11.33, 0.0000620),
+    ("Ba",    2.75, 0.7154,  2.29,  21.73, 0.0018540),
+    ("B",     4.25, 0.5736,  3.17,  45.43, 0.0227970),
+    ("Caa-C", 8.08, 0.4075,  4.94, 120.81, 0.1541870),
+]
+
+
+@pytest.mark.parametrize("grade, ccm_md, alpha_pub, ccm_star_pub, rs_pub, pd_ln",
+                         TABLE_12)
+def test_table_12_alpha_and_ccm_star(grade, ccm_md, alpha_pub, ccm_star_pub,
+                                     rs_pub, pd_ln):
+    """Eq. (26): matching confidence levels reproduces the published CCM*."""
+    assert conversion.alpha_moodys(ccm_md) == pytest.approx(alpha_pub, abs=1e-3)
+    ccm_star = conversion.no_arb_ccm_star_from_agency(ccm_md, conversion.Q_MOODYS)
+    assert ccm_star == pytest.approx(ccm_star_pub, abs=1e-2)
+
+
+# Table 11's log-normal PDs are printed to two decimal places, which is not
+# enough precision to reproduce the RiskScore column for the high grades: Aaa,
+# Aa and A all print as 0.00%, and Baa's 0.01% is really 0.0062%. Only the
+# grades whose printed PD carries enough significant figures are asserted; the
+# tolerance for each is set by the rounding of its own printed PD.
+TABLE_12_RS = [
+    ("Baa", 1.79, 0.0001, 11.33, 1.0),      # 0.01% -> 1 s.f., loose
+    ("Ba",  2.75, 0.0019, 21.73, 0.15),     # 0.19% -> 2 s.f.
+    ("B",   4.25, 0.0228, 45.43, 0.02),     # 2.28% -> 3 s.f.
+    ("Caa-C", 8.08, 0.1541, 120.81, 0.05),  # 15.41% -> 4 s.f.
+]
+
+
+@pytest.mark.parametrize("grade, ccm_md, pd_ln, rs_pub, tol", TABLE_12_RS)
+def test_table_12_sp_risk_score(grade, ccm_md, pd_ln, rs_pub, tol):
+    """Eq. (27): substituting the source PD and CCM* gives the S&P RiskScore."""
+    ccm_star = conversion.no_arb_ccm_star_from_agency(ccm_md, conversion.Q_MOODYS)
+    assert conversion.risk_score_sp(pd_ln, ccm_star) == pytest.approx(rs_pub, abs=tol)
+
+
+# --- Tables 13 and 14: first-passage -> S&P ---------------------------------
+# (mu, published S&P RiskScore) at the table's CCM.
+TABLE_13 = [(1, 139.00), (5, 53.35), (10, 30.99), (15, 21.08), (20, 15.41),
+            (25, 11.75), (30, 9.23), (35, 7.41), (50, 4.18), (75, 1.93),
+            (100, 1.01), (150, 0.34)]
+TABLE_14 = [(1, 258.78), (5, 126.37), (10, 85.40), (15, 65.12), (20, 52.41),
+            (25, 43.55), (30, 36.97), (35, 31.87), (50, 21.75), (75, 13.02),
+            (100, 8.51), (150, 4.21)]
+
+
+def test_table_13_and_14_ccm_star_anchors():
+    assert conversion.no_arb_ccm_star(1.5) == pytest.approx(1.35373, abs=1e-4)
+    assert conversion.no_arb_ccm_star(5.0) == pytest.approx(2.22928, abs=1e-4)
+    assert conversion.alpha_first_hitting(1.5) == pytest.approx(0.91906, abs=1e-5)
+    assert conversion.alpha_first_hitting(5.0) == pytest.approx(0.72749, abs=1e-5)
+
+
+@pytest.mark.parametrize("mu, rs_pub", TABLE_13)
+def test_table_13_sp_risk_score_reproduces(mu, rs_pub):
+    from signal_construction import measures
+
+    pit = measures.pit_pd_first_hitting(mu, 1.5)
+    got = conversion.no_arb_convert(pit, 1.5).risk_score
+    assert got == pytest.approx(rs_pub, abs=0.01)
+
+
+@pytest.mark.parametrize("mu, rs_pub", TABLE_14)
+def test_table_14_sp_risk_score_reproduces(mu, rs_pub):
+    from signal_construction import measures
+
+    pit = measures.pit_pd_first_hitting(mu, 5.0)
+    got = conversion.no_arb_convert(pit, 5.0).risk_score
+    assert got == pytest.approx(rs_pub, abs=0.01)
+
+
+# --- The Table 8 RiskScore -> TTC PD scale ----------------------------------
+def test_ttc_scale_reproduces_the_published_grades():
+    for rs, pd1 in zip(conversion.SP_TTC_RISK_SCORES, conversion.SP_TTC_PD1):
+        assert conversion.ttc_pd_from_risk_score(rs) == pytest.approx(pd1, rel=1e-9)
+
+
+def test_ttc_scale_is_monotone_and_bounded():
+    prev = 0.0
+    for rs in (1.0, 2.7, 5.0, 10.0, 25.0, 60.0, 154.8, 500.0):
+        v = conversion.ttc_pd_from_risk_score(rs)
+        assert v >= prev, "TTC PD must increase with RiskScore"
+        assert 0.0 < v <= 1.0
+        prev = v
+    assert math.isnan(conversion.ttc_pd_from_risk_score(float("nan")))
+    assert math.isnan(conversion.ttc_pd_from_risk_score(-1.0))
+
+
+@pytest.mark.parametrize("rs, ttc_pub", [
+    (53.35, 0.047), (30.99, 0.019), (21.08, 0.009), (15.41, 0.005),
+    (11.75, 0.003), (9.23, 0.002),
+])
+def test_ttc_scale_tracks_the_published_column_outside_ccc(rs, ttc_pub):
+    """Agreement is within 0.25pp from AAA through B.
+
+    Inside the CCC/C band the published column uses a finer notching than the
+    paper prints, and the gap widens to ~4pp; that limit is documented on
+    ttc_pd_from_risk_score rather than papered over with a loose tolerance.
+    """
+    assert conversion.ttc_pd_from_risk_score(rs) == pytest.approx(ttc_pub, abs=2.5e-3)
+
+
+# --- The grid as an oracle for the analytical route -------------------------
+@needs_tables
+@pytest.mark.parametrize("ccm, mu", [
+    (1.5, 5.0), (1.5, 10.0), (1.5, 15.0), (2.0, 20.0), (3.0, 15.0), (1.0, 25.0),
+])
+def test_analytical_agrees_with_the_grid_where_the_scale_resolves(ccm, mu):
+    """Both routes are defined here and must agree to within one notch.
+
+    The grid interpolates a proprietary table; the analytical route evaluates a
+    closed form and maps it through the seven-point Table 8 scale. Exact
+    equality is not expected, but a disagreement wide enough to move the letter
+    by more than one notch would mean one of them is wrong.
+    """
+    from signal_construction import measures
+
+    t = conversion.load_tables()
+    grid = conversion.ttc_pd(t, ccm, mu)
+    assert grid.basis is conversion.RatingBasis.GRID_INTERIOR
+
+    pit = measures.pit_pd_first_hitting(mu, ccm)
+    analytical = conversion.no_arb_convert(pit, ccm)
+
+    # Relative agreement loosens at very small PDs, where a 30% relative gap is
+    # 3 basis points; the absolute term carries those. The letter is the
+    # binding assertion.
+    assert analytical.ttc_pd == pytest.approx(grid.value, rel=0.4, abs=5e-4)
+    labels = list(t.sp_labels)
+    i = labels.index(conversion.sp_rating(t, analytical.ttc_pd))
+    j = labels.index(conversion.sp_rating(t, grid.value))
+    assert abs(i - j) <= 1, "letters differ by more than one notch"
+
+
+@needs_tables
+@pytest.mark.parametrize("ccm, mu", [(5.0, 5.0), (5.0, 10.0)])
+def test_known_divergence_inside_the_ccc_band(ccm, mu):
+    """Documented limit, asserted so it cannot widen unnoticed.
+
+    Table 8 has a single anchor (RiskScore 154.8) covering everything from CCC
+    to D, so the analytical route cannot resolve notches inside the distress
+    band. It reads ~2-5pp riskier than the grid there, which is up to two
+    notches. Investment grade through BB is unaffected.
+    """
+    from signal_construction import measures
+
+    t = conversion.load_tables()
+    grid = conversion.ttc_pd(t, ccm, mu)
+    pit = measures.pit_pd_first_hitting(mu, ccm)
+    analytical = conversion.no_arb_convert(pit, ccm)
+
+    assert analytical.risk_score > 60.0, "premise: this is the distress band"
+    gap = analytical.ttc_pd - grid.value
+    assert 0.0 < gap < 0.06, f"divergence outside the documented band: {gap:+.4f}"
+
+
+@needs_tables
+def test_off_grid_now_converts_analytically_instead_of_blanking():
+    """The point of #11: a CCM below the grid floor still gets a rating."""
+    from signal_construction import measures
+
+    t = conversion.load_tables()
+    ccm, mu = 0.05, 30.0                      # CCM below the grid's 0.1 floor
+    pit = measures.pit_pd_first_hitting(mu, ccm)
+
+    without = conversion.ttc_pd(t, ccm, mu)                 # no PIT PD supplied
+    assert without.basis is conversion.RatingBasis.OFF_GRID
+    assert math.isnan(without.value)
+
+    with_pit = conversion.ttc_pd(t, ccm, mu, pit_pd=pit)
+    assert with_pit.basis is conversion.RatingBasis.ANALYTICAL
+    assert math.isfinite(with_pit.value)
+    assert 0.0 < with_pit.value <= 1.0
+
+
+def test_analytical_route_refuses_undefined_inputs():
+    for pit, ccm in [(float("nan"), 1.5), (0.1, float("nan")), (0.1, 0.0),
+                     (0.1, -1.0)]:
+        out = conversion.no_arb_convert(pit, ccm)
+        assert math.isnan(out.risk_score) and math.isnan(out.ttc_pd)

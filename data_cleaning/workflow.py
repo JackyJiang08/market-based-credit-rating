@@ -206,12 +206,16 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
 
         try:
             tables = conversion.load_tables()
-            ttc = conversion.ttc_pd(tables, data.ccm, data.mu)
+            # pit_pd is PD_A of Eq. (27); without it an off-grid point
+            # cannot be converted analytically.
+            ttc = conversion.ttc_pd(tables, data.ccm, data.mu,
+                                    pit_pd=data.pit_pd)
             data.ttc_pd = ttc.value
             data.rating_basis = ttc.basis.value
             data.rating_off_grid = ttc.off_grid
             data.ttc_at_floor = ttc.at_floor
-            if ttc.basis is conversion.RatingBasis.GRID_INTERIOR:
+            if ttc.basis in (conversion.RatingBasis.GRID_INTERIOR,
+                             conversion.RatingBasis.ANALYTICAL):
                 data.sp_rating = conversion.sp_rating(tables, ttc.value)
                 data.outlook = conversion.outlook(data.pit_pd, ttc.value)
                 LOG.info("  rating: TTC_PD=%.4f  S&P=%-4s Outlook=%+.4f  "
