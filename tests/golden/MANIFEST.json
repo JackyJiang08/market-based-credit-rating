@@ -1,0 +1,7 @@
+{
+  "generated_utc": "2026-07-26T20:22:20Z",
+  "git_sha": "9f2ad99",
+  "package_version": "0.4.0",
+  "conversion_workbook_present": true,
+  "note": "grid-dependent columns (TTC PD, letter, basis, determination, intervals) are populated because local/ was present in the generating environment; environments without it assert NaN for those columns instead (see tests/test_golden_workbook.py)"
+}
