@@ -16,7 +16,7 @@ from raw_data_architecture import lineage
 
 from . import config, records
 
-LOG = logging.getLogger("pfpa.dashboard.longtable")
+LOG = logging.getLogger(__name__)
 
 LONG_COLUMNS = ["Ticker", "AsOf", "Category", "Period", "Metric", "Value"]
 

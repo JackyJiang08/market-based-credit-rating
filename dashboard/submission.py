@@ -33,7 +33,7 @@ from data_cleaning.company import CompanyData
 
 from . import records
 
-LOG = logging.getLogger("pfpa.submission")
+LOG = logging.getLogger(__name__)
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "outputs")

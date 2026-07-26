@@ -7,14 +7,14 @@ value ``A_t`` once the asset volatility ``sigma_A`` is fixed. We recover
 
   E-step:  given ``sigma_A``, invert ``E_t = g(A_t)`` for ``A_t`` on every
            trading day. ``g`` is the Black-Scholes call value, strictly
-           increasing in ``A`` -> solved by bisection (deck slides 63-64).
+           increasing in ``A`` -> solved by bisection.
   M-step:  recompute ``sigma_A`` from the asset log-returns and estimate the
-           real-world asset drift ``eta_A`` simultaneously (deck slide 56).
+           real-world asset drift ``eta_A`` simultaneously.
 
 Iterate until ``sigma_A`` converges.
 
 References: asset GBM ``A_t = A_0 exp((eta_A - sigma_A^2/2) t + sigma_A W_t)``
-(paper Eq. 10); DD/EDF (paper Eq. 14); deck "KMV Rating Method" slides 52-68.
+(Eq. 10); DD/EDF (Eq. 14) -- the KMV EM estimation route.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from scipy.stats import norm
 
 from . import config
 
-LOG = logging.getLogger("pfpa.em")
+LOG = logging.getLogger(__name__)
 
 
 class EMError(RuntimeError):

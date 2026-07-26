@@ -16,7 +16,7 @@ import pandas as pd
 from . import config
 from .company import CompanyData
 
-LOG = logging.getLogger("pfpa.persistence")
+LOG = logging.getLogger(__name__)
 
 
 def _write(df: pd.DataFrame, directory: str, name: str, index: bool = True) -> None:

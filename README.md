@@ -3,18 +3,18 @@
 [![tests](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/tests.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/tests.yml)
 [![DEVLOG gate](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 
 A market-based credit-rating pipeline for public companies. It downloads equity
 and rate data, estimates a **KMV/Merton** structural model by **EM** (recovering
 asset value, asset volatility, and asset return), and produces **Time-Consistent
 (TiC)** credit measures — RiskScore, Distance-to-Default, a Point-in-Time PD, a
 no-regulatory-arbitrage Through-The-Cycle PD, and an **S&P-equivalent** letter
-rating. A PFPA intern project.
+rating.
 
-Reference PDFs and the `TiC_TTC_conversion.xlsx` workbook live in a git-ignored
-`local/` directory and are not committed; code comments cite the paper by
-equation number.
+The methodology reference materials and the `TiC_TTC_conversion.xlsx` workbook
+are licensed material, kept out of the repository (a git-ignored `local/` tree);
+code docstrings cite the methodology by equation number.
 
 ## Results at a glance
 
@@ -38,14 +38,14 @@ Four layers, each owning one responsibility and passing pandas frames forward.
 See [`docs/DEPENDENCY_MAPS.md`](docs/DEPENDENCY_MAPS.md) and
 [`docs/GAP_ANALYSIS.md`](docs/GAP_ANALYSIS.md).
 
-## Method (formula -> code -> paper equation)
+## Method (formula → code → reference)
 
-| Step | Where | Paper ref |
+| Step | Where | Reference |
 | --- | --- | --- |
-| Equity `E = shares x price` (dividends added back) | `data_cleaning/alignment.py` | deck slide 61 |
-| Default-point debt `D = 100% ST + 50% LT` | `data_cleaning/transforms.py` | deck slide 55 |
-| As-of alignment of price / statement / 1Y rate (no look-ahead) | `data_cleaning/alignment.py` | deck slide 62 |
-| **EM**: invert `E = g(A)` by bisection; recover `sigma_A`, `A`, `eta_A` | `signal_construction/em.py` | Eq. (10); deck 52-68 |
+| Equity `E = shares x price` (dividends added back) | `data_cleaning/alignment.py` | total-return convention: a dividend is firm value paid out, not destroyed |
+| Default-point debt `D = 100% ST + 50% LT` | `data_cleaning/transforms.py` | the standard KMV default-point convention |
+| As-of alignment of price / statement / 1Y rate (no look-ahead) | `data_cleaning/alignment.py` | point-in-time discipline ([TIMING_PROTOCOL](docs/TIMING_PROTOCOL.md)) |
+| **EM**: invert `E = g(A)` by bisection; recover `sigma_A`, `A`, `eta_A` | `signal_construction/em.py` | Eq. (10) |
 | `mu`, `CCM` (first-passage factors) | `signal_construction/measures.py` | Eq. (11) |
 | `TiC = sigma_A^2/ln^2(A/D)`, `RiskScore = 100*TiC` | `measures.py` | Eq. (12), (5) |
 | `DD`, `EDF = Phi(-DD)` | `measures.py` | Eq. (14) |
@@ -53,8 +53,8 @@ See [`docs/DEPENDENCY_MAPS.md`](docs/DEPENDENCY_MAPS.md) and
 | No-arbitrage `alpha` match, `CCM*`; TTC PD; S&P letter | `signal_construction/conversion.py` | Prop. 5.2, Sec. 5.3 |
 | `Outlook = PIT PD - TTC PD` | `conversion.py` | Prop. 5.3 |
 
-Verified against the paper: PIT PD reproduces Tables 13-14; `alpha_FH(1.5)=0.91906`,
-`CCM*=1.35373`.
+Verified against the methodology's published anchors: PIT PD reproduces
+Tables 13–14; `alpha_FH(1.5)=0.91906`, `CCM*=1.35373`.
 
 ## Data sources
 
@@ -63,8 +63,7 @@ Verified against the paper: PIT PD reproduces Tables 13-14; `alpha_FH(1.5)=0.919
 | Prices, shares, dividends, balance sheets | Yahoo Finance (`yfinance`) |
 | Risk-free rate: **1-Year Treasury** (`DGS1`) | FRED (Federal Reserve H.15) |
 
-The 1-year tenor matches the 1-year credit horizon used throughout (deck:
-"Risk-free interest rate (1 year)").
+The 1-year tenor matches the 1-year credit horizon used throughout the model.
 
 ## Quickstart
 
@@ -128,7 +127,7 @@ pip install -r requirements.txt && pytest
 
 That line is the entire fresh-clone story — no other setup. The offline suite
 covers the no-look-ahead canary, EM recovery of a known σ_A, measures vs the
-paper's tables, and conversion checks. Grid/lookup tests that need the
+reference tables, and conversion checks. Grid/lookup tests that need the
 proprietary workbook skip automatically when `local/` is absent, so a fresh
 clone is green. CI runs the same suite with coverage on every push.
 
@@ -176,7 +175,7 @@ misordered — COST ranks 1st in 100% of replicates, ORCL 10th in 99.7%.
    5–9 and swap freely (INTU holds its exact point rank in only 35% of replicates). The
    stability is at the extremes, where the companies are actually far apart.
 
-### Why this is the paper's own thesis, demonstrated numerically
+### Why this is the methodology's own thesis, demonstrated numerically
 
 This is not a defect we discovered; it is the result the framework predicts. Prop. 4.4.2
 establishes that `TiC = σ_A²/ln²(A₀/D)` is invariant under the Girsanov change of measure
@@ -315,8 +314,8 @@ its known limits: [`docs/UNCERTAINTY.md`](docs/UNCERTAINTY.md).
 - **Market-based PIT PD is liquidity-sensitive.** For large, liquid,
   investment-grade names PIT PD is legitimately ~0; compare firms by **DD** and
   **RiskScore** rather than PIT PD. Typical asset volatilities land in ~10-60%.
-- **η_A is noisy** over a 1-year window (the deck notes it "makes both
-  unstable"); this shows up in µ/CCM/PIT but *not* in the η-independent RiskScore.
+- **η_A is noisy** over a short estimation window — the classic drift-estimation
+  problem; this shows up in µ/CCM/PIT but *not* in the η-independent RiskScore.
 - **Off-grid conversions** (CCM or µ outside the lookup grid) are edge-clamped
   and flagged in the `validation` sheet.
 - **Yahoo free tier** returns ~5-7 quarters of statements; banks (e.g. PNC)
@@ -324,7 +323,21 @@ its known limits: [`docs/UNCERTAINTY.md`](docs/UNCERTAINTY.md).
 - The `Asset` sheet `R` column is the realized drift `η_A - σ_A^2/2` (the DD
   term); pending confirmation of the intended definition.
 
+## Methodology & acknowledgements
+
+This pipeline is an **independent implementation of the Time-Consistent (TiC)
+credit-rating methodology (Y. Yang)**, combined with standard KMV/Merton
+structural-model machinery. The methodology is not ours: equation and
+proposition numbers are retained in the docstrings of every module that
+implements a TiC formula (`signal_construction/em.py`, `measures.py`,
+`conversion.py`) — that is the attribution mechanism, and it stays. The
+reference materials and the conversion workbook are licensed third-party
+material and are not part of this repository; the implementation must not be
+represented as original methodology.
+
 ## License
 
-Project code: [MIT](LICENSE). Reference PDFs and the conversion workbook are
-proprietary PFPA material and are kept out of the repository.
+Project code: [Apache-2.0](LICENSE) (see also [NOTICE](NOTICE)). The
+methodology reference materials and the conversion workbook are licensed
+third-party material, **not** covered by the project license, and are kept out
+of the repository.

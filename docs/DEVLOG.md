@@ -35,6 +35,33 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Repositioned referencing; relicensed Apache-2.0
+
+- **Scope:** README, code comments/loggers, LICENSE/NOTICE, pyproject,
+  CHANGELOG, docs/README.md. No behavior change.
+- **Repositioning (attribution preserved, consolidated):** methodology
+  attribution now lives in ONE README section ("Methodology &
+  acknowledgements") stating this is an independent implementation of the
+  Time-Consistent (TiC) credit-rating methodology (Y. Yang), with equation and
+  proposition numbers retained in code docstrings as the attribution
+  mechanism. Slide-number citations are replaced by the conventions they named
+  (e.g. "the standard KMV default-point convention"); the method table column
+  is now "Reference"; the intern-project framing is removed; the
+  proprietary-materials note is reworded neutrally ("licensed material, kept
+  out of the repository"). Loggers renamed from `pfpa.*` to
+  `logging.getLogger(__name__)`. **Attribution was repositioned, not
+  weakened** — the acknowledgement also now ships in NOTICE.
+- **Relicense MIT -> Apache-2.0** while sole-authored (no external
+  contributions to re-license): canonical LICENSE text, new NOTICE carrying
+  the methodology acknowledgement, README badge and license section updated,
+  CHANGELOG entry. The reference-materials clause stays: licensed third-party
+  material, not covered by the project license.
+- **Breaking changes:** log record names change from `pfpa.*` to module paths
+  (nothing parses them).
+- **Validation:** `python3 -m pytest -q` -> 304 passed, run before this push;
+  `grep -rn "pfpa\|deck" --include="*.py"` and README grep both clean.
+- **Follow-ups:** universe expansion (Parts 1-6 of the current work order).
+
 ### 2026-07-26 - Presentation pass 2: figures and the 90-second README
 
 - **Scope:** `docs/figures/` (two scripts, four SVGs, committed data CSVs),

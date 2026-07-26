@@ -30,7 +30,7 @@ def test_em_recovers_true_sigma():
     res = em.estimate(E, D, R)
 
     assert res.converged
-    assert res.n_iter <= 20                       # deck expects ~10
+    assert res.n_iter <= 20                       # typically converges in ~10
     assert abs(res.sigma_A - 0.25) < 0.03         # recovered within sampling noise
     # Structural invariants.
     assert res.asset_last > res.debt_last

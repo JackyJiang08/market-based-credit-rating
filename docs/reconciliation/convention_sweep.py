@@ -13,7 +13,7 @@ can be compared directly.
 Sweeps
 ------
 1. **Long-term debt weight** over {0, 0.25, 0.5, 0.75, 1.0}. Zero treats only
-   short-term debt as the barrier; one treats all debt as due. The deck's 0.5 is
+   short-term debt as the barrier; one treats all debt as due. The standard 0.5 is
    the midpoint of a range nobody has justified from data.
 2. **Statement vintage**: the latest statement the valuation date may see, versus
    the one before it. Not a look-ahead question -- both are legitimately

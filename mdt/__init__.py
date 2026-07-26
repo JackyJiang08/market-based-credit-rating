@@ -1,4 +1,4 @@
-"""One-click command-line interface for the PFPA credit-rating pipeline.
+"""One-click command-line interface for the market-based credit-rating pipeline.
 
     python -m mdt rate AAPL                    # one company -> table + report
     python -m mdt batch config/companies.yaml  # the batch run

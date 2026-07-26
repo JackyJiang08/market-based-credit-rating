@@ -50,7 +50,7 @@ from scipy.optimize import brentq
 from scipy.special import log_ndtr, logsumexp
 from scipy.stats import norm
 
-LOG = logging.getLogger("pfpa.conversion")
+LOG = logging.getLogger(__name__)
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_XLSX = os.path.join(_PROJECT_ROOT, "local", "TiC_TTC_conversion.xlsx")

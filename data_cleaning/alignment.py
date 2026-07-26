@@ -20,7 +20,7 @@ import pandas as pd
 
 from . import config, transforms
 
-LOG = logging.getLogger("pfpa.alignment")
+LOG = logging.getLogger(__name__)
 
 
 def total_return_close(close: pd.Series, dividends: pd.Series) -> pd.Series:
@@ -98,8 +98,8 @@ def build_panel(prices: pd.DataFrame,
         Close, AdjClose          : raw and dividend/split-adjusted close
         Dividends                : per-share cash dividend on ex-date (0 otherwise)
         DivAddBackClose          : Close + cumulative dividends added back
-                                   (deck slide 61: "add back dividends to stock
-                                   prices" so equity reflects total return)
+                                   (total-return convention: a dividend is firm
+                                   value paid out, not value destroyed)
         Shares                   : constant reference share count
         MarketCap_E              : equity value E = Shares x DivAddBackClose
         RawMarketCap             : Shares x Close (actual market cap, reference)
@@ -126,7 +126,7 @@ def build_panel(prices: pd.DataFrame,
     else:
         panel["AdjClose"] = np.nan
 
-    # Dividend add-back (deck slide 61): the equity series must be a total-return
+    # Dividend add-back (total-return convention): the equity series must be a total-return
     # series, with no artificial drop on an ex-dividend date.
     #
     # A missing dividend is NOT zero. `NaN` means "we do not know what was paid";
@@ -140,7 +140,7 @@ def build_panel(prices: pd.DataFrame,
     panel["DivAddBackClose"] = total_return_close(panel["Close"], panel["Dividends"])
 
     # Equity value E using the constant one-day share count. E feeds the KMV/EM
-    # option inversion, so it uses the dividend-added-back price per the deck.
+    # option inversion, so it uses the dividend-added-back (total-return) price.
     panel["Shares"] = reference_shares
     if reference_shares:
         panel["MarketCap_E"] = panel["Shares"] * panel["DivAddBackClose"]

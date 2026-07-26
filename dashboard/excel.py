@@ -23,7 +23,7 @@ from signal_construction import config as signal_config
 
 from . import config, records
 
-LOG = logging.getLogger("pfpa.dashboard.excel")
+LOG = logging.getLogger(__name__)
 
 HEADER_FILL = PatternFill("solid", fgColor="1F4E78")
 HEADER_FONT = Font(bold=True, color="FFFFFF")

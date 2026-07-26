@@ -25,7 +25,7 @@ from . import alignment, persistence, sectors, transforms
 from . import config as clean_config
 from .company import CompanyData
 
-LOG = logging.getLogger("pfpa.workflow")
+LOG = logging.getLogger(__name__)
 
 
 @dataclass
@@ -352,7 +352,7 @@ def _fmt(x: Optional[float]) -> str:
 
 def _log_vol_comparison(companies: list[CompanyData]) -> None:
     """Log asset volatility by sector -- a cross-check that riskier/tech names
-    carry higher sigma_A than defensive/financial names (deck intuition)."""
+    carry higher sigma_A than defensive/financial names."""
     rows = [(c.ticker, c.sector or "?", c.sigma_A)
             for c in companies if c.sigma_A is not None]
     if not rows:

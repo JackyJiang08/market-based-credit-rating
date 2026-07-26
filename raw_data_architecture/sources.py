@@ -21,7 +21,7 @@ from . import config
 from .errors import (DataSourceError, RateLimitedError,
                      SourceUnavailableError, classify)
 
-LOG = logging.getLogger("pfpa.raw_data")
+LOG = logging.getLogger(__name__)
 
 # Waiting can only help these two: the source refused us, or the transport
 # failed. A delisted symbol and a successful-but-empty answer are terminal.

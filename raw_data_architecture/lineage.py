@@ -17,7 +17,7 @@ try:
 except Exception as _exc:  # pragma: no cover - probe must never be fatal
     # An unknown package version in a provenance record is a gap in the record,
     # so say so rather than writing "?" and moving on.
-    logging.getLogger("pfpa.lineage").warning(
+    logging.getLogger(__name__).warning(
         "yfinance version could not be determined (%s); run provenance will "
         "record it as unknown", _exc)
     _YF_VERSION = "unknown"
