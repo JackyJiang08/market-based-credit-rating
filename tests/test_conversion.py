@@ -27,6 +27,37 @@ def test_no_arb_ccm_star_matches_paper():
     assert conversion.no_arb_ccm_star(1.5) == pytest.approx(1.35373, abs=1e-4)
 
 
+# --- Outlook direction (Prop. 5.3, Eq. 28) ----------------------------------
+# Eq. (28) reads `Outlook = PD_FH - S&P TTC`, i.e. PIT - TTC. The prose above it
+# in the paper reads in the opposite order and has already prompted one proposal
+# to invert this. These tests exist to make that inversion fail loudly.
+def test_outlook_is_pit_minus_ttc_not_the_reverse():
+    assert conversion.outlook(0.30, 0.10) == pytest.approx(0.20)
+    assert conversion.outlook(0.10, 0.30) == pytest.approx(-0.20)
+    # Asymmetric inputs: an inverted implementation returns the negation, so a
+    # symmetric pair would pass either way. This pair cannot.
+    assert conversion.outlook(0.75, 0.25) == pytest.approx(0.50)
+
+
+def test_outlook_sign_matches_the_papers_trend_reading():
+    """`Outlook > 0` must mean PIT above TTC (elevated short-term risk)."""
+    # Prop. 5.3: "If Outlook>0, then the future trend is positive" -- short-term
+    # risk exceeds through-the-cycle, so reversion to TTC is an improvement.
+    assert conversion.outlook(0.20, 0.05) > 0      # PIT > TTC -> positive trend
+    assert conversion.outlook(0.05, 0.20) < 0      # PIT < TTC -> negative trend
+    assert conversion.outlook(0.10, 0.10) == 0.0   # neutral
+
+
+def test_outlook_reproduces_the_delivered_asset_sheet_value():
+    """The delivered sheet shows -0.0002 at PIT=0, TTC=0.0002 (the 2bp floor).
+
+    That value is correct per Eq. (28). It is negative only because the TTC grid
+    floors at 2bp while PIT underflows to 0 -- a floor artifact, not a signal.
+    See the `rating_basis` / floor-determined reporting for the interpretation.
+    """
+    assert conversion.outlook(0.0, 0.0002) == pytest.approx(-0.0002)
+
+
 # --- Grid reproduces the paper's S&P TTC (Tables 13-14) ---------------------
 @needs_tables
 def test_ttc_grid_reproduces_paper_sp_ttc():
