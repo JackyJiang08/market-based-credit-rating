@@ -45,6 +45,32 @@ STATEMENT_KEYS = ("q_income", "q_balance", "q_cashflow",
                   "a_income", "a_balance", "a_cashflow")
 
 
+CANONICAL_DATETIME_UNIT = "ns"
+
+
+def _normalize_datetimes(df: pd.DataFrame) -> pd.DataFrame:
+    """Coerce every datetime index/column to the canonical unit (ns).
+
+    The one dtype chokepoint for the cache boundary. Parquet round-trips come
+    back as datetime64[us] on pandas >= 2/3 while fresh vendor downloads are
+    datetime64[ns]; pandas 3 refuses to merge the two (MergeError in the
+    as-of join). Everything leaving this module is therefore [ns], tz
+    preserved, regardless of pandas version or storage format.
+    """
+    if isinstance(df.index, pd.DatetimeIndex) and hasattr(df.index, "as_unit"):
+        df.index = df.index.as_unit(CANONICAL_DATETIME_UNIT)
+    for col in df.columns:
+        s = df[col]
+        if pd.api.types.is_datetime64_any_dtype(s) and hasattr(s, "dt"):
+            try:
+                df[col] = s.dt.as_unit(CANONICAL_DATETIME_UNIT)
+            except AttributeError:  # pandas 1.x: ns is the only unit
+                pass
+    if isinstance(df.columns, pd.DatetimeIndex) and hasattr(df.columns, "as_unit"):
+        df.columns = df.columns.as_unit(CANONICAL_DATETIME_UNIT)
+    return df
+
+
 def cache_dir() -> str:
     return os.environ.get("MDT_CACHE_DIR", os.path.join(_ROOT, "data", "cache"))
 
@@ -110,7 +136,7 @@ def load_prices(ticker: str) -> Optional[pd.DataFrame]:
     if not enabled() or refresh() or not os.path.exists(p):
         return None
     _warn_if_stale(_tdir(ticker), f"{ticker} prices")
-    return pd.read_parquet(p)
+    return _normalize_datetimes(pd.read_parquet(p))
 
 
 def save_prices(ticker: str, prices: pd.DataFrame) -> None:
@@ -135,7 +161,7 @@ def load_statements(ticker: str) -> Optional[dict[str, pd.DataFrame]]:
             # Statement columns are period-end dates, stored as ISO strings
             # (parquet requires string column names).
             df.columns = pd.to_datetime(df.columns)
-            out[key] = df
+            out[key] = _normalize_datetimes(df)
             found = True
         else:
             out[key] = pd.DataFrame()
@@ -169,7 +195,7 @@ def load_rates() -> Optional[pd.DataFrame]:
     if not enabled() or refresh() or not os.path.exists(p):
         return None
     _warn_if_stale(os.path.dirname(p), "FRED rates")
-    return pd.read_parquet(p)
+    return _normalize_datetimes(pd.read_parquet(p))
 
 
 def save_rates(rates: pd.DataFrame) -> None:

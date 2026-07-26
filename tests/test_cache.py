@@ -9,6 +9,16 @@ import pytest
 from raw_data_architecture import cache
 
 
+def _canonical(df):
+    """The cache's own normalizer, applied to an expected frame.
+
+    On pandas >= 3 freshly constructed frames carry datetime64[us]; the cache
+    contract is that everything it RETURNS is [ns]. Expected frames must be
+    stated in the contract's unit before comparison.
+    """
+    return cache._normalize_datetimes(df.copy())
+
+
 @pytest.fixture()
 def tmp_cache(tmp_path, monkeypatch):
     monkeypatch.setenv("MDT_CACHE_DIR", str(tmp_path))
@@ -35,7 +45,7 @@ def test_prices_round_trip_preserves_tz_aware_index(tmp_cache):
     assert back.index.tz is not None
     # check_freq=False: parquet does not persist the index freq attribute,
     # which real vendor data never carries anyway.
-    pd.testing.assert_frame_equal(back, prices, check_freq=False)
+    pd.testing.assert_frame_equal(back, _canonical(prices), check_freq=False)
 
 
 def test_statements_round_trip_restores_timestamp_columns(tmp_cache):
@@ -45,16 +55,48 @@ def test_statements_round_trip_restores_timestamp_columns(tmp_cache):
     cache.save_statements("TST", {"q_balance": bal})
     back = cache.load_statements("TST")
     assert all(isinstance(c, pd.Timestamp) for c in back["q_balance"].columns)
-    pd.testing.assert_frame_equal(back["q_balance"], bal)
+    pd.testing.assert_frame_equal(back["q_balance"], _canonical(bal))
     # Absent statements come back as empty frames, present ones as data.
     assert back["a_income"].empty
+
+
+def test_round_trip_is_dtype_identical(tmp_cache):
+    """The cache boundary is the one dtype chokepoint (pandas 3 regression).
+
+    Parquet round-trips come back datetime64[us] on pandas >= 2/3 while fresh
+    downloads are [ns]; pandas 3 raises MergeError when the as-of join mixes
+    the two. Everything leaving the cache must be [ns], tz preserved.
+    """
+    idx = pd.date_range("2026-01-02", periods=4, freq="B",
+                        tz="America/New_York")
+    prices = pd.DataFrame({"Close": [1.0, 2.0, 3.0, 4.0]}, index=idx)
+    cache.save_prices("TST", prices)
+    once = cache.load_prices("TST")
+    assert "[ns" in str(once.index.dtype), str(once.index.dtype)
+    # A second round-trip through the cache must be dtype-identical to the
+    # first: the canonical unit is a fixed point, whatever unit went in.
+    cache.save_prices("TST2", once)
+    twice = cache.load_prices("TST2")
+    assert str(twice.index.dtype) == str(once.index.dtype)
+    assert [str(t) for t in twice.dtypes] == [str(t) for t in once.dtypes]
+
+    bal = pd.DataFrame({pd.Timestamp("2026-03-31"): {"Total Debt": 1.0}})
+    cache.save_statements("TST", {"q_balance": bal})
+    cols = cache.load_statements("TST")["q_balance"].columns
+    assert "[ns" in str(cols.dtype), str(cols.dtype)
+
+    rates = pd.DataFrame({"Date": pd.date_range("2026-01-01", periods=3),
+                          "DGS1": [0.04, 0.041, 0.042]})
+    cache.save_rates(rates)
+    back_rates = cache.load_rates()
+    assert "[ns" in str(back_rates["Date"].dtype), str(back_rates["Date"].dtype)
 
 
 def test_rates_round_trip(tmp_cache):
     rates = pd.DataFrame({"Date": pd.date_range("2026-01-01", periods=3),
                           "DGS1": [0.041, 0.0415, 0.042]})
     cache.save_rates(rates)
-    pd.testing.assert_frame_equal(cache.load_rates(), rates)
+    pd.testing.assert_frame_equal(cache.load_rates(), _canonical(rates))
 
 
 def test_cache_off_bypasses_everything(tmp_cache, monkeypatch):
