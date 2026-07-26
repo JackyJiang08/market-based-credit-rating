@@ -35,6 +35,40 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Presentation pass 1: IP spot-check, CLI rating table, warning fix
+
+- **Scope:** `mdt/__main__.py`, `dashboard/submission.py` (one line),
+  `dashboard/records.py` (rename to public), this DEVLOG. No model code.
+- **IP SPOT-CHECK of the committed deliverables (result: CLEAN).** Both
+  workbooks under `docs/deliverables/` were checked sheet by sheet against the
+  proprietary material in `local/`: no sheet is grid-shaped (largest is 36x2;
+  the grids are 154x93 and the S&P threshold table 27x2), and **zero numeric
+  values in any sheet of either workbook match any value in
+  `local/tables/sp_thresholds.csv` or the TTC grid** (exact comparison at
+  1e-10 rounding, 0/1 excluded). Contents are exclusively our own computed
+  company-level outputs, conventions prose, and provenance. No regeneration
+  needed; nothing to revert.
+- **CLI:** `python -m mdt rate <TICKER>` now prints a sectioned, aligned table
+  (INPUTS / MODEL / CREDIT MEASURES / RATING / FLAGS) that follows the
+  presentation rule -- RiskScore leads the credit block, the letter appears
+  only with its interval or the reason there is none -- and surfaces every
+  flag (weak identification with t, drift regime, applicability with reason
+  code, off-grid clamp, floor determination, contradictory debt source). All
+  fields project from `dashboard.records` (`rating_with_interval` made public
+  for this), so the CLI cannot drift from the workbook. The per-ticker report
+  filename now carries a UTC stamp so the never-overwrite guard does not trip
+  on a second run.
+- **Warnings:** the openpyxl `StyleProxy.copy(**kwargs)` deprecation in
+  `submission.py` is fixed by constructing a fresh `Alignment`; the suite now
+  passes with that warning escalated to error
+  (`-W "error:Call to deprecated function copy:DeprecationWarning"`).
+- **Breaking changes:** None (CLI output format changes; no consumer parses it).
+- **Validation:** `python3 -m pytest -q` -> 304 passed, run before this push;
+  0 occurrences of the deprecated-copy warning (was ~360). Live
+  `python3 -m mdt rate COST` run to verify the new table renders.
+- **Follow-ups:** presentation pass 2 -- CI coverage, figures, README
+  restructure.
+
 ### 2026-07-26 - Deliverable v1 frozen
 
 - **Scope:** Layer 4 (submission writer, records), Layer 2 (provenance columns

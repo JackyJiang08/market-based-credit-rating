@@ -352,7 +352,7 @@ RATINGS_SCHEMA: tuple[str, ...] = (
 )
 
 
-def _rating_with_interval(r: dict[str, Any]) -> str:
+def rating_with_interval(r: dict[str, Any]) -> str:
     """The letter, never bare: interval attached, or the reason there is none."""
     if r["sp_rating"]:
         iv = ""
@@ -385,7 +385,7 @@ def ratings_frame(companies: list[CompanyData]) -> pd.DataFrame:
             "Symbol": r["symbol"],
             "Company": r["company"],
             "TiC Risk Score": r["risk_score"],
-            "Rating (with interval)": _rating_with_interval(r),
+            "Rating (with interval)": rating_with_interval(r),
             "Rating Determination": r["rating_determination"],
             "Drift t": r["drift_t_stat"],
             "Weakly Identified": r["weakly_identified"],
