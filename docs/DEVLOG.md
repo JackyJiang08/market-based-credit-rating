@@ -35,6 +35,47 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Bootstrap uncertainty propagation; WEAKLY_IDENTIFIED
+
+- **Scope:** Layer 3 (new `bootstrap` module, weak-identification test) and
+  Layer 4 (six new Asset columns, three new validation columns). No formula
+  changed; every point estimate is identical.
+- **Summary:**
+  - Added `signal_construction/bootstrap.py`: a moving-block bootstrap over the
+    EM-recovered **asset** returns, block length `n^(1/3)`, propagated through
+    measures and conversion to give distributions of sigma_A, eta, drift, mu,
+    CCM, RiskScore, PIT PD, TTC PD and the implied notch. `A_0` and `D` are
+    held fixed because they are observations, not estimates; the intervals are
+    therefore parameter-estimation intervals and a lower bound on total
+    uncertainty, which the module docstring states.
+  - Added `measures.is_weakly_identified` (`|t| < 2`). It **annotates** a
+    rating and never suppresses one. `drift_regime` is unchanged: `DEFECTIVE`
+    still means only the Prop. 4.4.1 violation `drift <= 0`.
+  - Asset sheet gained `Drift SE`, `Drift t`, `Weakly Identified` and the
+    three `Rating Interval` columns; validation gained the bootstrap defective
+    share and the sigma 5/95 band.
+  - ADR 0002 updated: a fixed `k*SE` threshold was **considered and rejected**,
+    with the reasoning recorded.
+- **Breaking changes:** the Asset sheet is now 32 columns (23 canonical + 9
+  additions) and validation 17. Golden schema tests updated. Batch runtime is
+  roughly 4s/company higher from 500 bootstrap replicates; `RunConfig` gained
+  `run_bootstrap` to switch it off.
+- **Validation:** `python -m pytest -q` -> 260 passed, run before this push.
+  Bootstrap calibration checked: replicate medians track the point estimates.
+  Live batch re-run and captured to
+  `docs/reconciliation/history/10_after_partA_bootstrap.csv`.
+- **Findings of record:**
+  - **7 of 10 companies are WEAKLY_IDENTIFIED.** Only DELL (2.01), PNC (2.07)
+    and WMT (2.01) clear |t| = 2, and all three within 0.1 of it.
+  - **ORCL's BB is not supportable as a point rating.** The drift goes negative
+    in 40.6% of replicates, so the company is unrateable in nearly half of
+    them; where it is rateable the interval spans BBB..BB, four notches.
+  - **No model-determined name has a tight interval.** DELL has the strongest
+    t and the widest interval (8 notches). T spans 5, PNC 4.
+- **Follow-ups:** the README still presents ORCL's BB as a model result and
+  needs revising; Part C (workbook README sheet) and Part D (#17, #18, #20)
+  are not done.
+
 ### 2026-07-26 - Make the push gate enforceable
 
 - **Scope:** repository tooling only. No application code, no model output.

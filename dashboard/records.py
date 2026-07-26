@@ -43,8 +43,15 @@ CANONICAL_ASSET_COLUMNS: tuple[str, ...] = (
 )
 
 # Appended to the canonical set. See the module docstring.
+# Deliberate additions beyond the reference workbook's 23 columns. Kept as a
+# separate block, after the canonical set, so the reference prefix stays
+# byte-comparable and the deviation is explicit. Documented on the workbook's
+# README sheet.
 EXTENDED_ASSET_COLUMNS: tuple[str, ...] = (
-    "lambda", "Rating Basis", "Rating Determination")
+    "lambda", "Rating Basis", "Rating Determination",
+    "Drift SE", "Drift t", "Weakly Identified",
+    "Rating Interval Low", "Rating Interval High", "Rating Interval Notches",
+)
 
 ASSET_SCHEMA: tuple[str, ...] = CANONICAL_ASSET_COLUMNS + EXTENDED_ASSET_COLUMNS
 
@@ -53,6 +60,7 @@ VALIDATION_SCHEMA: tuple[str, ...] = (
     "Symbol", "Data Status", "EM converged", "EM iters", "sigma_A",
     "Drift regime", "Drift SE", "Drift span (y)", "Rating basis",
     "TTC at floor", "Off-grid", "Rating determination", "S&P RiskScore",
+    "Bootstrap defective %", "sigma 5%", "sigma 95%",
     "Statement available at", "Availability method", "Warnings",
 )
 
@@ -148,6 +156,14 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
         "outlook": c.outlook,
         "rating_basis": c.rating_basis,
         "rating_determination": c.rating_determination,
+        "drift_t_stat": c.drift_t_stat,
+        "weakly_identified": c.weakly_identified,
+        "boot_sigma_lo": c.boot_sigma_lo,
+        "boot_sigma_hi": c.boot_sigma_hi,
+        "boot_defective_fraction": c.boot_defective_fraction,
+        "rating_interval_low": c.rating_interval_low,
+        "rating_interval_high": c.rating_interval_high,
+        "rating_interval_notches": c.rating_interval_notches,
         "sp_risk_score": c.sp_risk_score,
         "ttc_at_floor": c.ttc_at_floor,
         "rating_off_grid": c.rating_off_grid,
@@ -192,6 +208,12 @@ def asset_row(c: CompanyData) -> dict[str, Any]:
         "lambda": r["lam"],
         "Rating Basis": r["rating_basis"],
         "Rating Determination": r["rating_determination"],
+        "Drift SE": r["drift_se"],
+        "Drift t": r["drift_t_stat"],
+        "Weakly Identified": r["weakly_identified"],
+        "Rating Interval Low": r["rating_interval_low"],
+        "Rating Interval High": r["rating_interval_high"],
+        "Rating Interval Notches": r["rating_interval_notches"],
     }
     assert tuple(row) == ASSET_SCHEMA, "asset_row drifted from ASSET_SCHEMA"
     return row
@@ -219,6 +241,16 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
     if r["rating_determination"] == "PINNED_AT_SCALE_TOP":
         flags.append("RiskScore below the best published grade -> rating is "
                      "scale-determined, not model-determined")
+    if r["weakly_identified"] and r["drift_regime"] == "VALID":
+        t = r["drift_t_stat"]
+        flags.append(
+            f"WEAKLY_IDENTIFIED: drift t={t:.2f}, |t| < 2 -- mu and CCM divide "
+            "by a drift indistinguishable from zero; read the rating interval, "
+            "not the point rating")
+    if (r["rating_interval_notches"] or 0) > 3:
+        flags.append(
+            f"rating interval spans {r['rating_interval_notches']} notches "
+            f"({r['rating_interval_low']}..{r['rating_interval_high']})")
     flags.extend(r["em_warnings"] or [])
 
     row = {
@@ -235,6 +267,10 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
         "Off-grid": bool(r["rating_off_grid"]),
         "Rating determination": r["rating_determination"],
         "S&P RiskScore": r["sp_risk_score"],
+        "Bootstrap defective %": (100.0 * r["boot_defective_fraction"]
+                                  if r["boot_defective_fraction"] is not None else None),
+        "sigma 5%": r["boot_sigma_lo"],
+        "sigma 95%": r["boot_sigma_hi"],
         "Statement available at": r["statement_available_at"],
         "Availability method": r["availability_method"],
         "Warnings": "; ".join(flags) if flags else "OK",

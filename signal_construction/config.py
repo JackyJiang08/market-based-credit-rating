@@ -33,3 +33,17 @@ MIN_OBSERVATIONS = 30         # fewest clean daily rows EM will accept
 # Sanity-check bounds for annualized asset volatility.
 SIGMA_A_WARN_LOW = 0.10
 SIGMA_A_WARN_HIGH = 0.60
+
+
+# Uncertainty propagation (signal_construction/bootstrap.py).
+BOOTSTRAP_REPLICATES = 500    # per company in a batch run; analysis uses more
+BOOTSTRAP_SEED = 20260726     # fixed so a run is reproducible
+BOOTSTRAP_INTERVAL = (0.05, 0.95)
+
+# Weak identification. A drift whose |t| falls below this is not distinguishable
+# from zero at any conventional level, so mu and CCM -- which divide by it -- are
+# driven by noise. This ANNOTATES a rating; it never suppresses one. Suppression
+# is reserved for the genuine Prop. 4.4.1 violation (drift <= 0), because that is
+# an assumption failure rather than a precision problem.
+# See docs/adr/0002-defective-drift-interval-proposal.md.
+WEAK_IDENTIFICATION_T = 2.0

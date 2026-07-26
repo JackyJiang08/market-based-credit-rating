@@ -21,6 +21,8 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.special import log_ndtr, logsumexp
 
+from . import config
+
 
 class DriftRegime(enum.Enum):
     """Whether Prop. 4.4.1's precondition `eta - sigma_A^2/2 > 0` holds.
@@ -34,6 +36,22 @@ class DriftRegime(enum.Enum):
 
     VALID = "VALID"
     DEFECTIVE = "DEFECTIVE"
+
+
+def is_weakly_identified(drift: float, drift_se: float,
+                         threshold: float = None) -> bool:
+    """Is the drift statistically indistinguishable from zero?
+
+    `|t| = |drift| / SE` below the threshold means `mu = ln(A/D)/drift` and
+    `CCM` are dividing by a quantity the data cannot pin down. The rating is
+    still produced -- this annotates it. Contrast `drift_regime`, which
+    suppresses output for the Prop. 4.4.1 assumption failure.
+    """
+    if threshold is None:
+        threshold = config.WEAK_IDENTIFICATION_T
+    if not (math.isfinite(drift) and math.isfinite(drift_se)) or drift_se <= 0:
+        return True
+    return abs(drift / drift_se) < threshold
 
 
 def drift_regime(drift: float) -> DriftRegime:

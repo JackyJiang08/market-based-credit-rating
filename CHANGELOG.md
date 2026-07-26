@@ -123,3 +123,11 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   ORCL and T become DEFECTIVE (rated 8→6, model-determined 4→2); at `k = 1.645` COST, KO
   and AMZN also go (rated 8→3, model-determined still 2). ORCL's `t = 0.08` decides it.
   Recommends `k = 1`, configurable. **Not switched on.** The full bootstrap is not built.
+- **Part A/B** Added `signal_construction/bootstrap.py`: moving-block bootstrap over
+  EM-recovered asset returns, propagated through measures and conversion to give
+  distributions of σ_A, µ, CCM, RiskScore, PIT PD, TTC PD and the implied notch. Added
+  `WEAKLY_IDENTIFIED` (`|t| < 2`), which **annotates** a rating rather than suppressing
+  it — `DEFECTIVE` still means only the Prop. 4.4.1 violation `drift ≤ 0`. A fixed `k·SE`
+  threshold was considered and rejected (ADR 0002). The Asset sheet publishes `Drift SE`,
+  `Drift t`, `Weakly Identified` and the rating interval. **7 of 10 are weakly identified;
+  ORCL is unrateable in 40.6% of replicates and spans BBB..BB where it is rateable.**

@@ -25,12 +25,15 @@ GOLDEN_ASSET_SCHEMA = (
     "Interest Rate", "sigma", "A", "R", "eta", "CCM", "mu", "TiC Risk Score",
     "DD", "EDF", "PIT PD", "TTC PD", "SP Rating", "Outlook",
     "lambda", "Rating Basis", "Rating Determination",
+    "Drift SE", "Drift t", "Weakly Identified",
+    "Rating Interval Low", "Rating Interval High", "Rating Interval Notches",
 )
 
 GOLDEN_VALIDATION_SCHEMA = (
     "Symbol", "Data Status", "EM converged", "EM iters", "sigma_A",
     "Drift regime", "Drift SE", "Drift span (y)", "Rating basis",
     "TTC at floor", "Off-grid", "Rating determination", "S&P RiskScore",
+    "Bootstrap defective %", "sigma 5%", "sigma 95%",
     "Statement available at", "Availability method", "Warnings",
 )
 

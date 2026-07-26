@@ -34,6 +34,7 @@ class RunConfig:
     years: int = raw_config.DEFAULT_YEARS
     include_rates: bool = True
     run_credit_model: bool = True
+    run_bootstrap: bool = True
 
     @property
     def cutoff_date(self) -> datetime:
@@ -165,6 +166,9 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     data.availability_method = clean_config.AVAILABILITY_METHOD
 
     # --- EM asset-value estimation (Layer 3) ---
+    _em_asset_path = None
+    _em_debt_last = None
+    _conversion_tables = None
     if cfg.run_credit_model and not data.panel.empty:
         # Import the modelling layer only when used, so Layer 1/2 tooling and
         # CLI help do not require SciPy.
@@ -176,6 +180,8 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
         try:
             res = em.estimate(window["MarketCap_E"], window["DefaultPointDebt_D"],
                               window["RiskFree_R"])
+            _em_asset_path = res.asset_values.to_numpy()
+            _em_debt_last = res.debt_last
             data.sigma_A = res.sigma_A
             data.eta_A = res.eta_A
             data.asset_value = res.asset_last
@@ -195,6 +201,15 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             data.mu, data.ccm, data.tic, data.risk_score = m.mu, m.ccm, m.tic, m.risk_score
             data.lam, data.dd, data.edf, data.pit_pd = m.lam, m.dd, m.edf, m.pit_pd
             data.drift_regime = m.regime.value
+            data.drift_t_stat = (m.drift / res.drift_se
+                                 if res.drift_se else float("nan"))
+            data.weakly_identified = measures.is_weakly_identified(
+                m.drift, res.drift_se)
+            if data.weakly_identified and m.regime is measures.DriftRegime.VALID:
+                LOG.warning(
+                    "  WEAKLY_IDENTIFIED: drift t=%.2f (|t| < %.1f) -- mu and CCM "
+                    "divide by a drift indistinguishable from zero",
+                    data.drift_t_stat, sig_config.WEAK_IDENTIFICATION_T)
             if m.regime is measures.DriftRegime.DEFECTIVE:
                 LOG.warning(
                     "  drift regime DEFECTIVE: eta-sigma^2/2 = %+.4f <= 0 "
@@ -212,6 +227,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
 
         try:
             tables = conversion.load_tables()
+            _conversion_tables = tables
             # pit_pd is PD_A of Eq. (27); without it an off-grid point
             # cannot be converted analytically.
             ttc = conversion.ttc_pd(tables, data.ccm, data.mu,
@@ -243,6 +259,35 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
                             data.rating_basis, data.ccm, data.mu)
         except FileNotFoundError as exc:
             LOG.warning("  TTC/S&P skipped: %s", exc)
+
+    # --- uncertainty propagation (bootstrap) ---
+    if (cfg.run_bootstrap and data.sigma_A is not None
+            and data.asset_value is not None and _em_asset_path is not None):
+        from signal_construction import bootstrap as bs
+
+        try:
+            import numpy as _np
+
+            u = _np.diff(_np.log(_em_asset_path))
+            b = bs.run(ticker, u, data.asset_value, _em_debt_last,
+                       _conversion_tables,
+                       n_replicates=sig_config.BOOTSTRAP_REPLICATES,
+                       seed=sig_config.BOOTSTRAP_SEED)
+            lo_q, hi_q = sig_config.BOOTSTRAP_INTERVAL
+            data.boot_sigma_lo, data.boot_sigma_hi = (
+                b.quantiles("sigma_A", (lo_q, hi_q))[lo_q],
+                b.quantiles("sigma_A", (lo_q, hi_q))[hi_q])
+            data.boot_defective_fraction = b.defective_fraction
+            best, worst, width = b.notch_interval(lo_q, hi_q)
+            data.rating_interval_low = best
+            data.rating_interval_high = worst
+            data.rating_interval_notches = width
+            LOG.info("  bootstrap: %d reps, block=%d, defective in %.0f%% of "
+                     "replicates, rating interval %s..%s (%d notches)",
+                     b.n_replicates, b.block_length,
+                     100 * b.defective_fraction, best, worst, width)
+        except Exception as exc:  # noqa: BLE001 - bootstrap is diagnostic
+            LOG.warning("  bootstrap skipped: %s", exc)
 
     # Persist raw + cleaned datasets per company (git-ignored data trees).
     try:

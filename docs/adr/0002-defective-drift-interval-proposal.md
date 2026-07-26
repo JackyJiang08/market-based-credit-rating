@@ -146,3 +146,79 @@ Make `k` configurable and record it in the run manifest, so the threshold is a d
 choice rather than a constant.
 
 **Not switched on.** Awaiting a decision on the coverage trade-off.
+
+---
+
+# Decision — 2026-07-26: no fixed `k`; annotate instead of suppress
+
+**Status: accepted and implemented.** A fixed `k·SE` threshold on `DEFECTIVE` was
+considered and **rejected**. Recording why, because the addendum above recommended it.
+
+## Why a fixed `k` was rejected
+
+The impact table showed `k = 1` removing only ORCL, and `k = 1.645` additionally removing
+COST, KO and AMZN. Those three are `PINNED_AT_SCALE_TOP` or `PINNED_AT_FLOOR` — their
+letters are set by the edge of a scale, so losing them costs nothing informative. Stripping
+that away, **the parameter's entire practical effect is to decide the fate of ORCL**, the
+one result anybody cares about: our only sub-investment-grade rating.
+
+A parameter whose visible range only ever toggles a single company is not a threshold, it is
+a switch with a number written on it. Choosing `k` would have been choosing ORCL's fate
+while appearing to apply a general rule.
+
+It also conflates two different failures:
+
+- **`drift ≤ 0`** is an *assumption violation*. Prop. 4.4.1 requires the drift positive; when
+  it is not, `µ = E[τ]` diverges and Eq. (11) has no value. There is nothing to report.
+- **`|t| < 2`** is a *precision* problem. `µ` and `CCM` exist, but they divide by a quantity
+  the data cannot pin down. There is something to report — with a warning attached.
+
+Suppressing the second because it resembles the first discards information and hides the
+uncertainty behind a blank cell.
+
+## What was implemented instead
+
+1. **`DEFECTIVE` keeps its original meaning**: `drift ≤ 0`, the genuine assumption failure.
+   `signal_construction/measures.py::drift_regime` is unchanged.
+2. **`WEAKLY_IDENTIFIED`** (`measures.is_weakly_identified`, `|t| < 2.0`) **annotates** a
+   rating and never suppresses one. It travels into the workbook as a `Weakly Identified`
+   column on the Asset sheet, a warning on the validation sheet, and a log line — so it
+   reaches the API and the UI by construction rather than needing to be re-derived.
+3. **`t` and a bootstrap rating interval are published alongside every rating**
+   (`Drift SE`, `Drift t`, `Rating Interval Low/High/Notches`), so a reader sees the
+   precision without having to ask for it.
+
+## Standing, 2026-07-26
+
+**7 of 10 companies carry `WEAKLY_IDENTIFIED`.** Only DELL (`t = 2.01`), PNC (`t = 2.07`)
+and WMT (`t = 2.01`) clear it — and all three sit within 0.1 of the threshold, which is
+itself a reason not to have made the threshold load-bearing for suppression.
+
+| Ticker | t | Weak | Determination | Bootstrap interval | Notches | Defective in |
+|---|---:|---|---|---|---:|---:|
+| COST | 1.37 | **yes** | scale-top | AAA..AAA- | 2 | 11.8% |
+| KO | 1.24 | **yes** | scale-top | AAA..AAA- | 2 | 7.4% |
+| DELL | 2.01 | no | **model** | AAA..A- | **8** | 0.8% |
+| **ORCL** | **0.08** | **yes** | **model** | **BBB..BB** | **4** | **40.6%** |
+| PNC | 2.07 | no | **model** | AAA..AA | 4 | 3.8% |
+| WMT | 2.01 | no | scale-top | AAA..AAA | 1 | 0.4% |
+| INTU | −0.39 | **yes** | not rated | — | — | 64.6% |
+| AMZN | 1.48 | **yes** | floor | AAA..AAA- | 2 | 4.0% |
+| T | 0.84 | **yes** | **model** | AAA..AA- | **5** | 23.6% |
+| KHC | −0.48 | **yes** | not rated | — | — | 77.2% |
+
+## The finding this produced
+
+**ORCL's BB is not supportable as a point rating.** In **40.6% of bootstrap replicates the
+drift goes negative**, so the company cannot be rated at all; in the 59% where it can, the
+rating spans **BBB to BB, four notches**. The point estimate is one draw from a distribution
+that is nearly half "unrateable" and otherwise smeared across investment grade and junk.
+
+The README must not present it as a model result. It should be shown with its interval and
+its `WEAKLY_IDENTIFIED` flag, or not shown as a letter at all.
+
+**None of the four model-determined names survives uncertainty as a point rating.** DELL has
+the strongest `t` in the set and the *widest* interval (8 notches, AAA..A-), because it sits
+where the S&P scale is finely notched. T spans 5, PNC 4. The `MODEL_DETERMINED` count of 4
+describes which ratings the scale can resolve — it says nothing about whether the estimate
+behind them is precise, and on this evidence none of them is.

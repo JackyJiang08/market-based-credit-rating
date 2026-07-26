@@ -72,6 +72,16 @@ class CompanyData:
     drift_regime: Optional[str] = None
     drift_se: Optional[float] = None          # sigma_A / sqrt(drift span years)
     drift_span_years: Optional[float] = None  # calendar span used for eta
+    drift_t_stat: Optional[float] = None      # drift / SE
+    # |t| < WEAK_IDENTIFICATION_T: the rating is still published, annotated.
+    weakly_identified: Optional[bool] = None
+    # Bootstrap outputs (signal_construction/bootstrap.py).
+    boot_sigma_lo: Optional[float] = None
+    boot_sigma_hi: Optional[float] = None
+    boot_defective_fraction: Optional[float] = None
+    rating_interval_low: Optional[str] = None    # best grade in the interval
+    rating_interval_high: Optional[str] = None   # worst grade in the interval
+    rating_interval_notches: Optional[int] = None
 
     # PIT -> TTC -> S&P conversion (Layer 3)
     ttc_pd: Optional[float] = None        # no-arbitrage through-the-cycle PD
