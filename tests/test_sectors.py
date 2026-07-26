@@ -59,14 +59,50 @@ def test_gated_types_are_not_applicable_with_a_machine_readable_reason(ft, code)
     assert code in sectors.REASON_TEXT, "every code needs prose for the workbook"
 
 
-def test_negative_book_equity_is_gated():
-    status, reason = sectors.applicability(sectors.FirmType.NONFINANCIAL, -1.0e9)
+def test_nonfinancial_is_applicable_regardless_of_book_equity():
+    """Book equity is not an input to the gate any more (ADR 0003, revision 1).
+
+    The signature change is the test: `applicability` takes only the firm type,
+    so a negative-book-equity name like DELL cannot be gated on an accounting
+    artifact the market-implied model never uses.
+    """
+    status, reason = sectors.applicability(sectors.FirmType.NONFINANCIAL)
+    assert status is sectors.Applicability.APPLICABLE
+    assert reason is None
+
+
+# --- market-based capital-structure test (ADR 0003, revision 1) --------------
+def test_dell_shaped_firm_passes_the_market_test():
+    """DELL: A ~= $301bn against ~$31bn total debt -- negative book equity,
+    comfortably applicable on market numbers."""
+    status, reason = sectors.market_applicability(301.3e9, 31.2e9)
+    assert status is sectors.Applicability.APPLICABLE
+    assert reason is None
+
+
+def test_assets_inside_the_convention_band_are_gated():
+    status, reason = sectors.market_applicability(90e9, 100e9)
     assert status is sectors.Applicability.NOT_APPLICABLE
-    assert reason == "NEGATIVE_BOOK_EQUITY"
+    assert reason == "ASSETS_BELOW_TOTAL_DEBT"
+    assert reason in sectors.REASON_TEXT
 
 
-def test_positive_equity_nonfinancial_is_applicable():
-    status, reason = sectors.applicability(sectors.FirmType.NONFINANCIAL, 5.0e10)
+def test_assets_exactly_at_the_w1_barrier_are_gated():
+    """The margin is strict: A must exceed the w = 1.0 barrier, not meet it."""
+    status, reason = sectors.market_applicability(100e9, 100e9)
+    assert status is sectors.Applicability.NOT_APPLICABLE
+    assert reason == "ASSETS_BELOW_TOTAL_DEBT"
+
+
+@pytest.mark.parametrize("a, d", [
+    (None, 100e9),
+    (100e9, None),
+    (float("nan"), 100e9),
+    (100e9, float("nan")),
+])
+def test_missing_market_inputs_do_not_gate(a, d):
+    """Same philosophy as UNKNOWN firm types: absent data is not evidence."""
+    status, reason = sectors.market_applicability(a, d)
     assert status is sectors.Applicability.APPLICABLE
     assert reason is None
 
@@ -131,7 +167,7 @@ def test_pnc_is_gated_under_every_variant():
                                                  term["LongTermDebt"])
     ft = sectors.classify("PNC", "Financial Services", "Banks - Regional")
     for _name in variants:
-        status, reason = sectors.applicability(ft, 63_627e6)
+        status, reason = sectors.applicability(ft)
         assert status is sectors.Applicability.NOT_APPLICABLE
         assert reason == "BANK_DEPOSIT_FUNDED"
 

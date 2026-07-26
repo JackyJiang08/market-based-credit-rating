@@ -111,14 +111,17 @@ def classify(ticker: str, sector: Optional[str] = None,
     return FirmType.NONFINANCIAL
 
 
-def applicability(firm_type: FirmType,
-                  total_equity: Optional[float] = None
-                  ) -> tuple[Applicability, Optional[str]]:
-    """Decide whether to rate this firm, with a machine-readable reason.
+def applicability(firm_type: FirmType) -> tuple[Applicability, Optional[str]]:
+    """Decide from the firm type whether to rate this firm.
 
     Returns `(status, reason_code)`. `reason_code` is None when applicable and
     otherwise a stable identifier suitable for a workbook column or an API
     field -- not prose, which callers cannot branch on.
+
+    Book equity deliberately does not appear here. An earlier revision gated on
+    negative book equity; that removed DELL, whose negative equity is a buyback
+    artifact the market-implied model never looks at (ADR 0003, revision 1).
+    The capital-structure test is `market_applicability`, run after EM.
     """
     if firm_type is FirmType.BANK:
         return Applicability.NOT_APPLICABLE, "BANK_DEPOSIT_FUNDED"
@@ -126,11 +129,32 @@ def applicability(firm_type: FirmType,
         return Applicability.NOT_APPLICABLE, "INSURER_RESERVE_LIABILITIES"
     if firm_type is FirmType.REIT:
         return Applicability.NOT_APPLICABLE, "REIT_ASSET_STRUCTURE"
-    if total_equity is not None and total_equity < 0:
-        # A > D is the model's own precondition; negative book equity does not
-        # by itself violate it (A is market-implied), but it signals a capital
-        # structure the barrier construction handles badly.
-        return Applicability.NOT_APPLICABLE, "NEGATIVE_BOOK_EQUITY"
+    return Applicability.APPLICABLE, None
+
+
+def market_applicability(asset_value: Optional[float],
+                         total_debt: Optional[float]
+                         ) -> tuple[Applicability, Optional[str]]:
+    """Market-based capital-structure test, run after the EM step.
+
+    `A > D` alone is vacuous as a gate -- the EM inverter raises on it -- so the
+    margin is the operative choice. The margin here: market-implied assets must
+    clear the barrier under the MOST CONSERVATIVE debt convention, `w = 1.0`
+    (`ST + 1.0*LT`, i.e. total debt), not merely the rated `w = 0.5` one. The
+    convention sweep showed the letter moves with `w`; applicability must not.
+    A firm inside the band [ST+0.5*LT, ST+LT] would flip between ratable and
+    at-the-barrier on an arbitrary weight, which is a specification question,
+    not a credit measurement (ADR 0003, revision 1).
+
+    Missing inputs do not gate, for the same reason `UNKNOWN` firm types do
+    not: refusing to rate on absent metadata is its own failure mode.
+    """
+    if asset_value is None or total_debt is None:
+        return Applicability.APPLICABLE, None
+    if not (asset_value == asset_value and total_debt == total_debt):  # NaN
+        return Applicability.APPLICABLE, None
+    if asset_value <= total_debt:
+        return Applicability.NOT_APPLICABLE, "ASSETS_BELOW_TOTAL_DEBT"
     return Applicability.APPLICABLE, None
 
 
@@ -145,7 +169,9 @@ REASON_TEXT = {
     "REIT_ASSET_STRUCTURE":
         "Asset value is property-appraisal driven and the capital structure is "
         "shaped by distribution requirements rather than default risk.",
-    "NEGATIVE_BOOK_EQUITY":
-        "Negative book equity signals a capital structure the debt-barrier "
-        "construction handles badly.",
+    "ASSETS_BELOW_TOTAL_DEBT":
+        "Market-implied asset value does not clear the default barrier under "
+        "the most conservative debt convention (ST + 1.0*LT). Inside that band "
+        "the rating would depend on the arbitrary long-term debt weight rather "
+        "than on the firm.",
 }

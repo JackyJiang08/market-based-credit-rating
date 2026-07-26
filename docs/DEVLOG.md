@@ -35,6 +35,48 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - DELL objection accepted: market-based test replaces the negative-equity gate
+
+- **Scope:** Layer 2 (`sectors.py`, `workflow.py`), tests, ADR 0003. Changes
+  which companies are rated.
+- **Summary:** the project owner accepted the DELL objection recorded in ADR
+  0003 — negative book equity is a quantity the market-based model never uses,
+  and gating on it removed the best-identified name in the universe (drift
+  t = 2.01). `sectors.applicability` now gates on firm type only; the
+  capital-structure test is the new `sectors.market_applicability`, run after
+  EM: applicable iff `A > ST + 1.0*LT` (strict). The margin is the most
+  conservative debt-weight convention, so applicability is invariant to the
+  arbitrary long-term weight the convention sweep indicted; the full argument,
+  the original spec, the objection and the resolution are in ADR 0003
+  "Revision 1". Firm-type gates (BANK/INSURER/REIT) unchanged; PNC stays gated
+  as `BANK_DEPOSIT_FUNDED`. Reason code `NEGATIVE_BOOK_EQUITY` is replaced by
+  `ASSETS_BELOW_TOTAL_DEBT`.
+- **Expected standing** (to be confirmed by the next live batch run): rated
+  7/10, scale-resolved 3/10 (DELL, ORCL, T); MODEL_NOT_APPLICABLE 1 (PNC).
+  DELL passes the market test with A ≈ $301bn against ≈ $31bn total debt
+  (2026-07-26 archived run, `history/13`).
+- **Panel reconciliation (housekeeping):** the tracking panel again showed
+  Part B and Part C open although both results shipped (pushes of 2026-07-26,
+  `history/12`/`history/13`). Cause of the recurring staleness: the panel's
+  Part B/C entries are not linked to any repository issue — `gh issue list`
+  shows no open issues and no issue titled "Part B"/"Part C" — so no commit,
+  close keyword, or automation can ever move them; additionally this agent's
+  GitHub token lacks the `project` scope (`gh project list` → "missing
+  required scopes [read:project]"), so agent sessions cannot update the board
+  even on request. Until the cards are linked to issues (or the scope is
+  granted with `gh auth refresh -s project,read:project`), the panel will go
+  stale after every push and must be moved by hand.
+- **Breaking changes:** DELL is rated again; rated coverage 6/10 -> 7/10. The
+  `sectors.applicability` signature drops its `total_equity` parameter.
+- **Validation:** `python3 -m pytest -q` -> 270 passed, 30 skipped, run before
+  this push (30 skips are network-dependent tests; the grid tests run, since
+  `local/` is present in this environment). New/updated tests in
+  `tests/test_sectors.py` cover the market test (DELL-shaped pass, in-band
+  gate, strict boundary, missing-input non-gating) and the signature change.
+  Live batch not yet re-run; standings above are therefore labelled expected.
+- **Follow-ups:** live batch re-run to confirm the 7/10 standing and capture
+  `history/14`; README standings table update; deliverable v1 freeze.
+
 ### 2026-07-26 - README standings updated for the gate
 
 - **Scope:** README only. No code.

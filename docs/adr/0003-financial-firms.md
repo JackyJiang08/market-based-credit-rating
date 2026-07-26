@@ -1,6 +1,7 @@
 # ADR 0003 — Financial firms, default-point variants, and the applicability gate
 
-- **Status:** accepted and implemented
+- **Status:** accepted and implemented; **revision 1 applied 2026-07-26** — the
+  `NEGATIVE_BOOK_EQUITY` gate is replaced by a market-based test (see "Revision 1" below)
 - **Date:** 2026-07-26
 - **Closes:** #16. Relates to `docs/adr/0001`, `docs/UNCERTAINTY.md`.
 
@@ -78,7 +79,7 @@ and payment processors, which do not share a balance-sheet shape.
 | `BANK_DEPOSIT_FUNDED` | deposits dominate; failure point is a capital ratio |
 | `INSURER_RESERVE_LIABILITIES` | policy reserves are contingent, not fixed claims |
 | `REIT_ASSET_STRUCTURE` | appraisal-driven assets, distribution-shaped capital structure |
-| `NEGATIVE_BOOK_EQUITY` | capital structure the barrier construction handles badly |
+| `NEGATIVE_BOOK_EQUITY` | *(original spec — removed in revision 1, replaced by `ASSETS_BELOW_TOTAL_DEBT`)* |
 
 **The gate suppresses the rating, not the measures.** σ_A, A, DD, RiskScore and the drift
 diagnostics are still computed and published — they are informative — but no letter is
@@ -116,7 +117,7 @@ Standing after the gate, of ten companies:
 
 Rated coverage falls from 8/10 to 6/10, and scale-resolved from 4 to 2.
 
-### Open question: negative book equity is too blunt
+### Open question: negative book equity is too blunt *(resolved — see Revision 1)*
 
 **DELL is gated for `NEGATIVE_BOOK_EQUITY`, and that is probably wrong.** Dell's negative
 book equity is an artifact of the post-EMC buyback programme, not distress — the same is true
@@ -130,6 +131,70 @@ entirely in favour of the firm-type gate alone.
 
 Note that DELL was the name with the **strongest drift t-statistic in the universe** (2.01),
 so this gate removed the best-identified estimate we had.
+
+## Revision 1 (2026-07-26) — the negative-equity gate is replaced
+
+### The original spec, the objection, and the resolution
+
+- **Original spec:** gate any firm with negative book equity
+  (`NEGATIVE_BOOK_EQUITY`), alongside the firm-type gates. Implemented as
+  specified on 2026-07-26.
+- **Objection (recorded above and in the DEVLOG at implementation time):**
+  book equity is a quantity this market-based model never uses. `A` is
+  market-implied; the gate removed DELL — the best-identified name in the
+  universe (drift `t = 2.01`) — for a buyback artifact, not for anything the
+  barrier construction cares about.
+- **Resolution:** the objection was accepted by the project owner; the spec was
+  wrong. The negative-equity gate is removed and replaced by a market-based
+  capital-structure test. The firm-type gates (`BANK`, `INSURER`, `REIT`) are
+  unchanged.
+
+### The replacement test, and why this margin
+
+`sectors.market_applicability(A, ST + 1.0·LT)`, run **after** the EM step:
+
+```text
+applicable  ⇔  A  >  ST + 1.0·LT        (strict)
+```
+
+`A > D` alone cannot be the gate — it is the model's own precondition and the
+EM inverter raises when it fails — so the entire content of the test is the
+margin. The margin chosen is the **most conservative debt-weight convention,
+`w = 1.0`**, i.e. assets must clear *total* debt, not just the rated
+`ST + 0.5·LT` barrier:
+
+- **It makes applicability convention-invariant.** The convention sweep
+  (`docs/reconciliation/convention_sweep.py`) showed the *letter* moves with
+  the long-term weight — T by seven notches. Whether the model applies at all
+  must not move with it. A firm with `A` above total debt is applicable under
+  every weight anyone could argue for.
+- **Inside the band `[ST + 0.5·LT, ST + LT]` the answer is the weight, not the
+  firm.** Such a firm would flip between "ratable" and "at the barrier" on the
+  0.5 → 1.0 choice; that is a specification question, and reporting a letter
+  there would attribute the convention to the company.
+- **A fixed numeric margin (e.g. `A > 1.05·D`) was considered and rejected**:
+  any constant would be exactly the kind of unargued convention the sweep
+  indicts. The `w = 1.0` barrier is firm-specific, observable, and derived
+  from the same statements as `D` itself.
+- **Missing inputs do not gate** — the same philosophy as `UNKNOWN` firm
+  types: silently refusing to rate on absent data is its own failure mode.
+
+Reason code: `ASSETS_BELOW_TOTAL_DEBT`. DELL passes with an order of magnitude
+to spare: `A ≈ $301bn` against total debt `≈ $31bn`.
+
+### Standing after revision 1
+
+| | Original spec | Revision 1 |
+|---|---|---|
+| `SCALE_RESOLVED` | 2 (ORCL, T) | **3** (DELL, ORCL, T) |
+| `MODEL_NOT_APPLICABLE` | 2 (DELL, PNC) | **1** (PNC) |
+| `PINNED_AT_SCALE_TOP` | 3 | 3 |
+| `PINNED_AT_FLOOR` | 1 | 1 |
+| `NOT_RATED` | 2 | 2 |
+
+Rated coverage returns to **7/10**, scale-resolved to **3/10**. PNC remains
+gated — `BANK_DEPOSIT_FUNDED` was always the correct reason there, and the
+market test never reaches it.
 
 ### Also open
 

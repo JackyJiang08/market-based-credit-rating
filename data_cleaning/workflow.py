@@ -179,13 +179,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     # default point of ~$33bn against ~$539bn of total liabilities. Rating it
     # anyway produces a confident-looking investment-grade letter.
     firm_type = sectors.classify(ticker, data.sector, data.industry)
-    equity_book = None
-    if not data.q_balance.empty:
-        eq_row = transforms.pick_row(data.q_balance, ("Stockholders Equity",
-                                                      "Total Equity Gross Minority Interest"))
-        if eq_row is not None and eq_row.notna().any():
-            equity_book = float(eq_row.dropna().iloc[0])
-    status, reason = sectors.applicability(firm_type, equity_book)
+    status, reason = sectors.applicability(firm_type)
     data.firm_type = firm_type.value
     data.model_applicable = status is sectors.Applicability.APPLICABLE
     data.applicability_reason = reason
@@ -250,6 +244,26 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
                      m.risk_score, m.ccm, m.mu, m.dd, m.edf, m.pit_pd)
         except (em.EMError, ValueError) as exc:
             LOG.warning("  EM/measures failed: %s", exc)
+
+    # --- market-based applicability (ADR 0003, revision 1) ---
+    # Runs after EM because it needs the market-implied asset value. The firm
+    # must clear the barrier under the most conservative debt weight (w = 1.0,
+    # total debt), so applicability cannot depend on the arbitrary 0.5.
+    if data.model_applicable and data.asset_value is not None:
+        total_debt_w1 = None
+        if not data.panel.empty and {"ShortTermDebt", "LongTermDebt"} <= set(data.panel.columns):
+            st = data.panel["ShortTermDebt"].dropna()
+            lt = data.panel["LongTermDebt"].dropna()
+            if not st.empty and not lt.empty:
+                total_debt_w1 = float(st.iloc[-1]) + float(lt.iloc[-1])
+        status, reason = sectors.market_applicability(data.asset_value, total_debt_w1)
+        if status is not sectors.Applicability.APPLICABLE:
+            data.model_applicable = False
+            data.applicability_reason = reason
+            LOG.warning("  %s: %s -- A=%.4g does not clear the w=1.0 barrier "
+                        "%.4g; the letter would be a statement about the debt "
+                        "weight, not the firm", status.value, reason,
+                        data.asset_value, total_debt_w1)
 
     # --- PIT -> TTC -> S&P conversion (local tables; skipped if tables absent) ---
     if data.ccm is not None and data.mu is not None:
