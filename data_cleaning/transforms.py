@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Iterable, Optional
 
+import numpy as np
 import pandas as pd
 
 from . import config
@@ -21,14 +22,28 @@ def _norm(s: object) -> str:
 
 def pick_row(frame: pd.DataFrame, candidates: Iterable[str]) -> Optional[pd.Series]:
     """Return the first frame row whose index matches a candidate label."""
+    row, _ = pick_row_named(frame, candidates)
+    return row
+
+
+def pick_row_named(frame: pd.DataFrame, candidates: Iterable[str]
+                   ) -> tuple[Optional[pd.Series], Optional[str]]:
+    """As `pick_row`, but also return which candidate label matched.
+
+    Two companies in the same batch can have the same metric sourced from
+    different line items, and nothing recorded which. That is the single largest
+    input difference against a peer implementation -- ORCL and AMZN differ from
+    it by exactly their capital-lease rows, purely because we take the
+    lease-inclusive candidate first (#16).
+    """
     if frame is None or frame.empty:
-        return None
+        return None, None
     norm_index = {_norm(idx): idx for idx in frame.index}
     for cand in candidates:
         hit = norm_index.get(_norm(cand))
         if hit is not None:
-            return frame.loc[hit]
-    return None
+            return frame.loc[hit], str(hit)
+    return None, None
 
 
 def trim_to_window(frame: pd.DataFrame, cutoff: datetime) -> pd.DataFrame:
@@ -105,19 +120,44 @@ def split_term_debt(balance: pd.DataFrame) -> pd.DataFrame:
     if balance is None or balance.empty:
         return pd.DataFrame(columns=["ShortTermDebt", "LongTermDebt"])
 
-    total = pick_row(balance, config.BALANCE_SHEET_MAP["Total Debt"])
-    short = pick_row(balance, config.BALANCE_SHEET_MAP["Short-term / Current Debt"])
-    long_ = pick_row(balance, config.BALANCE_SHEET_MAP["Long-term Debt"])
+    total, f_total = pick_row_named(balance, config.BALANCE_SHEET_MAP["Total Debt"])
+    short, f_short = pick_row_named(balance, config.BALANCE_SHEET_MAP["Short-term / Current Debt"])
+    long_, f_long = pick_row_named(balance, config.BALANCE_SHEET_MAP["Long-term Debt"])
 
     periods = balance.columns
     st = short.reindex(periods) if short is not None else pd.Series(index=periods, dtype=float)
     lt = long_.reindex(periods) if long_ is not None else pd.Series(index=periods, dtype=float)
     tot = total.reindex(periods) if total is not None else pd.Series(index=periods, dtype=float)
 
-    st = st.where(st.notna(), (tot - lt).clip(lower=0))
-    lt = lt.where(lt.notna(), (tot - st).clip(lower=0))
+    # Complements, BEFORE clipping, so a contradictory source is visible rather
+    # than silently flattened to zero (#16). `Total < Long-term` means the two
+    # rows disagree; `.clip(lower=0)` used to turn that into `ShortTermDebt = 0`,
+    # which is what produced PNC's 36% default-point difference against a peer
+    # and made its entire barrier depend on the long-term weight.
+    st_complement = tot - lt
+    lt_complement = tot - st
+    st_contradictory = st.isna() & st_complement.notna() & (st_complement < 0)
+    lt_contradictory = lt.isna() & lt_complement.notna() & (lt_complement < 0)
 
-    out = pd.DataFrame({"ShortTermDebt": st, "LongTermDebt": lt})
+    st_imputed = st.isna() & st_complement.notna()
+    lt_imputed = lt.isna() & lt_complement.notna()
+
+    st = st.where(st.notna(), st_complement.clip(lower=0))
+    lt = lt.where(lt.notna(), lt_complement.clip(lower=0))
+
+    out = pd.DataFrame({
+        "ShortTermDebt": st,
+        "LongTermDebt": lt,
+        # Provenance, per period. Which line item supplied each leg, whether it
+        # was imputed from the complement, and whether that complement was
+        # negative (i.e. the source contradicts itself).
+        "ShortTermDebtSource": np.where(st_imputed, "imputed:Total-LongTerm",
+                                        f_short or "missing"),
+        "LongTermDebtSource": np.where(lt_imputed, "imputed:Total-ShortTerm",
+                                       f_long or "missing"),
+        "TotalDebtSource": f_total or "missing",
+        "DebtSourceContradictory": (st_contradictory | lt_contradictory),
+    })
     out.index = pd.to_datetime(out.index)
     return out.sort_index()
 
@@ -190,3 +230,43 @@ def default_point_debt(short_term: pd.Series, long_term: pd.Series) -> pd.Series
     d = (config.SHORT_TERM_DEBT_WEIGHT * short_term.fillna(0)
          + config.LONG_TERM_DEBT_WEIGHT * long_term.fillna(0))
     return d.where(~both_missing)
+
+
+# --------------------------------------------------------------------------- #
+# Default-point variants (financial firms)
+# --------------------------------------------------------------------------- #
+def default_point_variants(balance: pd.DataFrame,
+                           short_term: pd.Series,
+                           long_term: pd.Series) -> dict:
+    """Every default-point definition, side by side, per period.
+
+    The shipped convention `ST + 0.5*LT` looks at *debt*. For a deposit-funded
+    bank that is a small fraction of what the firm owes -- PNC's is about $33bn
+    against $539bn of total liabilities -- so two liability-based alternatives
+    are offered for comparison:
+
+      standard                      1.0*ST + 0.5*LT   (the deck's rule)
+      total_liabilities             all liabilities treated as the barrier
+      total_liabilities_ex_deposits liabilities less deposits
+
+    Returns `{variant: Series}`, with a variant absent from the mapping when its
+    inputs are not in the source. Notably, the free-tier balance sheet carries
+    no deposits line for PNC, so `total_liabilities_ex_deposits` is **not
+    computable** there -- reported as absent rather than silently equal to
+    `total_liabilities`.
+    """
+    out: dict = {"standard": default_point_debt(short_term, long_term)}
+
+    tl, _ = pick_row_named(balance, config.BALANCE_SHEET_MAP["Total Liabilities"])
+    if tl is not None:
+        tl_series = pd.to_numeric(tl, errors="coerce")
+        tl_series.index = pd.to_datetime(tl_series.index)
+        out["total_liabilities"] = tl_series.sort_index()
+
+        dep, _ = pick_row_named(balance, config.DEPOSIT_ROWS)
+        if dep is not None:
+            dep_series = pd.to_numeric(dep, errors="coerce")
+            dep_series.index = pd.to_datetime(dep_series.index)
+            net = (tl_series.sort_index() - dep_series.sort_index()).clip(lower=0)
+            out["total_liabilities_ex_deposits"] = net
+    return out

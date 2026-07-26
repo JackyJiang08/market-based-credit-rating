@@ -53,7 +53,8 @@ CANONICAL_ASSET_COLUMNS: tuple[str, ...] = (
 # byte-comparable and the deviation is explicit. Documented on the workbook's
 # README sheet.
 EXTENDED_ASSET_COLUMNS: tuple[str, ...] = (
-    "lambda", "Rating Basis", "Rating Determination",
+    "lambda", "Rating Basis", "Rating Determination", "Firm Type",
+    "Model Applicable", "Applicability Reason",
     "Drift SE", "Drift t", "Weakly Identified",
     "Rating Interval Low", "Rating Interval High", "Rating Interval Notches",
 )
@@ -161,6 +162,9 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
         "outlook": c.outlook,
         "rating_basis": c.rating_basis,
         "rating_determination": c.rating_determination,
+        "firm_type": c.firm_type,
+        "model_applicable": c.model_applicable,
+        "applicability_reason": c.applicability_reason,
         "drift_t_stat": c.drift_t_stat,
         "weakly_identified": c.weakly_identified,
         "boot_sigma_lo": c.boot_sigma_lo,
@@ -213,6 +217,9 @@ def asset_row(c: CompanyData) -> dict[str, Any]:
         "lambda": r["lam"],
         "Rating Basis": r["rating_basis"],
         "Rating Determination": r["rating_determination"],
+        "Firm Type": r["firm_type"],
+        "Model Applicable": r["model_applicable"],
+        "Applicability Reason": r["applicability_reason"],
         "Drift SE": r["drift_se"],
         "Drift t": r["drift_t_stat"],
         "Weakly Identified": r["weakly_identified"],
@@ -246,6 +253,11 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
     if r["rating_determination"] == "PINNED_AT_SCALE_TOP":
         flags.append("RiskScore below the best published grade -> rating is "
                      "scale-determined, not model-determined")
+    if r["model_applicable"] is False:
+        from data_cleaning import sectors as _sectors
+        code = r["applicability_reason"]
+        flags.append(f"MODEL_NOT_APPLICABLE ({code}): "
+                     f"{_sectors.REASON_TEXT.get(code, 'see docs/adr/0003')}")
     if r["weakly_identified"] and r["drift_regime"] == "VALID":
         t = r["drift_t_stat"]
         flags.append(

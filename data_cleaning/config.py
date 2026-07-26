@@ -32,6 +32,19 @@ BALANCE_SHEET_MAP: dict[str, tuple[str, ...]] = {
     ),
 }
 
+# Candidate line items for deposits, used by the financial-firm default-point
+# variants. The free tier does not publish a deposits row for every bank; when
+# it is absent the ex-deposits variant is reported as not computable rather
+# than silently equal to total liabilities.
+DEPOSIT_ROWS: tuple[str, ...] = (
+    "Total Deposits", "Deposits", "Customer Deposits",
+    "Deposits From Customers", "Interest Bearing Deposits Liability",
+)
+
+# Which default-point definition the pipeline rates on:
+#   standard | total_liabilities | total_liabilities_ex_deposits
+DEFAULT_POINT_VARIANT = "standard"
+
 SHORT_TERM_DEBT_WEIGHT = 1.0
 LONG_TERM_DEBT_WEIGHT = 0.5
 

@@ -155,3 +155,11 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   bootstrap interval. **For ORCL, PNC and T the convention span equals or exceeds the
   parameter span** — T moves seven notches on the debt weight alone. Recorded in the README
   results section; the bootstrap is confirmed as a lower bound on total uncertainty.
+- **Part C / #16** Added `data_cleaning/sectors.py` (firm-type classification and an
+  applicability gate with machine-readable reason codes), default-point variants
+  (`standard` / `total_liabilities` / `total_liabilities_ex_deposits`, reported side by
+  side, absent when not computable), and field provenance on the debt split so a
+  contradictory source is flagged rather than clipped to zero. **PNC: $33.3bn (6.2% of
+  liabilities) → AAA under the shipped rule, $539.4bn → BB under total liabilities, against
+  an actual A/A2 agency rating** — the convention brackets the truth without hitting it.
+  DELL and PNC are now `MODEL_NOT_APPLICABLE`; rated coverage 8/10 → 6/10.

@@ -35,6 +35,49 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Financial firms, default-point variants, applicability gate (#16)
+
+- **Scope:** Layers 1-2 (new `sectors` module, provenance columns, default-point
+  variants) and Layer 4 (three new Asset columns). Changes which companies are
+  rated. Closes #16.
+- **Summary:**
+  - #16: `pick_row_named` reports which candidate line item matched;
+    `split_term_debt` emits `ShortTermDebtSource`, `LongTermDebtSource`,
+    `TotalDebtSource` and `DebtSourceContradictory`. The `.clip(lower=0)` stays
+    -- the alternative is negative debt -- but it no longer hides a source that
+    disagrees with itself.
+  - `transforms.default_point_variants` returns `standard`,
+    `total_liabilities` and `total_liabilities_ex_deposits` side by side.
+    `DEFAULT_POINT_VARIANT` selects the rated one; it stays `standard`. A
+    variant that cannot be computed is **absent**, never silently substituted.
+  - `data_cleaning/sectors.py`: firm-type classification (override map, then
+    industry, then sector) and an applicability gate returning machine-readable
+    reason codes. The gate suppresses the **rating**, not the measures.
+- **Evidence of record -- PNC against its actual A / A2 agency rating:**
+  - `standard`: D = $33.3bn, 6.2% of liabilities, DD 9.31 -> **AAA**
+  - `total_liabilities`: D = $539.4bn, 100%, DD 3.93 -> **BB**
+  - `total_liabilities_ex_deposits`: **not computable** -- the free tier has no
+    deposits row for PNC, which is the variant most likely to be right.
+  - The convention choice spans AAA to BB and brackets the true rating without
+    landing on it. No choice of barrier rescues the model here, which is the
+    argument for the gate rather than for a better default point.
+- **Breaking changes:** DELL and PNC are no longer rated. Rated coverage 8/10 ->
+  6/10; scale-resolved 4 -> 2. Asset sheet gains three columns.
+- **Validation:** `python -m pytest -q` -> 294 passed, run before this push, of
+  which 23 are new in `tests/test_sectors.py` covering classification,
+  the gate, PNC under every variant, and the #16 provenance and contradiction
+  flags. Live batch re-run, captured to
+  `docs/reconciliation/history/13_after_partC_financials.csv`.
+- **Flagged, not smoothed over:** DELL is gated for `NEGATIVE_BOOK_EQUITY`, and
+  that is probably wrong. Its negative book equity is a post-EMC buyback
+  artifact, not distress; the model uses market-implied asset value and book
+  equity does not enter the calculation. The gate was implemented as specified
+  and the objection is recorded in ADR 0003. Note DELL had the strongest drift
+  t-statistic in the universe (2.01), so this removed the best-identified
+  estimate we had.
+- **Follow-ups:** revisit the negative-equity threshold; find a deposits source;
+  replace the ~20-name override map with a GICS/SIC feed.
+
 ### 2026-07-26 - Convention uncertainty sweep
 
 - **Scope:** new analysis script under `docs/reconciliation/`; README and

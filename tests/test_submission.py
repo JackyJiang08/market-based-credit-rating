@@ -24,7 +24,8 @@ GOLDEN_ASSET_SCHEMA = (
     "Last Statement Date", "Debt/Short Term", "Debt/Long Term", "Total Debt",
     "Interest Rate", "sigma", "A", "R", "eta", "CCM", "mu", "TiC Risk Score",
     "DD", "EDF", "PIT PD", "TTC PD", "SP Rating", "Outlook",
-    "lambda", "Rating Basis", "Rating Determination",
+    "lambda", "Rating Basis", "Rating Determination", "Firm Type",
+    "Model Applicable", "Applicability Reason",
     "Drift SE", "Drift t", "Weakly Identified",
     "Rating Interval Low", "Rating Interval High", "Rating Interval Notches",
 )

@@ -69,6 +69,10 @@ class CompanyData:
     # (TIMING_PROTOCOL §3 requires the reference date to be stored).
     shares_method: Optional[str] = None
     shares_reference_date: Optional[str] = None
+    # Firm type and the applicability gate (data_cleaning/sectors.py).
+    firm_type: Optional[str] = None
+    model_applicable: Optional[bool] = None
+    applicability_reason: Optional[str] = None   # machine-readable code
 
     # Drift provenance (Prop. 4.4.1). `drift_regime` is "VALID" or "DEFECTIVE";
     # DEFECTIVE means eta - sigma^2/2 <= 0, so mu/CCM/PIT/TTC/rating are

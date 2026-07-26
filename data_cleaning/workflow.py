@@ -21,7 +21,7 @@ from raw_data_architecture import config as raw_config
 from raw_data_architecture import errors as raw_errors
 from raw_data_architecture import sources
 
-from . import alignment, persistence, transforms
+from . import alignment, persistence, sectors, transforms
 from . import config as clean_config
 from .company import CompanyData
 
@@ -173,6 +173,28 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
         available_at=available_at)
     data.availability_method = clean_config.AVAILABILITY_METHOD
 
+    # --- applicability gate (financial firms) ---
+    # The first-passage construction assumes the barrier is debt. For a
+    # deposit-funded bank it is not, and PNC shows the size of the gap: a
+    # default point of ~$33bn against ~$539bn of total liabilities. Rating it
+    # anyway produces a confident-looking investment-grade letter.
+    firm_type = sectors.classify(ticker, data.sector, data.industry)
+    equity_book = None
+    if not data.q_balance.empty:
+        eq_row = transforms.pick_row(data.q_balance, ("Stockholders Equity",
+                                                      "Total Equity Gross Minority Interest"))
+        if eq_row is not None and eq_row.notna().any():
+            equity_book = float(eq_row.dropna().iloc[0])
+    status, reason = sectors.applicability(firm_type, equity_book)
+    data.firm_type = firm_type.value
+    data.model_applicable = status is sectors.Applicability.APPLICABLE
+    data.applicability_reason = reason
+    if not data.model_applicable:
+        LOG.warning("  %s: %s (%s) -- the structural model is not meaningful "
+                    "for this firm type; measures are still computed and "
+                    "reported, the rating is not", status.value, reason,
+                    firm_type.value)
+
     # --- EM asset-value estimation (Layer 3) ---
     _em_asset_path = None
     _em_debt_last = None
@@ -248,8 +270,13 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
                                   if ttc.risk_score == ttc.risk_score else None)
             data.rating_determination = conversion.classify_determination(
                 ttc.basis, ttc.at_floor, ttc.risk_score).value
-            if ttc.basis in (conversion.RatingBasis.GRID_INTERIOR,
-                             conversion.RatingBasis.ANALYTICAL):
+            if not data.model_applicable:
+                data.sp_rating = None
+                data.outlook = None
+                data.rating_determination = "MODEL_NOT_APPLICABLE"
+                LOG.warning("  rating suppressed: %s", data.applicability_reason)
+            elif ttc.basis in (conversion.RatingBasis.GRID_INTERIOR,
+                               conversion.RatingBasis.ANALYTICAL):
                 data.sp_rating = conversion.sp_rating(tables, ttc.value)
                 data.outlook = conversion.outlook(data.pit_pd, ttc.value)
                 LOG.info("  rating: TTC_PD=%.4f  S&P=%-4s Outlook=%+.4f  "
