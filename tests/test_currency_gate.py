@@ -38,6 +38,7 @@ def test_tm_is_gated_for_currency_mismatch_not_crashed(monkeypatch):
     # Unlike the firm-type gate, the measures are suppressed too: they would
     # be unit-corrupt, not merely inapplicable.
     assert c.sigma_A is None and c.sp_rating is None
+    assert c.rating_determination == "MODEL_NOT_APPLICABLE"
     assert "JPY" in (c.em_error or "")
 
 

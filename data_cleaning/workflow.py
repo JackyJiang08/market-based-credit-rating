@@ -218,6 +218,9 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             and data.currency != data.financial_currency):
         data.model_applicable = False
         data.applicability_reason = "REPORTING_CURRENCY_MISMATCH"
+        # The conversion block never runs for these names (no measures), so
+        # the determination must be stamped here or it would read as blank.
+        data.rating_determination = "MODEL_NOT_APPLICABLE"
         data.em_error = (f"statements report in {data.financial_currency}, "
                          f"prices in {data.currency}; EM would mix units")
         LOG.warning("  MODEL_NOT_APPLICABLE: REPORTING_CURRENCY_MISMATCH "
