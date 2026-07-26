@@ -406,6 +406,14 @@ def _log_vol_comparison(companies: list[CompanyData]) -> None:
 
 
 def run(cfg: RunConfig) -> list[CompanyData]:
+    import uuid
+
+    import structlog
+
+    run_id = uuid.uuid4().hex[:12]
+    structlog.contextvars.bind_contextvars(run_id=run_id)
+    slog = structlog.get_logger("creditrating.run")
+    slog.info("run.start", tickers=len(cfg.tickers), workers=cfg.workers)
     # Layer 4 remains a compatibility publisher while only Layers 1/2 are
     # active. Keeping this import local prevents a dashboard dependency from
     # becoming part of the cleaning package's import contract.
@@ -493,4 +501,10 @@ def run(cfg: RunConfig) -> list[CompanyData]:
 
     LOG.info("Done. %d/%d companies succeeded. Output: %s",
              len(companies), len(resolved), dashboard_config.OUTPUT_DIR)
+    from . import provenance
+    from creditrating.io import workbook as _wb
+    manifest_path = provenance.write_manifest(run_id, cfg, companies,
+                                              _wb.OUTPUT_DIR)
+    slog.info("run.done", succeeded=len(companies), of=len(resolved),
+              manifest=os.path.relpath(manifest_path))
     return companies

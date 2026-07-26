@@ -148,9 +148,22 @@ app = typer.Typer(add_completion=False, no_args_is_help=True,
 
 
 def _setup_logging() -> None:
+    import structlog
+
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s  %(levelname)-7s  %(message)s",
                         datefmt="%H:%M:%S")
+    # structlog carries the per-run correlation id (run_id) bound in
+    # pipeline.run; stdlib loggers keep their existing format.
+    structlog.configure(
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            structlog.processors.add_log_level,
+            structlog.processors.TimeStamper(fmt="%H:%M:%S", utc=True),
+            structlog.dev.ConsoleRenderer(colors=False),
+        ],
+        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+    )
 
 
 @app.command()
