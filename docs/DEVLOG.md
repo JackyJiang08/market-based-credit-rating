@@ -35,6 +35,44 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Presentation pass 2: figures and the 90-second README
+
+- **Scope:** `docs/figures/` (two scripts, four SVGs, committed data CSVs),
+  README restructure, `.gitignore` exception, current-doc number sync. No
+  model or pipeline code.
+- **Figures** (all SVG, no proprietary content -- letter scales and our own
+  computed outputs only; regenerable):
+  - `make_figure_data.py` re-ran the study of record live (2,000 moving-block
+    replicates, seed 20260726) and writes the committed data CSVs. It
+    **reproduces the documented findings**: sigma 0.240, RiskScore 0.480
+    (x2.00 exactly), tau median 0.956, p05 0.867, 99.85% >= 0.8. The headline
+    amplification lands at **x4,073** vs the recorded x4,077 and PIT width
+    ~1,955 vs ~1,960 -- a 4th-significant-digit vendor-revision effect at the
+    same 2026-07-24 close. Current docs (README, UNCERTAINTY.md) are synced to
+    the regenerated values so text, figures and committed data agree; the
+    original values remain in this log's history.
+  - `make_figures.py` renders: amplification ladder (log-scale dot plot -- a
+    bar chart would misstate lengths on a log axis), rank-stability heatmap
+    (sequential one-hue ramp, selective labels), convention sweep (emphasis
+    form: T in accent, rest gray -- eight categorical hues would fail CVD
+    separation), and the per-company rating-interval strip. Palette is the
+    validated dataviz default (accent #2a78d6; ΔE-checked).
+  - `convention_sweep_letters.csv` records the 2026-07-26 sweep table; the
+    other three CSVs regenerate live.
+- **README:** badges (tests, DEVLOG gate, Python, MIT); a four-number
+  results-at-a-glance block on the first screen, each line linking to its full
+  section; the money chart directly under it; the abbreviated real output of
+  `python -m mdt rate COST` in Quickstart; the full three-uncertainty analysis
+  moved under "Findings in depth"; all four figures embedded at their
+  sections; Tests states that `pip install -r requirements.txt && pytest` is
+  the entire fresh-clone story. All prior content preserved.
+- **Breaking changes:** None.
+- **Validation:** `python3 -m pytest -q` -> 304 passed, run before this push.
+  Figure-data run: 10/10 companies, 2,000 replicates each. All four SVGs
+  rasterized and visually inspected (label collisions fixed before commit).
+- **Follow-ups:** regenerate `docs/figures/data/` and the SVGs when the data
+  vintage moves (both scripts are one command each).
+
 ### 2026-07-26 - CI coverage measurement
 
 - **Scope:** `.github/workflows/tests.yml`, `.gitignore`. No code.

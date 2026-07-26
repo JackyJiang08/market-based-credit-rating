@@ -38,11 +38,11 @@ A **moving-block bootstrap** over the EM-recovered **asset** log-returns.
 
 | Quantity | Median relative width | Amplification |
 |---|---:|---|
-| σ_A | 0.239 | — |
-| RiskScore (drift-free) | 0.479 | **×2.00 vs σ_A** |
+| σ_A | 0.240 | — |
+| RiskScore (drift-free) | 0.480 | **×2.00 vs σ_A** |
 | DD | 0.317 | ×1.3 |
 | TTC PD | 1.512 | ×3.2 vs RiskScore |
-| PIT PD | ~1,960 | **×4,077 vs RiskScore** |
+| PIT PD | ~1,955 | **×4,073 vs RiskScore** |
 
 ×2.00 is the square, exactly: `RiskScore ∝ σ_A²`, so `d(RS)/RS = 2·dσ/σ`. RiskScore
 inherits σ's uncertainty and nothing else.
@@ -87,7 +87,7 @@ comparable size. Reporting only the first would overstate what the letter means.
 
 | Source | What varies | How it is measured | What it does to the letter |
 |---|---|---|---|
-| **Parameter** | Sampling noise in `σ_A` and `η` from ~1–5 years of returns, conventions held fixed | Moving-block bootstrap (this document) | DELL 10 notches, T 6, ORCL 4; the PD chain amplifies drift noise ×4,077 vs RiskScore |
+| **Parameter** | Sampling noise in `σ_A` and `η` from ~1–5 years of returns, conventions held fixed | Moving-block bootstrap (this document) | DELL 10 notches, T 6, ORCL 4; the PD chain amplifies drift noise ×4,073 vs RiskScore |
 | **Convention** | The unargued `0.5` long-term debt weight, and the statement vintage | Debt-weight sweep, `w ∈ {0, 0.25, 0.5, 0.75, 1.0}` (`docs/reconciliation/convention_sweep.py`) | **T moves 7 notches on the weight alone**; ORCL from unrateable to B+; **convention span ≥ parameter span for ORCL, PNC and T** |
 | **Specification** | Whether `ST + w·LT` is the right barrier *at all* | Default-point variants under ADR 0003 | **PNC: AAA under standard `D`, BB under total liabilities — actual agency rating A / A2.** The conventions bracket the truth without landing on it; the standard barrier was 6% of what PNC owes |
 
