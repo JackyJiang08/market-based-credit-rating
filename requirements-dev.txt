@@ -1,0 +1,9 @@
+# Test and development tooling. CI installs ONLY requirements.txt +
+# requirements-dev.txt (with -c constraints.txt); nothing ad hoc.
+pytest>=7
+pytest-cov
+hypothesis>=6
+ruff
+black
+mypy
+pre-commit

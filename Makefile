@@ -6,8 +6,7 @@ PY ?= python3
 .PHONY: setup test lint run batch serve demo
 
 setup:
-	$(PY) -m pip install -r requirements.txt -c constraints.txt
-	$(PY) -m pip install -e ".[dev]" -c constraints.txt
+	$(PY) -m pip install -r requirements.txt -r requirements-dev.txt -c constraints.txt
 
 test:
 	$(PY) -m pytest -q
