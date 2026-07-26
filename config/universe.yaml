@@ -1,0 +1,187 @@
+# Expanded test universe: 150 US-listed names spanning the rating spectrum,
+# deliberately including the hard cases ten hand-picked mega-caps never hit.
+#
+# Fields per entry:
+#   ticker : exact Yahoo symbol
+#   why    : why this name is in the list (the selection is the experiment)
+#   agency : APPROXIMATE senior-unsecured agency rating (S&P scale) as of
+#            mid-2026, from public sources, recorded for the distribution
+#            comparison ONLY. Indicative, not authoritative; null = not rated
+#            or not reliably known. Never an input to the model.
+#
+# Categories: IG mega-caps (anchors) · dual share class · negative book equity
+# · banks/insurers/REITs (applicability gates) · utilities · energy ·
+# healthcare · consumer · telecom/media · industrials · autos/EV · airlines,
+# cruise & leisure (HY) · high-volatility/crypto-adjacent · recent IPOs (short
+# history) · ADRs (foreign issuers, reporting-currency risk) · genuinely
+# distressed · delisted/bankrupt (data-layer failure paths) · payment
+# networks & asset managers (financial-sector classification edge).
+companies:
+  # --- investment-grade mega-cap anchors -----------------------------------
+  - {ticker: AAPL,  why: "IG mega-cap anchor",                          agency: AA+}
+  - {ticker: MSFT,  why: "one of two corporate AAAs",                   agency: AAA}
+  - {ticker: JNJ,   why: "the other corporate AAA",                     agency: AAA}
+  - {ticker: GOOGL, why: "dual share class (A vs C) share-count case",  agency: AA+}
+  - {ticker: AMZN,  why: "original-universe anchor, floor-pinned",      agency: AA}
+  - {ticker: META,  why: "dual class, founder super-voting",            agency: AA-}
+  - {ticker: NVDA,  why: "mega-cap with equity-vol regime shifts",      agency: AA-}
+  - {ticker: CRM,   why: "IG software, acquisition debt",               agency: A+}
+  - {ticker: AVGO,  why: "semis with LBO-scale acquisition debt",       agency: BBB+}
+  - {ticker: AMD,   why: "cyclical semis, recovered credit",            agency: A-}
+  - {ticker: MU,    why: "memory-cycle boom/bust issuer",               agency: BBB-}
+  - {ticker: INTC,  why: "fallen-angel trajectory, capex strain",       agency: BBB}
+  - {ticker: IBM,   why: "legacy IG with heavy debt",                   agency: A-}
+  - {ticker: ORCL,  why: "original universe; buyback-levered",          agency: BBB}
+  - {ticker: INTU,  why: "original universe; defective-drift case",     agency: A-}
+  - {ticker: DELL,  why: "original universe; negative book equity",     agency: BBB}
+  # --- negative book equity (buyback artifacts, not distress) --------------
+  - {ticker: MCD,   why: "negative book equity from buybacks",          agency: BBB+}
+  - {ticker: SBUX,  why: "negative book equity from buybacks",          agency: BBB}
+  - {ticker: HD,    why: "negative book equity from buybacks",          agency: A}
+  - {ticker: LOW,   why: "negative book equity from buybacks",          agency: BBB+}
+  - {ticker: BA,    why: "negative equity + genuine credit stress",     agency: BBB-}
+  - {ticker: PM,    why: "negative book equity, stable cash cow",       agency: A-}
+  - {ticker: YUM,   why: "negative equity, franchise leverage",         agency: BB+}
+  - {ticker: AZO,   why: "negative equity by design (buybacks)",        agency: BBB}
+  - {ticker: DPZ,   why: "negative equity, franchise leverage",         agency: null}
+  # --- banks (applicability gate must catch all of these) ------------------
+  - {ticker: JPM,   why: "money-center bank -- gate check",             agency: A-}
+  - {ticker: BAC,   why: "money-center bank -- gate check",             agency: A-}
+  - {ticker: WFC,   why: "money-center bank -- gate check",             agency: BBB+}
+  - {ticker: C,     why: "money-center bank -- gate check",             agency: BBB+}
+  - {ticker: GS,    why: "capital-markets bank -- gate check",          agency: BBB+}
+  - {ticker: MS,    why: "capital-markets bank -- gate check",          agency: A-}
+  - {ticker: PNC,   why: "original universe; the gate's motivating case", agency: A}
+  - {ticker: SCHW,  why: "broker with a bank balance sheet",            agency: A}
+  - {ticker: COF,   why: "card lender / bank hybrid",                   agency: BBB}
+  - {ticker: ALLY,  why: "auto lender, industry 'Credit Services'",     agency: BBB-}
+  - {ticker: KEY,   why: "regional bank (2023-class stress cohort)",    agency: BBB}
+  - {ticker: AXP,   why: "card network WITH deposits -- edge of gate",  agency: BBB+}
+  # --- payment networks & asset managers (classification edge: NOT banks) --
+  - {ticker: V,     why: "payment network, industry 'Credit Services' -- must NOT gate", agency: AA-}
+  - {ticker: MA,    why: "payment network, same classification edge",   agency: A+}
+  - {ticker: PYPL,  why: "fintech, 'Credit Services' but no deposits",  agency: A-}
+  - {ticker: BLK,   why: "asset manager -- financial but ordinary balance sheet", agency: AA-}
+  - {ticker: BX,    why: "alternative asset manager",                   agency: A+}
+  - {ticker: SPGI,  why: "the rating agency itself, financial-sector label", agency: A-}
+  # --- insurers (gate) ------------------------------------------------------
+  - {ticker: BRK-B, why: "insurer + dual class + hyphenated symbol",    agency: AA}
+  - {ticker: AIG,   why: "insurer -- gate check",                       agency: BBB+}
+  - {ticker: MET,   why: "life insurer -- reserve liabilities",         agency: A-}
+  - {ticker: ALL,   why: "P&C insurer",                                 agency: A-}
+  - {ticker: PGR,   why: "P&C insurer",                                 agency: A}
+  # --- REITs (gate) ---------------------------------------------------------
+  - {ticker: PLD,   why: "industrial REIT -- gate check",               agency: A}
+  - {ticker: AMT,   why: "tower REIT, heavy leverage",                  agency: BBB-}
+  - {ticker: SPG,   why: "mall REIT",                                   agency: A-}
+  - {ticker: O,     why: "net-lease REIT",                              agency: A-}
+  - {ticker: EQIX,  why: "data-center REIT",                            agency: BBB}
+  # --- utilities (regulated, stable sigma_A end of the spectrum) ------------
+  - {ticker: NEE,   why: "utility holding co, low asset vol",           agency: A-}
+  - {ticker: DUK,   why: "regulated utility",                           agency: BBB+}
+  - {ticker: SO,    why: "regulated utility",                           agency: A-}
+  - {ticker: D,     why: "utility, single-letter symbol edge",          agency: BBB+}
+  - {ticker: XEL,   why: "utility with wildfire liability tail",        agency: BBB+}
+  - {ticker: PCG,   why: "post-bankruptcy utility (2019 Ch.11)",        agency: BB+}
+  - {ticker: VST,   why: "merchant power, HY-to-IG crossover",          agency: BB+}
+  # --- energy ----------------------------------------------------------------
+  - {ticker: XOM,   why: "IG major, commodity-price vol",               agency: AA-}
+  - {ticker: CVX,   why: "IG major",                                    agency: AA-}
+  - {ticker: COP,   why: "IG E&P",                                      agency: A-}
+  - {ticker: OXY,   why: "leveraged E&P, fallen-and-recovered",         agency: BBB-}
+  - {ticker: SLB,   why: "oil services",                                agency: A}
+  - {ticker: KMI,   why: "midstream, high fixed debt",                  agency: BBB}
+  - {ticker: APA,   why: "HY-edge E&P",                                 agency: BB+}
+  - {ticker: BTU,   why: "coal -- structurally out-of-favor HY",        agency: B+}
+  - {ticker: RIG,   why: "offshore driller, deep HY, cyclical distress", agency: CCC+}
+  # --- healthcare -------------------------------------------------------------
+  - {ticker: LLY,   why: "mega-cap pharma",                             agency: A+}
+  - {ticker: UNH,   why: "managed care (insurer-adjacent but corporate)", agency: A+}
+  - {ticker: PFE,   why: "pharma with post-COVID revenue cliff",        agency: A}
+  - {ticker: MRK,   why: "IG pharma",                                   agency: A+}
+  - {ticker: ABBV,  why: "pharma, acquisition leverage",                agency: BBB+}
+  - {ticker: AMGN,  why: "biotech with acquisition debt",               agency: BBB+}
+  - {ticker: CVS,   why: "levered health conglomerate",                 agency: BBB}
+  - {ticker: MRNA,  why: "cash-rich, collapsed revenue -- odd drift",   agency: null}
+  - {ticker: HCA,   why: "hospital operator, HY-to-IG crossover",       agency: BBB-}
+  - {ticker: THC,   why: "hospital operator, HY",                       agency: B+}
+  - {ticker: CYH,   why: "genuinely distressed hospital chain",         agency: CCC+}
+  # --- consumer ---------------------------------------------------------------
+  - {ticker: KO,    why: "original universe anchor",                    agency: A+}
+  - {ticker: WMT,   why: "original universe anchor",                    agency: AA}
+  - {ticker: COST,  why: "original universe anchor",                    agency: A+}
+  - {ticker: TGT,   why: "IG retail",                                   agency: A}
+  - {ticker: NKE,   why: "dual class, IG consumer",                     agency: AA-}
+  - {ticker: DIS,   why: "media conglomerate",                          agency: A-}
+  - {ticker: DG,    why: "discount retail, downgrade path",             agency: BBB}
+  - {ticker: DLTR,  why: "discount retail",                             agency: BBB}
+  - {ticker: KHC,   why: "original universe; defective drift",          agency: BBB}
+  - {ticker: GIS,   why: "IG staples",                                  agency: BBB}
+  - {ticker: KSS,   why: "structurally challenged retail, HY",          agency: BB}
+  - {ticker: M,     why: "structurally challenged retail, HY",          agency: BB-}
+  - {ticker: W,     why: "unprofitable e-commerce, HY",                 agency: B+}
+  - {ticker: BYND,  why: "genuinely distressed, going-concern risk",    agency: CCC-}
+  # --- telecom / media ---------------------------------------------------------
+  - {ticker: T,     why: "original universe; 7-notch convention case",  agency: BBB}
+  - {ticker: VZ,    why: "IG telecom, heavy debt",                      agency: BBB+}
+  - {ticker: TMUS,  why: "IG telecom",                                  agency: BBB}
+  - {ticker: CHTR,  why: "levered cable, HY",                           agency: BB+}
+  - {ticker: WBD,   why: "fallen angel (2025 downgrade to HY)",         agency: BB}
+  - {ticker: PARA,  why: "fallen angel media",                          agency: BB-}
+  - {ticker: LUMN,  why: "genuinely distressed telecom",                agency: CCC+}
+  - {ticker: SATS,  why: "genuinely distressed satellite/spectrum",     agency: CCC}
+  # --- industrials --------------------------------------------------------------
+  - {ticker: CAT,   why: "IG cyclical bellwether",                      agency: A}
+  - {ticker: DE,    why: "IG cyclical",                                 agency: A}
+  - {ticker: GE,    why: "post-breakup aerospace",                      agency: A-}
+  - {ticker: LMT,   why: "defense IG",                                  agency: A-}
+  - {ticker: RTX,   why: "defense IG",                                  agency: BBB+}
+  - {ticker: FDX,   why: "IG logistics, cyclical",                      agency: BBB}
+  - {ticker: MMM,   why: "litigation-driven downgrade path",            agency: BBB+}
+  - {ticker: XRX,   why: "secular decline, HY",                         agency: BB-}
+  - {ticker: PBI,   why: "secular decline, deep HY",                    agency: B+}
+  # --- autos / EV ----------------------------------------------------------------
+  - {ticker: TSLA,  why: "high equity vol, crossover credit",           agency: BBB}
+  - {ticker: F,     why: "dual class, crossover credit",                agency: BBB-}
+  - {ticker: GM,    why: "crossover credit",                            agency: BBB}
+  - {ticker: RIVN,  why: "cash-burning EV, deep HY",                    agency: B-}
+  - {ticker: LCID,  why: "cash-burning EV, sovereign-backstopped",      agency: null}
+  # --- airlines / cruise / leisure (HY block) -------------------------------------
+  - {ticker: DAL,   why: "airline, IG-crossover",                       agency: BBB-}
+  - {ticker: UAL,   why: "airline HY",                                  agency: BB}
+  - {ticker: AAL,   why: "airline deep HY, huge debt",                  agency: B+}
+  - {ticker: CCL,   why: "cruise HY, pandemic-debt overhang",           agency: BB}
+  - {ticker: RCL,   why: "cruise HY-to-IG recovery",                    agency: BB+}
+  - {ticker: NCLH,  why: "cruise deep HY",                              agency: B+}
+  - {ticker: MGM,   why: "gaming HY",                                   agency: BB-}
+  - {ticker: CZR,   why: "gaming deep HY, LBO debt",                    agency: B}
+  # --- high volatility / crypto-adjacent ------------------------------------------
+  - {ticker: COIN,  why: "crypto exchange, extreme sigma_A",            agency: BB-}
+  - {ticker: MSTR,  why: "bitcoin-holding leverage machine",            agency: B-}
+  - {ticker: GME,   why: "meme equity, no agency rating",               agency: null}
+  - {ticker: AMC,   why: "genuinely distressed, meme equity",           agency: CCC+}
+  - {ticker: PLTR,  why: "high-multiple, cash-rich, no debt to speak of", agency: null}
+  # --- recent IPOs / spins (short history -- EM window stress) --------------------
+  - {ticker: ARM,   why: "2023 IPO + ADR: short history",               agency: null}
+  - {ticker: CAVA,  why: "2023 IPO: short history",                     agency: null}
+  - {ticker: KVUE,  why: "2023 spin-off: short history",                agency: BBB+}
+  - {ticker: RDDT,  why: "2024 IPO: very short history",                agency: null}
+  - {ticker: ALAB,  why: "2024 IPO: very short history",                agency: null}
+  - {ticker: TEM,   why: "2024 IPO: very short history",                agency: null}
+  - {ticker: BIRK,  why: "2023 IPO, foreign issuer",                    agency: BB+}
+  - {ticker: GEHC,  why: "2023 spin-off",                               agency: BBB}
+  - {ticker: SOLV,  why: "2024 spin-off: short history",                agency: BBB}
+  - {ticker: LINE,  why: "2024 IPO + REIT: two gates at once",          agency: BBB+}
+  # --- ADRs (foreign issuers; reporting-currency mismatch risk) --------------------
+  - {ticker: TSM,   why: "ADR: financials in TWD, price in USD",        agency: AA-}
+  - {ticker: BABA,  why: "ADR: financials in CNY",                      agency: A+}
+  - {ticker: NVO,   why: "ADR: financials in DKK",                      agency: AA-}
+  - {ticker: SAP,   why: "ADR: financials in EUR",                      agency: A+}
+  - {ticker: TM,    why: "ADR: financials in JPY, huge captive-finance debt", agency: A+}
+  - {ticker: ASML,  why: "ADR: financials in EUR",                      agency: A}
+  - {ticker: AZN,   why: "ADR: financials in USD (UK issuer)",          agency: A}
+  - {ticker: SHEL,  why: "ADR: financials in USD (UK issuer)",          agency: A+}
+  # --- delisted / bankrupt (data-layer failure paths, on purpose) -------------------
+  - {ticker: NKLA,  why: "bankrupt Feb 2025 -- delisted-path test",     agency: null}
+  - {ticker: SPWR,  why: "bankrupt 2024 -- delisted-path test",         agency: null}
+  - {ticker: FSR,   why: "bankrupt 2024 -- delisted-path test",         agency: null}
