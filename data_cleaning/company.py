@@ -82,6 +82,10 @@ class CompanyData:
     # NOT_APPLICABLE. Only GRID_INTERIOR (and, once Eq. 27 lands, ANALYTICAL)
     # carries a letter; the others report none rather than a clamped one.
     rating_basis: Optional[str] = None
+    # What decided the letter: MODEL_DETERMINED | PINNED_AT_FLOOR |
+    # PINNED_AT_SCALE_TOP | NOT_RATED. See docs/RATING_DETERMINATION.md.
+    rating_determination: Optional[str] = None
+    sp_risk_score: Optional[float] = None   # Eq. (27) output, analytical route
     # True when the TTC PD sits on the grid's smallest expressible value (2bp).
     # The letter is then floor-determined, not model-determined.
     ttc_at_floor: Optional[bool] = None

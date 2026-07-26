@@ -43,7 +43,8 @@ CANONICAL_ASSET_COLUMNS: tuple[str, ...] = (
 )
 
 # Appended to the canonical set. See the module docstring.
-EXTENDED_ASSET_COLUMNS: tuple[str, ...] = ("lambda", "Rating Basis")
+EXTENDED_ASSET_COLUMNS: tuple[str, ...] = (
+    "lambda", "Rating Basis", "Rating Determination")
 
 ASSET_SCHEMA: tuple[str, ...] = CANONICAL_ASSET_COLUMNS + EXTENDED_ASSET_COLUMNS
 
@@ -51,8 +52,8 @@ ASSET_SCHEMA: tuple[str, ...] = CANONICAL_ASSET_COLUMNS + EXTENDED_ASSET_COLUMNS
 VALIDATION_SCHEMA: tuple[str, ...] = (
     "Symbol", "Data Status", "EM converged", "EM iters", "sigma_A",
     "Drift regime", "Drift SE", "Drift span (y)", "Rating basis",
-    "TTC at floor", "Off-grid", "Statement available at", "Availability method",
-    "Warnings",
+    "TTC at floor", "Off-grid", "Rating determination", "S&P RiskScore",
+    "Statement available at", "Availability method", "Warnings",
 )
 
 
@@ -146,6 +147,8 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
         "sp_rating": c.sp_rating,
         "outlook": c.outlook,
         "rating_basis": c.rating_basis,
+        "rating_determination": c.rating_determination,
+        "sp_risk_score": c.sp_risk_score,
         "ttc_at_floor": c.ttc_at_floor,
         "rating_off_grid": c.rating_off_grid,
         # Provenance / diagnostics -- validation sheet only
@@ -188,6 +191,7 @@ def asset_row(c: CompanyData) -> dict[str, Any]:
         "Outlook": r["outlook"],
         "lambda": r["lam"],
         "Rating Basis": r["rating_basis"],
+        "Rating Determination": r["rating_determination"],
     }
     assert tuple(row) == ASSET_SCHEMA, "asset_row drifted from ASSET_SCHEMA"
     return row
@@ -209,9 +213,12 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
                      "TTC/rating NOT_APPLICABLE")
     if r["rating_basis"] == "OFF_GRID":
         flags.append("(CCM, mu) outside the conversion grid -> no rating reported")
-    if r["ttc_at_floor"]:
+    if r["rating_determination"] == "PINNED_AT_FLOOR":
         flags.append("TTC PD sits on the grid's 2bp floor -> rating is "
                      "floor-determined, not model-determined")
+    if r["rating_determination"] == "PINNED_AT_SCALE_TOP":
+        flags.append("RiskScore below the best published grade -> rating is "
+                     "scale-determined, not model-determined")
     flags.extend(r["em_warnings"] or [])
 
     row = {
@@ -226,6 +233,8 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
         "Rating basis": r["rating_basis"],
         "TTC at floor": bool(r["ttc_at_floor"]),
         "Off-grid": bool(r["rating_off_grid"]),
+        "Rating determination": r["rating_determination"],
+        "S&P RiskScore": r["sp_risk_score"],
         "Statement available at": r["statement_available_at"],
         "Availability method": r["availability_method"],
         "Warnings": "; ".join(flags) if flags else "OK",

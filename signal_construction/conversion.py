@@ -82,6 +82,51 @@ class ConversionTables:
     sp_thresholds: np.ndarray     # ascending lower-bound PD per label
 
 
+class RatingDetermination(enum.Enum):
+    """What actually decided the letter: the model, or the edge of a scale.
+
+    A rating basis (`RatingBasis`) says which *route* produced a number. This
+    says whether that number carries information.
+
+    MODEL_DETERMINED     the TTC PD sits strictly inside the range the route can
+                         express, so the letter moves when the model moves.
+    PINNED_AT_FLOOR      the grid lookup returned its smallest expressible value
+                         (2bp in the shipped workbook). The model asked for
+                         something smaller; the table had nothing left to say.
+    PINNED_AT_SCALE_TOP  the analytical route produced a RiskScore below the best
+                         published grade of the Table 8 scale (2.7), so the TTC
+                         PD is that grade's 0.01% whatever the model said.
+    NOT_RATED            no letter was produced at all (OFF_GRID or the drift
+                         regime is defective).
+
+    This is not a defect report. A structural model applied to large
+    investment-grade issuers produces one-year default probabilities many orders
+    of magnitude below anything a rating scale resolves -- see
+    docs/RATING_DETERMINATION.md. Publishing the count is how the deliverable
+    stays honest about which of its ratings are measurements.
+    """
+
+    MODEL_DETERMINED = "MODEL_DETERMINED"
+    PINNED_AT_FLOOR = "PINNED_AT_FLOOR"
+    PINNED_AT_SCALE_TOP = "PINNED_AT_SCALE_TOP"
+    NOT_RATED = "NOT_RATED"
+
+
+def classify_determination(basis: "RatingBasis | None", at_floor: bool | None,
+                           risk_score: float | None = None) -> RatingDetermination:
+    """Classify a rating by what decided it."""
+    if basis is None or basis in (RatingBasis.OFF_GRID, RatingBasis.NOT_APPLICABLE):
+        return RatingDetermination.NOT_RATED
+    if basis is RatingBasis.ANALYTICAL:
+        if risk_score is not None and is_scale_floor_determined(risk_score):
+            return RatingDetermination.PINNED_AT_SCALE_TOP
+        if at_floor:
+            return RatingDetermination.PINNED_AT_SCALE_TOP
+        return RatingDetermination.MODEL_DETERMINED
+    return (RatingDetermination.PINNED_AT_FLOOR if at_floor
+            else RatingDetermination.MODEL_DETERMINED)
+
+
 class RatingBasis(enum.Enum):
     """How a reported rating was arrived at. Every rating carries one.
 
@@ -111,7 +156,8 @@ class GridLookup:
     value: float
     off_grid: bool                # True if (CCM, mu) was clamped to an edge
     basis: RatingBasis = RatingBasis.GRID_INTERIOR
-    at_floor: bool = False        # value sits on the grid's TTC floor (2bp)
+    at_floor: bool = False        # value sits at the edge of what the route expresses
+    risk_score: float = float("nan")   # analytical route only: Eq. (27) output
 
 
 def _axis(series: pd.Series) -> np.ndarray:
@@ -221,7 +267,7 @@ def ttc_pd(tables: ConversionTables, ccm: float, mu: float,
     # For an analytical rating "at floor" means the *scale* ran out, not the
     # grid: the RiskScore fell below Table 8's best grade.
     return GridLookup(analytical.ttc_pd, True, RatingBasis.ANALYTICAL,
-                      analytical.at_scale_floor)
+                      analytical.at_scale_floor, analytical.risk_score)
 
 
 # Width of the grid's floor region, as a multiple of the floor itself. The

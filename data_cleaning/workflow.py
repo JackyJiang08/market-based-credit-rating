@@ -220,6 +220,10 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             data.rating_basis = ttc.basis.value
             data.rating_off_grid = ttc.off_grid
             data.ttc_at_floor = ttc.at_floor
+            data.sp_risk_score = (float(ttc.risk_score)
+                                  if ttc.risk_score == ttc.risk_score else None)
+            data.rating_determination = conversion.classify_determination(
+                ttc.basis, ttc.at_floor, ttc.risk_score).value
             if ttc.basis in (conversion.RatingBasis.GRID_INTERIOR,
                              conversion.RatingBasis.ANALYTICAL):
                 data.sp_rating = conversion.sp_rating(tables, ttc.value)

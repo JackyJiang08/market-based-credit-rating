@@ -111,3 +111,11 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   latest one downloaded. On the valuation date only T is affected — its 2026-06-30
   statement is 25 days old and therefore not yet public — moving D by −4.69% and its
   rating AA→A+; PNC moves AA+→AAA- from the historical panel change.
+- **Part B** Added `RatingDetermination` (`MODEL_DETERMINED` / `PINNED_AT_FLOOR` /
+  `PINNED_AT_SCALE_TOP` / `NOT_RATED`) as a first-class output: a `Rating Determination`
+  column on the Asset sheet, the classification plus the S&P RiskScore on the validation
+  sheet, a count in the README, and `docs/RATING_DETERMINATION.md` explaining why the
+  pinning is a property of structural models in the investment-grade region. Current
+  standing: 4 model-determined, 3 scale-top-pinned, 1 floor-pinned, 2 not rated — the
+  analytical route (#11) took rated coverage 5→8 without adding a single
+  model-determined name.

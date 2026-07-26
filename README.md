@@ -88,6 +88,27 @@ paper's tables, and conversion checks. Grid/lookup tests that need the
 proprietary workbook skip automatically when `local/` is absent, so a fresh
 clone is green.
 
+## What determines a rating
+
+Every published letter carries a `Rating Determination`, because not every letter is a
+measurement. A structural model applied to a large investment-grade issuer produces
+one-year default probabilities many orders of magnitude below anything a rating scale
+resolves, so some ratings are set by the edge of a scale rather than by the model.
+
+As of the 2026-07-25 run, of ten companies:
+
+| Determination | Count | |
+|---|---:|---|
+| `MODEL_DETERMINED` | **4** | the letter moves when the model moves |
+| `PINNED_AT_SCALE_TOP` | **3** | RiskScore below the best published grade |
+| `PINNED_AT_FLOOR` | **1** | TTC PD at the conversion grid's 2bp floor |
+| `NOT_RATED` | **2** | defective drift regime (Prop. 4.4.1) |
+
+"8 of 10 rated" without "4 of 10 model-determined" overstates what the model established.
+For investment-grade comparison, rank on `DD` and `RiskScore` rather than on the letter.
+Full explanation, including why this is a property of the model class and not a defect:
+[`docs/RATING_DETERMINATION.md`](docs/RATING_DETERMINATION.md).
+
 ## Known limitations
 
 - **Market-based PIT PD is liquidity-sensitive.** For large, liquid,
