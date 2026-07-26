@@ -9,14 +9,23 @@ investment-grade region — not a defect in this implementation**.
 
 | Value | Meaning |
 |---|---|
-| `MODEL_DETERMINED` | The TTC PD sits strictly inside the range its route can express. The letter moves when the model moves. |
+| `SCALE_RESOLVED` | The TTC PD sits strictly inside the range its route can express, so the scale could tell it apart from its neighbours. **A statement about the scale, not about estimation precision.** |
 | `PINNED_AT_FLOOR` | The grid lookup returned its smallest expressible value (2bp in the shipped workbook). The model asked for something smaller; the table had nothing left to say. |
 | `PINNED_AT_SCALE_TOP` | The analytical route produced a RiskScore below the best published grade of the S&P TTC scale (Table 8, RiskScore 2.7). The TTC PD is that grade's 0.01% whatever the model computed. |
 | `NOT_RATED` | No letter was produced: `(CCM, µ)` fell outside every route, or the drift regime is defective (Prop. 4.4.1). |
 
-`Rating Basis` says which *route* produced a number. `Rating Determination` says whether
-that number carries information. They are different questions and the deliverable answers
-both.
+`Rating Basis` says which *route* produced a number. `Rating Determination` says whether the
+**scale** could resolve it. Neither says whether the **estimate** is precise -- that is
+`Drift t` and the bootstrap rating interval, in [`UNCERTAINTY.md`](UNCERTAINTY.md).
+
+Three different questions, three different fields. Reading one for another is the mistake
+the old name invited.
+
+> **Renamed 2026-07-26.** This field's `SCALE_RESOLVED` value was called
+> `MODEL_DETERMINED`. DELL shows why that was wrong: it has the strongest drift
+> t-statistic in the universe (2.01) *and* the widest bootstrap letter interval
+> (10 notches), because it sits where the S&P scale is finely notched. The old name
+> implied a precision claim the classification never made.
 
 ## Current standing
 
@@ -24,23 +33,26 @@ Ten companies, as of the 2026-07-25 run:
 
 | Determination | Count | Companies |
 |---|---:|---|
-| `MODEL_DETERMINED` | **4** | DELL, ORCL, T, PNC |
+| `SCALE_RESOLVED` | **4** | DELL, ORCL, T, PNC |
 | `PINNED_AT_SCALE_TOP` | **3** | COST, KO, WMT |
 | `PINNED_AT_FLOOR` | **1** | AMZN |
 | `NOT_RATED` | **2** | INTU, KHC |
 
-**Only 4 of 10 published letters are measurements.** Half the rated names are pinned at the
-edge of a scale.
+**Only 4 of 10 published letters are ones the scale could resolve.** Half the rated names
+are pinned at the edge of a scale.
+
+And resolution is not precision: **none of those four has a tight interval.** DELL spans 10
+notches, T 6, ORCL 4, PNC 3. See [`UNCERTAINTY.md`](UNCERTAINTY.md).
 
 One caveat on PNC: its TTC PD is 0.000225 against a 2bp floor, i.e. 1.13× the floor. It
 clears the saturation band but not by much, and it should be read as a borderline case
 rather than a resolved one. T (0.000643, 3.2× the floor) and DELL and ORCL are clear.
 
-### The analytical route did not add model-determined coverage
+### The analytical route did not add scale-resolved coverage
 
 Wiring in the Prop. 5.2.1 analytical conversion (#11) took the rated count from 5 to 8 by
 rating COST, KO and WMT, which had been `OFF_GRID`. **All three came back
-`PINNED_AT_SCALE_TOP`.** Model-determined coverage did not increase by one.
+`PINNED_AT_SCALE_TOP`.** Scale-resolved coverage did not increase by one.
 
 That is worth stating plainly because it is easy to read "5 → 8 rated" as progress in
 coverage. It is progress in *honesty* — those three companies now get a letter and an
@@ -93,11 +105,15 @@ pipeline produces and, in this region, the least informative.
 
 ## Consequences for how the deliverable is read
 
-- The three-way count belongs next to any statement of coverage. "8 of 10 rated" without
-  "4 of 10 model-determined" overstates what the model established.
+- The count belongs next to any statement of coverage. "8 of 10 rated" without "4 of 10
+  scale-resolved" overstates coverage -- and neither number says anything about precision.
 - Comparisons between two pinned names are not meaningful at the letter level.
 - A change that moves a pinned name's inputs will usually not move its letter. That is not
   evidence the change had no effect.
-- Improving coverage of *model-determined* ratings means either a scale with more
-  resolution at the safe end, or accepting that the investment-grade region is where this
-  class of model has least to say.
+- Improving coverage of *scale-resolved* ratings means either a scale with more resolution
+  at the safe end, or accepting that the investment-grade region is where this class of
+  model has least to say.
+- **Never present a letter bare.** It is a derived, wide-interval conversion and carries
+  its interval and flags wherever it appears -- README, workbook, API, UI. ORCL is written
+  `BB (BBB-..BB-, unrateable in ~44% of replicates, weakly identified: t = 0.08)`, never
+  `BB`. See [`UNCERTAINTY.md`](UNCERTAINTY.md).

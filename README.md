@@ -88,26 +88,85 @@ paper's tables, and conversion checks. Grid/lookup tests that need the
 proprietary workbook skip automatically when `local/` is absent, so a fresh
 clone is green.
 
-## What determines a rating
+## Results: what survives uncertainty, and what does not
 
-Every published letter carries a `Rating Determination`, because not every letter is a
-measurement. A structural model applied to a large investment-grade issuer produces
-one-year default probabilities many orders of magnitude below anything a rating scale
-resolves, so some ratings are set by the edge of a scale rather than by the model.
+**The drift-free rating and the rank ordering survive uncertainty. The PD-based letter
+does not.** A moving-block bootstrap over the EM-recovered asset returns (2,000
+replicates, `signal_construction/bootstrap.py`) separates the two cleanly:
 
-As of the 2026-07-25 run, of ten companies:
+| Quantity | Median relative interval width | Amplification |
+|---|---:|---|
+| σ_A | 0.239 | — |
+| **RiskScore** (Eq. 12, drift-free) | **0.479** | **×2.00 vs σ_A** |
+| DD (Eq. 14) | 0.317 | ×1.3 |
+| TTC PD | 1.512 | ×3.2 vs RiskScore |
+| **PIT PD** (Eq. 13) | **~1,960** | **×4,077 vs RiskScore** |
+
+×2.00 is not approximately the square — it *is* the square. Differentiating
+`RiskScore ∝ σ_A²` gives `d(RS)/RS = 2·dσ/σ`, and the measured ratio is 2.00. RiskScore
+inherits the volatility's uncertainty and **nothing else**; no instability enters before
+the conversion. The amplification is introduced entirely by the PD-based conversion layer.
+
+**Rank ordering is stable.** Kendall's τ between each replicate's ordering of the ten
+companies and the point-estimate ordering: **median 0.956**, 5th percentile 0.867, and
+99.9% of replicates score τ ≥ 0.8. The safest and riskiest names are essentially never
+misordered — COST ranks 1st in 100% of replicates, ORCL 10th in 99.7%.
+
+**Two honesty points, both load-bearing:**
+
+1. **RiskScore at 48% relative width is *unamplified*, not tight.** A ±24% band on a risk
+   score is material. The claim is that it is exactly what its inputs support and ~4,000×
+   better than the PD route — not that it is precise.
+2. **The ordering shuffles in the genuinely-close middle.** INTU, KHC and T occupy ranks
+   5–9 and swap freely (INTU holds its exact point rank in only 35% of replicates). The
+   stability is at the extremes, where the companies are actually far apart.
+
+### Why this is the paper's own thesis, demonstrated numerically
+
+This is not a defect we discovered; it is the result the framework predicts. Prop. 4.4.2
+establishes that `TiC = σ_A²/ln²(A₀/D)` is invariant under the Girsanov change of measure
+**precisely because it does not depend on η** — the `(η − σ_A²/2)` terms cancel exactly
+between Eq. (11) and Eq. (12). Every other quantity in the chain keeps that dependence:
+`µ` and `CCM` divide by the drift (Eq. 11), and Eq. (13) then exponentiates it through the
+inverse-Gaussian first-hitting formula. Section 2's critique of PD-based agency ratings is
+the qualitative version of the same argument.
+
+Our contribution is the measurement: a ×4,077 amplification between two quantities computed
+from the same two parameters, on ten real companies.
+
+### How a rating must be presented
+
+**A letter rating is a derived, wide-interval conversion. It is never the headline.**
+Wherever one appears — this README, the workbook, the API, the UI — it carries its
+bootstrap interval and its flags. Concretely, ORCL is never written as `BB`; it is written
+
+> **BB** (BBB−..BB−, unrateable in ~44% of replicates, weakly identified: drift t = 0.08)
+
+Lead with `RiskScore` and the rank ordering. Use the letter only where an external
+counterparty requires one, and never without its interval.
+
+## What the scale could resolve
+
+Separately from precision, `Rating Determination` records whether the *scale* could tell a
+value from its neighbours. As of the 2026-07-26 run, of ten companies:
 
 | Determination | Count | |
 |---|---:|---|
-| `MODEL_DETERMINED` | **4** | the letter moves when the model moves |
+| `SCALE_RESOLVED` | **4** | the value sits inside the range the route can express |
 | `PINNED_AT_SCALE_TOP` | **3** | RiskScore below the best published grade |
 | `PINNED_AT_FLOOR` | **1** | TTC PD at the conversion grid's 2bp floor |
 | `NOT_RATED` | **2** | defective drift regime (Prop. 4.4.1) |
 
-"8 of 10 rated" without "4 of 10 model-determined" overstates what the model established.
-For investment-grade comparison, rank on `DD` and `RiskScore` rather than on the letter.
-Full explanation, including why this is a property of the model class and not a defect:
-[`docs/RATING_DETERMINATION.md`](docs/RATING_DETERMINATION.md).
+`SCALE_RESOLVED` is a statement about the scale, **not** about estimation precision. DELL
+is the case that proves it: strongest drift t-statistic in the universe (2.01) and the
+*widest* letter interval (10 notches), because it sits where the S&P scale is finely
+notched. The field was called `MODEL_DETERMINED` until 2026-07-26; that name implied a
+precision claim it never made. Precision is answered by `Drift t` and the rating interval.
+
+"8 of 10 rated" without "4 of 10 scale-resolved" overstates coverage, and neither number
+says anything about precision. Full explanation:
+[`docs/RATING_DETERMINATION.md`](docs/RATING_DETERMINATION.md); the uncertainty method and
+its known limits: [`docs/UNCERTAINTY.md`](docs/UNCERTAINTY.md).
 
 ## Known limitations
 

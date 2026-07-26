@@ -143,3 +143,10 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   and raises outside [0, 0.30]; a missing `Adj Close` is NaN rather than `Close`; the FRED
   date column is found by name. `#20` the remaining silent excepts are narrowed to specific
   exception types and report at WARNING. No rating moved.
+- **Part A** Renamed `MODEL_DETERMINED` → `SCALE_RESOLVED` (the label measures scale
+  resolution, not estimation precision — DELL has the strongest t and the widest interval).
+  Rewrote the README around the decomposition: RiskScore unamplified at ×2.00 of σ and rank
+  ordering stable (τ median 0.956) versus PIT PD at ×4,077; framed as a numerical
+  demonstration of Prop. 4.4.2. Added the rule that a letter is never a headline and always
+  carries its interval and flags. Added `docs/UNCERTAINTY.md` recording the method, its
+  limits, and the two bootstrap bugs that testing the algebraic prediction exposed.

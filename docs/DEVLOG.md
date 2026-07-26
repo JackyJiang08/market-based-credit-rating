@@ -35,6 +35,45 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Documentation rewritten around the decomposition finding
+
+- **Scope:** documentation only. No code, no model output.
+- **Summary:**
+  - `README.md` gained a "Results: what survives uncertainty, and what does
+    not" section leading on the two-sided headline: RiskScore's interval is
+    exactly 2.00x sigma's (the square, unamplified) and rank ordering is stable
+    (Kendall tau median 0.956), while TTC PD is 3.2x RiskScore and PIT PD
+    4,077x. Both honesty points are stated in the section rather than in a
+    footnote: 48% relative width is unamplified, NOT tight; and the ordering
+    shuffles in the genuinely-close middle (INTU holds its exact rank in 35% of
+    replicates).
+  - Framed as an independent numerical demonstration of the paper's own thesis,
+    citing Prop. 4.4.2 and the Eq. (11) -> Eq. (12) cancellation for why TiC is
+    Girsanov-invariant, and Eq. (13) for where the amplification enters.
+  - Added the presentation rule: a letter is a derived, wide-interval
+    conversion, never a headline, and always carries its interval and flags.
+    ORCL is written `BB (BBB-..BB-, unrateable in ~44% of replicates, weakly
+    identified: t = 0.08)` and never bare. Stated in README,
+    RATING_DETERMINATION.md and UNCERTAINTY.md so it binds the API and UI too.
+  - Added `docs/UNCERTAINTY.md`: method, stated limits, findings, and the bug
+    episode written as it happened.
+  - `docs/RATING_DETERMINATION.md` reworked for the rename and to separate three
+    questions that were being conflated: which route produced a number (basis),
+    whether the scale could resolve it (determination), and whether the estimate
+    is precise (drift t and the interval).
+- **The episode is recorded, not smoothed over:** the algebraic prediction
+  (`TiC = CCM/mu = sigma^2/ln^2(A/D)`, so RiskScore must be drift-free) was
+  tested, it failed, and the failure was ours -- drift-conditioned selection on
+  a drift-free quantity, and a bootstrap that resampled a different window than
+  the estimator uses. The previously published intervals were too narrow; DELL
+  was reported as 8 notches and is 10. Prediction-testing stays in the workflow,
+  and UNCERTAINTY.md says why: an algebraic identity is a free test oracle that
+  needs no reference dataset, and it caught in minutes what a 267-test suite did
+  not.
+- **Validation:** `python -m pytest -q` -> 271 passed, run before this push.
+- **Follow-ups:** Part B (convention uncertainty sweep) and Part C (financial
+  firms, #16) not started.
+
 ### 2026-07-26 - Rename MODEL_DETERMINED -> SCALE_RESOLVED
 
 - **Scope:** `RatingDetermination` enum value and the docstrings that define
