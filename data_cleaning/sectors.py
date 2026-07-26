@@ -169,6 +169,13 @@ REASON_TEXT = {
     "REIT_ASSET_STRUCTURE":
         "Asset value is property-appraisal driven and the capital structure is "
         "shaped by distribution requirements rather than default risk.",
+    "REPORTING_CURRENCY_MISMATCH":
+        "The statements report in a different currency than the listed price "
+        "(an ADR filing in its home currency). Equity and the debt barrier "
+        "would enter the inversion in different units, so EM and the measures "
+        "are skipped entirely rather than published unit-corrupt. No FX "
+        "conversion is attempted: a converted statement at a chosen rate "
+        "would be a fabricated input.",
     "ASSETS_BELOW_TOTAL_DEBT":
         "Market-implied asset value does not clear the default barrier under "
         "the most conservative debt convention (ST + 1.0*LT). Inside that band "

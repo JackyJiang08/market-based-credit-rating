@@ -71,6 +71,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             LOG.warning("  info unavailable (%s): %s", exc.status.value, exc)
     data.name = info.get("longName") or info.get("shortName") or ticker
     data.currency = info.get("currency", "")
+    data.financial_currency = info.get("financialCurrency", "")
     data.sector = info.get("sector", "")
     data.industry = info.get("industry", "")
     data.market_cap = info.get("marketCap")
@@ -204,11 +205,31 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
                     "reported, the rating is not", status.value, reason,
                     firm_type.value)
 
+    # --- unit-consistency gate: statements must be in the price currency ---
+    # An ADR prices in USD while filing in its home currency, so E arrives in
+    # one unit and D in another. TM made this loud (EM raised: A <= D by a
+    # factor of JPY); TSM/BABA/SAP/ASML were silently RATED on the same
+    # mismatch, which is worse. No FX conversion is attempted -- converting
+    # statements at some chosen rate would be a fabricated input (rule 2) --
+    # the company is gated and the mismatch stated. Unlike the firm-type gate
+    # this also suppresses the measures: they would be unit-corrupt, not
+    # merely inapplicable.
+    if (data.model_applicable and data.currency and data.financial_currency
+            and data.currency != data.financial_currency):
+        data.model_applicable = False
+        data.applicability_reason = "REPORTING_CURRENCY_MISMATCH"
+        data.em_error = (f"statements report in {data.financial_currency}, "
+                         f"prices in {data.currency}; EM would mix units")
+        LOG.warning("  MODEL_NOT_APPLICABLE: REPORTING_CURRENCY_MISMATCH "
+                    "(%s statements vs %s prices) -- EM and measures skipped",
+                    data.financial_currency, data.currency)
+
     # --- EM asset-value estimation (Layer 3) ---
     _em_asset_path = None
     _em_debt_last = None
     _conversion_tables = None
-    if cfg.run_credit_model and not data.panel.empty:
+    if (cfg.run_credit_model and not data.panel.empty
+            and data.applicability_reason != "REPORTING_CURRENCY_MISMATCH"):
         # Import the modelling layer only when used, so Layer 1/2 tooling and
         # CLI help do not require SciPy.
         from signal_construction import config as sig_config, em, measures

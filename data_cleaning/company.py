@@ -47,6 +47,7 @@ class CompanyData:
     eta_A: Optional[float] = None         # annualized asset return (drift)
     asset_value: Optional[float] = None   # A on the last trading day
     em_iters: Optional[int] = None
+    financial_currency: str = ""   # currency of the STATEMENTS (may differ from price currency)
     em_converged: Optional[bool] = None
     em_warnings: list = field(default_factory=list)
     # Why EM/measures did not produce estimates, when they did not. Logged
