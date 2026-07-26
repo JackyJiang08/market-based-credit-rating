@@ -100,8 +100,16 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
                  prices.index.min().date(), prices.index.max().date())
 
     # Reference shares via the one-day method (mktcap / price).
-    data.reference_shares = transforms.reference_shares(
+    data.reference_shares, data.shares_method = transforms.reference_shares(
         data.market_cap, data.last_close, data.shares_traded_class)
+    # TIMING_PROTOCOL §3: the constant-share assumption is only permitted when
+    # its reference date is stored. That date is the last priced day, because
+    # that is the day market cap and price were both observed.
+    if not prices.empty:
+        data.shares_reference_date = prices.index[-1].date().isoformat()
+    if data.shares_method == "shares_outstanding_single_class":
+        LOG.warning("  shares: market cap unavailable; fell back to "
+                    "sharesOutstanding, which is one share class only")
 
     # --- dividends ---
     if not prices.empty and "Dividends" in prices:

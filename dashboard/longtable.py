@@ -116,5 +116,8 @@ def write_long_table(long_df: pd.DataFrame) -> None:
         pq_path = os.path.join(config.OUTPUT_DIR, "all_companies_long.parquet")
         long_df.to_parquet(pq_path, index=False)
         LOG.info("tidy long table -> %s", os.path.basename(pq_path))
-    except Exception as exc:  # noqa: BLE001
-        LOG.info("parquet skipped (%s); CSV is available", exc)
+    except (OSError, ImportError, ValueError) as exc:
+        # An artifact the caller asked for does not exist. CSV is still there,
+        # but that is a degraded result, not an informational note.
+        LOG.warning("parquet NOT written to %s (%s); only CSV is available",
+                    config.OUTPUT_DIR, exc)

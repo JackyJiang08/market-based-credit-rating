@@ -150,3 +150,81 @@ def test_retry_decorator_returns_on_success(monkeypatch):
         return "value"
 
     assert ok() == "value"
+
+
+# ===========================================================================
+# Unit and shape assumptions (#18) and provenance (#17)
+# ===========================================================================
+def test_risk_free_rate_outside_the_plausible_band_raises():
+    """A units change at the source must fail loudly, not scale everything."""
+    import numpy as np
+    import pandas as pd
+
+    from data_cleaning.alignment import build_panel
+
+    idx = pd.bdate_range("2024-01-02", periods=40)
+    prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
+    # A series arriving 100x too large is caught hard.
+    too_large = pd.Series([500.0], index=[pd.Timestamp("2024-01-01")])
+    with pytest.raises(ValueError, match="outside the plausible band"):
+        build_panel(prices, 1000.0, pd.DataFrame(), too_large)
+
+    # Percent input is accepted.
+    percent = pd.Series([5.0], index=[pd.Timestamp("2024-01-01")])
+    panel = build_panel(prices, 1000.0, pd.DataFrame(), percent)
+    assert panel["RiskFree_R"].dropna().iloc[0] == pytest.approx(0.05)
+
+
+def test_already_decimal_rate_warns_because_it_cannot_be_caught_by_a_band(caplog):
+    """The opposite units error is only detectable as 'suspiciously low'.
+
+    0.05 / 100 = 0.05% is a rate the 1-year Treasury has genuinely printed, so
+    no band can separate it from a real near-zero rate. It warns instead, and
+    this test pins that we do not pretend otherwise.
+    """
+    import logging
+
+    import pandas as pd
+
+    from data_cleaning.alignment import build_panel
+
+    idx = pd.bdate_range("2024-01-02", periods=40)
+    prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
+    already_decimal = pd.Series([0.05], index=[pd.Timestamp("2024-01-01")])
+
+    with caplog.at_level(logging.WARNING):
+        panel = build_panel(prices, 1000.0, pd.DataFrame(), already_decimal)
+    assert "may already be in decimals" in caplog.text or \
+        "switched to decimals" in caplog.text
+    assert panel["RiskFree_R"].notna().any()
+
+
+def test_missing_adj_close_is_nan_not_silently_the_close():
+    import numpy as np
+    import pandas as pd
+
+    from data_cleaning.alignment import build_panel
+
+    idx = pd.bdate_range("2024-01-02", periods=20)
+    prices = pd.DataFrame({"Close": 100.0, "Dividends": 0.0}, index=idx)
+    panel = build_panel(prices, 1000.0, pd.DataFrame(), None)
+    assert panel["AdjClose"].isna().all(), \
+        "Adj Close and Close differ across a split; do not substitute"
+
+
+def test_reference_shares_reports_which_method_it_used():
+    from data_cleaning import transforms
+
+    shares, method = transforms.reference_shares(1_000_000.0, 50.0, 12_345.0)
+    assert shares == pytest.approx(20_000.0)
+    assert method == "market_cap_over_price"
+
+    # The fallback is a single share class -- a different quantity for a
+    # dual-class issuer, so it must be labelled distinctly.
+    shares, method = transforms.reference_shares(None, 50.0, 12_345.0)
+    assert shares == 12_345.0
+    assert method == "shares_outstanding_single_class"
+
+    shares, method = transforms.reference_shares(None, None, None)
+    assert shares is None
+    assert method == "unavailable"

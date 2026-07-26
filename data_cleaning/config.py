@@ -51,6 +51,17 @@ QUARTERLY_FILING_LAG_DAYS = 45
 ANNUAL_FILING_LAG_DAYS = 90
 AVAILABILITY_METHOD = "estimated_lag"
 
+# Plausible band for an annualised risk-free rate expressed as a decimal, used
+# to catch a units change at the source. 1-year Treasury yields have ranged
+# roughly 0.04%-16% since 1962, so this is wide enough never to fire on real
+# data and narrow enough to catch a percent/decimal mix-up (which would land
+# either near 0.0004 or near 4.0).
+RATE_MIN = 0.0
+RATE_MAX = 0.30
+# Below this (in percent, before conversion) a series is suspiciously flat for a
+# percent quote and may already be in decimals. Warn only -- see alignment.py.
+RATE_PERCENT_SUSPICIOUS_MAX = 0.5
+
 # Credit horizon in years, tied to the 1-year risk-free tenor (DGS1) used in
 # alignment. Owned by the cleaning layer that builds the daily panel.
 HORIZON_YEARS = 1.0

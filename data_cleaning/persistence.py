@@ -26,8 +26,11 @@ def _write(df: pd.DataFrame, directory: str, name: str, index: bool = True) -> N
     df.to_csv(os.path.join(directory, f"{name}.csv"), index=index)
     try:
         df.to_excel(os.path.join(directory, f"{name}.xlsx"), index=index)
-    except Exception as exc:  # noqa: BLE001 - xlsx optional, csv is canonical
-        LOG.debug("xlsx write skipped for %s/%s: %s", directory, name, exc)
+    except (OSError, ImportError, ValueError) as exc:
+        # CSV is canonical so this is not fatal, but DEBUG meant nobody ever
+        # saw it. A run that silently produced half its artifacts looked clean.
+        LOG.warning("xlsx NOT written for %s/%s (%s); CSV is available",
+                    os.path.basename(directory), name, exc)
 
 
 def save_company(data: CompanyData) -> dict[str, str]:

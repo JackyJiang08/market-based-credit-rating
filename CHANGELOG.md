@@ -137,3 +137,9 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   lag constants, default point, LT debt field, share method, both estimation windows),
   how to read the rating basis / determination / weak-identification flags, and an
   explicit statement of the Asset sheet's deviation from the reference 23-column layout.
+- **Part D** `#17` `reference_shares` returns its method and the workflow stores
+  `shares_reference_date`, satisfying TIMING_PROTOCOL §3; the single-share-class fallback
+  is labelled and warns. `#18` the risk-free series is range-checked after unit conversion
+  and raises outside [0, 0.30]; a missing `Adj Close` is NaN rather than `Close`; the FRED
+  date column is found by name. `#20` the remaining silent excepts are narrowed to specific
+  exception types and report at WARNING. No rating moved.

@@ -13,10 +13,14 @@ in real time (no look-ahead).
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 import pandas as pd
 
 from . import config, transforms
+
+LOG = logging.getLogger("pfpa.alignment")
 
 
 def total_return_close(close: pd.Series, dividends: pd.Series) -> pd.Series:
@@ -114,7 +118,13 @@ def build_panel(prices: pd.DataFrame,
     panel = pd.DataFrame(index=prices.index.copy())
     panel.index.name = "Date"
     panel["Close"] = prices["Close"]
-    panel["AdjClose"] = prices.get("Adj Close", prices["Close"])
+    # `Adj Close` and `Close` are different quantities across any split, so a
+    # missing adjusted series is recorded as missing rather than silently
+    # replaced by the unadjusted one.
+    if "Adj Close" in prices:
+        panel["AdjClose"] = prices["Adj Close"]
+    else:
+        panel["AdjClose"] = np.nan
 
     # Dividend add-back (deck slide 61): the equity series must be a total-return
     # series, with no artificial drop on an ex-dividend date.
@@ -193,7 +203,32 @@ def build_panel(prices: pd.DataFrame,
         rf = risk_free.rename("RiskFree_R").reset_index()
         rf.columns = ["Date", "RiskFree_R"]
         rf["Date"] = pd.to_datetime(rf["Date"])
+        # FRED publishes DGS1 in percent. Nothing had checked that: if the
+        # series ever arrived as a decimal, every rate would silently become
+        # 0.04% and the Black-Scholes inversion would run happily on it.
         rf["RiskFree_R"] = rf["RiskFree_R"] / 100.0  # percent -> decimal
+        finite = rf["RiskFree_R"].dropna()
+        if not finite.empty:
+            lo, hi = float(finite.min()), float(finite.max())
+            if not (config.RATE_MIN <= lo and hi <= config.RATE_MAX):
+                raise ValueError(
+                    f"risk-free rate outside the plausible band after unit "
+                    f"conversion: [{lo:.6f}, {hi:.6f}] not within "
+                    f"[{config.RATE_MIN}, {config.RATE_MAX}]. The source may "
+                    f"have changed units.")
+            # The band above catches a series arriving 100x too large. The
+            # opposite error -- a series already in decimals, divided again --
+            # cannot be caught by a band, because 0.05 / 100 = 0.05% is itself
+            # a rate the 1-year Treasury has genuinely printed. It is only
+            # detectable as "suspiciously low for a percent series", so it
+            # warns rather than raising.
+            raw_max = float((finite * 100.0).max())
+            if raw_max < config.RATE_PERCENT_SUSPICIOUS_MAX:
+                LOG.warning(
+                    "risk-free series peaks at %.4f%% before conversion, which "
+                    "is low for a percent-quoted series -- check the source has "
+                    "not switched to decimals (values would then be 100x too "
+                    "small)", raw_max)
         left = panel.reset_index()[["Date"]].sort_values("Date")
         merged = pd.merge_asof(left, rf.sort_values("Date"),
                                on="Date", direction="backward")

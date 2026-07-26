@@ -42,11 +42,15 @@ import math
 import os
 from dataclasses import dataclass
 
+import logging
+
 import numpy as np
 import pandas as pd
 from scipy.optimize import brentq
 from scipy.special import log_ndtr, logsumexp
 from scipy.stats import norm
+
+LOG = logging.getLogger("pfpa.conversion")
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_XLSX = os.path.join(_PROJECT_ROOT, "local", "TiC_TTC_conversion.xlsx")
@@ -210,8 +214,10 @@ def _cache_csv(tables: ConversionTables) -> None:
         pd.DataFrame({"SP": tables.sp_labels,
                       "PD_threshold": tables.sp_thresholds}).to_csv(
             os.path.join(CACHE_DIR, "sp_thresholds.csv"), index=False)
-    except Exception:  # noqa: BLE001 - caching is best-effort
-        pass
+    except OSError as exc:
+        # Caching is best-effort, but a read-only disk or a permissions problem
+        # should not be invisible -- it was silently swallowed before.
+        LOG.warning("conversion table cache not written to %s: %s", CACHE_DIR, exc)
 
 
 def _bilinear(grid: np.ndarray, xaxis: np.ndarray, yaxis: np.ndarray,

@@ -35,6 +35,38 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Data-layer hardening: #17, #18, #20
+
+- **Scope:** Layers 1-2 defensive changes plus provenance fields. No formula
+  changed and no rating moved. Closes #17, #18, #20. #16 deliberately left open.
+- **Summary:**
+  - #17: `reference_shares` now returns `(shares, method)` and the workflow
+    records `shares_reference_date`, satisfying TIMING_PROTOCOL §3's condition
+    that a constant-share assumption store its reference date. The
+    `sharesOutstanding` fallback is labelled `single_class` and warns, because
+    for a dual-class issuer it is a different quantity from market cap / price
+    -- the case the primary method exists to handle.
+  - #18: the risk-free series is range-checked after unit conversion and raises
+    if it lands outside [0, 0.30]; a missing `Adj Close` is NaN rather than the
+    unadjusted `Close`; the FRED date column is located by name with a logged
+    positional fallback.
+  - #20: `_cache_csv`, the parquet write, the xlsx write and the yfinance
+    version probe now catch specific exceptions and report at WARNING. The
+    version probe records "unknown" rather than "?".
+- **Honest limit recorded in code and test:** the *opposite* rate-units error --
+  a series already in decimals, divided again -- cannot be caught by a band,
+  because 0.05/100 = 0.05% is a rate the 1-year Treasury has genuinely printed.
+  It warns as "suspiciously low for a percent series" instead, and a test pins
+  that we do not claim to detect it.
+- **Breaking changes:** `transforms.reference_shares` returns a tuple.
+- **Validation:** `python -m pytest -q` -> 267 passed, run before this push.
+  Live batch re-run; all ten ratings, determinations and weak-identification
+  flags are byte-identical to the previous run, confirming these are defensive
+  changes only. Captured to `docs/reconciliation/history/12_after_partD.csv`.
+- **Follow-ups:** #16 (field-selection provenance and the `.clip(lower=0)` that
+  hides PNC's contradictory ST = 0) left open for the financial-firms work. The
+  README still presents ORCL's BB without its interval.
+
 ### 2026-07-26 - Workbook README sheet
 
 - **Scope:** Layer 4 only. No model output changed.

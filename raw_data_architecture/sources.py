@@ -180,7 +180,19 @@ def fetch_fred_series(series_id: str, start: datetime, end: datetime) -> pd.Data
     resp = requests.get(url, timeout=config.REQUEST_TIMEOUT)
     resp.raise_for_status()
     df = pd.read_csv(StringIO(resp.text))
-    date_col = df.columns[0]  # 'observation_date' or 'DATE'
+    # Locate the date column by name rather than by position: a layout change
+    # at the source would otherwise silently mislabel a column.
+    named = [c for c in df.columns
+             if str(c).strip().lower() in ("observation_date", "date")]
+    if named:
+        date_col = named[0]
+    elif len(df.columns) >= 2:
+        date_col = df.columns[0]
+        LOG.warning("FRED %s: no recognised date column in %s; falling back to "
+                    "the first column %r", series_id, list(df.columns), date_col)
+    else:
+        raise SourceUnavailableError(
+            f"FRED {series_id}: unexpected CSV layout {list(df.columns)}")
     df = df.rename(columns={date_col: "Date"})
     df["Date"] = pd.to_datetime(df["Date"])
     df[series_id] = pd.to_numeric(df[series_id], errors="coerce")

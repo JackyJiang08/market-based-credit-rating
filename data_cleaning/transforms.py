@@ -68,17 +68,29 @@ def build_debt_schedule(balance: pd.DataFrame) -> pd.DataFrame:
 
 
 def reference_shares(market_cap: Optional[float], last_close: Optional[float],
-                     fallback: Optional[float]) -> Optional[float]:
-    """Shares outstanding via the one-day method (market cap / price).
+                     fallback: Optional[float]) -> tuple[Optional[float], str]:
+    """Shares outstanding via the one-day method, and how it was obtained.
 
     Pick one day (the latest), shares = market cap / price, then hold this
     constant when computing daily market cap = shares x price. For dual-class
     names (e.g. DELL) this recovers the *total* shares so market cap reconciles,
     which a single share-class figure would not.
+
+    Returns `(shares, method)`. `docs/TIMING_PROTOCOL.md` §3 permits a constant
+    reference-share assumption "only when it is explicitly identified as a
+    modelling assumption and its reference date is stored", so the caller
+    records both the method and the date it belongs to.
+
+    The fallback matters more than it looks: `sharesOutstanding` is a *single
+    share class*, so for a dual-class issuer it is a different quantity from
+    market cap / price -- exactly the case the primary method exists to handle.
+    It is labelled distinctly so that substitution is never invisible.
     """
     if market_cap and last_close:
-        return market_cap / last_close
-    return fallback
+        return market_cap / last_close, "market_cap_over_price"
+    if fallback:
+        return fallback, "shares_outstanding_single_class"
+    return None, "unavailable"
 
 
 def split_term_debt(balance: pd.DataFrame) -> pd.DataFrame:

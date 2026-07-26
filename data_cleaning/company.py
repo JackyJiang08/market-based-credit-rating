@@ -65,6 +65,10 @@ class CompanyData:
     data_status: Optional[str] = None
     # How available_at was derived (TIMING_PROTOCOL §3): "estimated_lag".
     availability_method: Optional[str] = None
+    # How reference_shares was obtained, and the date it belongs to
+    # (TIMING_PROTOCOL §3 requires the reference date to be stored).
+    shares_method: Optional[str] = None
+    shares_reference_date: Optional[str] = None
 
     # Drift provenance (Prop. 4.4.1). `drift_regime` is "VALID" or "DEFECTIVE";
     # DEFECTIVE means eta - sigma^2/2 <= 0, so mu/CCM/PIT/TTC/rating are
