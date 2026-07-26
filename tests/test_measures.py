@@ -117,3 +117,56 @@ def test_edf_resolves_past_the_linear_space_underflow_cliff():
     assert norm.cdf(-m.dd) == 0.0, "premise: linear space underflows here"
     assert m.edf > 0.0, "EDF underflowed to exactly zero in log space too"
     assert m.edf == pytest.approx(math.exp(log_ndtr(-m.dd)), rel=1e-9)
+
+
+# --- Prop. 4.4.1 drift regime contract (#3, #13) ----------------------------
+# Nothing pinned what happens when eta - sigma^2/2 <= 0, so the abs() could be
+# reintroduced -- or the NaN behaviour broken -- without a test moving.
+def test_positive_drift_is_valid_and_yields_finite_mu_and_ccm():
+    m = measures.compute(sigma_A=0.30, asset=200.0, debt=100.0, eta_A=0.10)
+    assert m.regime is measures.DriftRegime.VALID
+    assert m.drift > 0
+    assert math.isfinite(m.mu) and math.isfinite(m.ccm)
+    assert math.isfinite(m.pit_pd)
+
+
+@pytest.mark.parametrize("eta_A", [0.0, 0.02, 0.044, -0.10, -1.0])
+def test_non_positive_drift_is_defective_and_mu_ccm_are_nan(eta_A):
+    """sigma=0.30 -> sigma^2/2 = 0.045, so every eta here gives drift <= 0."""
+    m = measures.compute(sigma_A=0.30, asset=200.0, debt=100.0, eta_A=eta_A)
+    assert m.drift <= 0
+    assert m.regime is measures.DriftRegime.DEFECTIVE
+    assert math.isnan(m.mu), "mu = E[tau] diverges in a defective regime"
+    assert math.isnan(m.ccm)
+    assert math.isnan(m.pit_pd), "PIT PD is a function of (mu, CCM)"
+    assert math.isnan(m.lam), "lambda is a function of CCM"
+
+
+def test_defective_regime_never_returns_the_absolute_value():
+    """The exact defect #3 was opened for: |drift| gave a finite, wrong mu."""
+    m = measures.compute(sigma_A=0.30, asset=200.0, debt=100.0, eta_A=-0.055)
+    ln_ad = math.log(2.0)
+    would_have_been = ln_ad / abs(m.drift)          # the old abs() result
+    assert math.isfinite(would_have_been), "premise: abs() produced a finite mu"
+    assert math.isnan(m.mu), "must not substitute |drift|"
+
+
+def test_dd_edf_and_tic_survive_a_defective_regime():
+    """Eq. (14) uses the signed drift and Eq. (12) is drift-free (Prop. 4.4.2)."""
+    m = measures.compute(sigma_A=0.30, asset=200.0, debt=100.0, eta_A=-0.50)
+    assert m.regime is measures.DriftRegime.DEFECTIVE
+    assert math.isfinite(m.dd) and math.isfinite(m.edf)
+    assert math.isfinite(m.tic) and math.isfinite(m.risk_score)
+    # TiC depends only on sigma_A and ln(A/D).
+    assert m.tic == pytest.approx(0.30 ** 2 / math.log(2.0) ** 2)
+
+
+def test_drift_regime_boundary_is_strictly_positive():
+    assert measures.drift_regime(1e-12) is measures.DriftRegime.VALID
+    assert measures.drift_regime(0.0) is measures.DriftRegime.DEFECTIVE
+    assert measures.drift_regime(-1e-12) is measures.DriftRegime.DEFECTIVE
+    assert measures.drift_regime(float("nan")) is measures.DriftRegime.DEFECTIVE
+    # A non-finite drift is not a usable estimate, so it is DEFECTIVE rather
+    # than "very valid" -- VALID must mean the Eq. (11) denominator is real.
+    assert measures.drift_regime(float("inf")) is measures.DriftRegime.DEFECTIVE
+    assert measures.drift_regime(float("-inf")) is measures.DriftRegime.DEFECTIVE

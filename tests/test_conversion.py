@@ -11,6 +11,7 @@ import math
 import os
 
 import pytest
+from scipy.stats import norm
 
 from signal_construction import conversion
 
@@ -139,3 +140,36 @@ def test_sp_rating_refuses_a_non_finite_pd():
         sp_labels = None
     assert conversion.sp_rating(_T(), float("nan")) == "n/a"
     assert conversion.sp_rating(_T(), None) == "n/a"
+
+
+# --- alpha_sp directly (Eq. 24 confidence-level half) -----------------------
+def test_alpha_sp_uses_one_over_q_not_q():
+    """The paper's stacked fraction reads as `0.625913 * ln CCM`; it is 1/Q.
+
+    Only exercised indirectly through no_arb_ccm_star until now, so a Q vs 1/Q
+    regression would have surfaced as a confusing CCM* drift rather than here.
+    """
+    ccm = 1.35373
+    L = math.log(ccm + 1.0)
+    expected = norm.cdf((1.35 - (1.0 / conversion.Q_SP) * math.log(ccm) + L / 2.0)
+                        / math.sqrt(L))
+    assert conversion.alpha_sp(ccm) == pytest.approx(expected, rel=1e-12)
+
+    # The wrong reading (Q instead of 1/Q) gives a materially different number.
+    wrong = norm.cdf((1.35 - conversion.Q_SP * math.log(ccm) + L / 2.0)
+                     / math.sqrt(L))
+    assert abs(conversion.alpha_sp(ccm) - wrong) > 1e-3
+
+
+def test_alpha_sp_closes_the_loop_on_the_papers_anchor():
+    """CL_SP(CCM*) must equal alpha_FH(1.5) at the paper's CCM* = 1.35373."""
+    assert conversion.alpha_sp(1.35373) == pytest.approx(
+        conversion.alpha_first_hitting(1.5), abs=1e-5)
+
+
+def test_alpha_is_decreasing_in_ccm():
+    """Eq. (22) part 3: alpha(CCM) is a decreasing function of CCM."""
+    vals = [conversion.alpha_first_hitting(c) for c in (0.5, 1.0, 1.5, 5.0, 50.0)]
+    assert all(a > b for a, b in zip(vals, vals[1:]))
+    vals = [conversion.alpha_sp(c) for c in (0.5, 1.0, 1.5, 5.0, 50.0)]
+    assert all(a > b for a, b in zip(vals, vals[1:]))

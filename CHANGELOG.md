@@ -59,3 +59,8 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   no output). `EM iters` moved to the validation sheet. Added `Rating Basis` so a
   blank rating is interpretable on the sheet that shows it. Golden-file tests pin
   both schemas exactly.
+- **#13** Added the missing regression tests: the Prop. 4.4.1 drift-regime contract
+  (including that `|drift|` is never substituted), the `split_term_debt` fallbacks
+  that produce `ShortTermDebt = 0` for banks, `default_point_debt` returning NaN
+  rather than 0 when both legs are missing, `union_balance_sheets`, a direct
+  `alpha_sp` anchor pinning the `1/Q` reading, and monotonicity of α(CCM).
