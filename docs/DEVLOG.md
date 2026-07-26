@@ -35,6 +35,27 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Live batch confirms the revision-1 standing; history/14 captured
+
+- **Scope:** README standings, `docs/reconciliation/history/14_after_dell_market_gate.csv`.
+  No code.
+- **Summary:** live batch re-run (`python3 -m mdt batch config/companies.yaml`,
+  10/10 succeeded, prices through the 2026-07-24 close) confirms the expected
+  post-revision standing exactly: **7/10 rated, 3/10 SCALE_RESOLVED (DELL,
+  ORCL, T)**, 3 PINNED_AT_SCALE_TOP (COST, KO, WMT), 1 PINNED_AT_FLOOR (AMZN),
+  **1 MODEL_NOT_APPLICABLE (PNC, BANK_DEPOSIT_FUNDED)**, 2 NOT_RATED (INTU,
+  KHC). DELL rates A- on GRID_INTERIOR with drift t = 2.01 and a 10-notch
+  interval (AAA..BBB) — rated again, and still the widest letter interval in
+  the universe, which is the scale-vs-precision distinction working as
+  documented. The Asset sheet is captured as `history/14`; README standings
+  table updated with a note recording the brief DELL gating and pointing to
+  ADR 0003 Revision 1.
+- **Breaking changes:** None.
+- **Validation:** `python3 -m pytest -q` -> 300 passed, 0 skipped (network
+  tests ran; `local/` present), run before this push. Live batch run as above;
+  invariants held across the 10-company batch.
+- **Follow-ups:** deliverable v1 freeze.
+
 ### 2026-07-26 - The three uncertainty sources presented side by side
 
 - **Scope:** documentation only — `docs/UNCERTAINTY.md` and the README results

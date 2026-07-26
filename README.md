@@ -231,11 +231,17 @@ value from its neighbours. As of the 2026-07-26 run, of ten companies:
 
 | Determination | Count | |
 |---|---:|---|
-| `SCALE_RESOLVED` | **2** | ORCL, T — the value sits inside the range the route can express |
+| `SCALE_RESOLVED` | **3** | DELL, ORCL, T — the value sits inside the range the route can express |
 | `PINNED_AT_SCALE_TOP` | **3** | COST, KO, WMT — RiskScore below the best published grade |
 | `PINNED_AT_FLOOR` | **1** | AMZN — TTC PD at the conversion grid's 2bp floor |
-| `MODEL_NOT_APPLICABLE` | **2** | DELL, PNC — see [ADR 0003](docs/adr/0003-financial-firms.md) |
+| `MODEL_NOT_APPLICABLE` | **1** | PNC — see [ADR 0003](docs/adr/0003-financial-firms.md) |
 | `NOT_RATED` | **2** | INTU, KHC — defective drift regime (Prop. 4.4.1) |
+
+DELL was briefly gated for negative book equity — a quantity this market-based model never
+uses. That spec was revised the same day: the gate is now the market-based test
+`A > ST + 1.0·LT` (DELL passes with A ≈ $301bn against ≈ $31bn), and the full record —
+original spec, objection, resolution, and why that margin — is in
+[ADR 0003, Revision 1](docs/adr/0003-financial-firms.md).
 
 **PNC is the case that motivated the gate.** Its default point under the shipped rule is
 $33.3bn against **$539.4bn of total liabilities** — the model was looking at 6% of what the
@@ -249,7 +255,7 @@ is the case that proves it: strongest drift t-statistic in the universe (2.01) a
 notched. The field was called `MODEL_DETERMINED` until 2026-07-26; that name implied a
 precision claim it never made. Precision is answered by `Drift t` and the rating interval.
 
-"6 of 10 rated" without "2 of 10 scale-resolved" overstates coverage, and neither number
+"7 of 10 rated" without "3 of 10 scale-resolved" overstates coverage, and neither number
 says anything about precision. Full explanation:
 [`docs/RATING_DETERMINATION.md`](docs/RATING_DETERMINATION.md); the uncertainty method and
 its known limits: [`docs/UNCERTAINTY.md`](docs/UNCERTAINTY.md).
