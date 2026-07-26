@@ -88,3 +88,17 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   `NOT_APPLICABLE` — the proposal un-blanks nothing today, and the interval it would
   produce runs from unrateable to AAA-. Recommends a significance test in
   `drift_regime()` instead. See `docs/adr/0002-defective-drift-interval-proposal.md`.
+
+## Unreleased (data layer)
+
+### Fixed
+
+- **#15** Replaced the additive `Close + Dividends.cumsum()` add-back with a reinvested
+  total-return index anchored at the valuation date. The old series' level was `Close`
+  plus every dividend paid since the first *downloaded* row, so `σ_A`, `A` and the rating
+  depended on `DEFAULT_YEARS`; raising it 2→6 silently moved every number in the batch.
+  σ_A and A are now bit-identical across download windows of 2, 4 and 6 years. Removed
+  the `.fillna(0.0)` on dividends: a missing dividend is unknown, not zero, and an absent
+  dividend column now yields NaN rather than a silently price-only series.
+  σ_A rose 0.9–3.8pp for dividend payers and A fell correspondingly; AMZN, which pays no
+  dividend, is unchanged to every digit. PNC AAA-→AA+, T AAA-→AA.

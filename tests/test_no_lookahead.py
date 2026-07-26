@@ -78,16 +78,32 @@ def test_rate_is_as_of_backward():
     assert panel.loc[pd.Timestamp("2024-06-03"), "RiskFree_R"] == pytest.approx(0.052)
 
 
-def test_dividend_add_back_lifts_equity_level():
+def test_dividend_add_back_credits_the_distribution_to_total_return():
+    """A dividend must raise total return, and the series must anchor at spot.
+
+    Rewritten for the reinvested construction (#15). The old additive add-back
+    made the *later* values higher by `shares * dividend`; the reinvested index
+    is anchored at the valuation date, so the dividend instead makes the
+    *earlier* values lower relative to spot -- the same economics, expressed so
+    that the level does not depend on where the window starts.
+    """
     plain = build_panel(_prices(), 1000.0, _balance_sheet(), _rates())
     with_div = build_panel(_prices("2024-04-01", 2.0), 1000.0, _balance_sheet(), _rates())
 
-    # Before the ex-date the two series match; after, the dividend is added back.
-    assert with_div.loc[pd.Timestamp("2024-03-15"), "MarketCap_E"] == \
-        plain.loc[pd.Timestamp("2024-03-15"), "MarketCap_E"]
-    assert with_div.loc[pd.Timestamp("2024-05-01"), "MarketCap_E"] > \
-        plain.loc[pd.Timestamp("2024-05-01"), "MarketCap_E"]
-    # Add-back is exactly shares * dividend once the ex-date has passed.
-    diff = (with_div.loc[pd.Timestamp("2024-05-01"), "MarketCap_E"]
-            - plain.loc[pd.Timestamp("2024-05-01"), "MarketCap_E"])
-    assert abs(diff - 1000.0 * 2.0) < 1e-6
+    # Both series end at the true market value: shares * last close.
+    for panel in (plain, with_div):
+        last = panel.index[-1]
+        assert panel.loc[last, "MarketCap_E"] == pytest.approx(
+            panel.loc[last, "RawMarketCap"], rel=1e-12)
+
+    # A distribution adds to the total return earned over the period, so the
+    # pre-dividend level needed to reach the same spot value is lower.
+    before = pd.Timestamp("2024-03-15")
+    assert with_div.loc[before, "MarketCap_E"] < plain.loc[before, "MarketCap_E"]
+
+    # And the cumulative total return over the window is higher by the dividend.
+    def total_return(panel):
+        s = panel["MarketCap_E"].dropna()
+        return s.iloc[-1] / s.iloc[0] - 1.0
+
+    assert total_return(with_div) > total_return(plain)

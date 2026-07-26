@@ -19,6 +19,70 @@ import pandas as pd
 from . import config, transforms
 
 
+def total_return_close(close: pd.Series, dividends: pd.Series) -> pd.Series:
+    """A reinvested total-return price series anchored at the valuation date.
+
+    The equity series feeding the EM inversion has to satisfy two things at once:
+
+      1. its **log-returns** must be total returns, so an ex-dividend drop is not
+         read as a loss of firm value; and
+      2. its **last value** must be the real market price, because `A_0`, `D` and
+         therefore `ln(A/D)` are all measured on that date.
+
+    The previous construction, `Close + Dividends.cumsum()`, satisfied neither
+    cleanly. Its level was `Close` plus every dividend paid *since the first row
+    that happened to be downloaded*, so lengthening the history raised every
+    value in the series and changed `sigma_A`, `A` and the rating. It also added
+    nominal cash to a price level, which mis-scales: a $1 dividend paid five
+    years ago is not $1 of today's price.
+
+    This builds the standard reinvested index instead::
+
+        r_t = (Close_t + Div_t) / Close_{t-1} - 1
+        I_t = prod(1 + r)  normalised so that I_T = 1
+        out = Close_T * I_t
+
+    Each `r_t` depends only on two adjacent days, and the normalisation is to the
+    **last** row, so the whole series is invariant to how far back the window
+    starts. `out[-1] == Close[-1]` exactly, so the valuation-date market cap is
+    the true one.
+
+    Dividends that are `NaN` make the corresponding return unknown. Rather than
+    silently treating them as zero, the affected returns propagate `NaN`, and the
+    EM step drops those rows and says how many it dropped.
+    """
+    close = pd.to_numeric(close, errors="coerce")
+    div = pd.to_numeric(dividends, errors="coerce")
+    if close.empty:
+        return close.astype(float)
+
+    if div.isna().all():
+        # Nothing is known about distributions, so no total-return series can be
+        # built. Returning the price series instead would silently assert the
+        # company pays no dividends.
+        return pd.Series(np.nan, index=close.index, name="DivAddBackClose")
+
+    prev = close.shift(1)
+    daily_tr = (close + div) / prev - 1.0
+    # The first row has no prior day, so it is the base of the index rather than
+    # a return. That is a definition, not an imputed value.
+    if len(daily_tr) > 0:
+        daily_tr.iloc[0] = 0.0
+
+    growth = (1.0 + daily_tr).cumprod()
+    anchor = growth.dropna()
+    if anchor.empty:
+        return pd.Series(np.nan, index=close.index, name="DivAddBackClose")
+
+    last_close = close.dropna()
+    if last_close.empty:
+        return pd.Series(np.nan, index=close.index, name="DivAddBackClose")
+
+    out = growth / anchor.iloc[-1] * float(last_close.iloc[-1])
+    out.name = "DivAddBackClose"
+    return out
+
+
 def build_panel(prices: pd.DataFrame,
                 reference_shares: float | None,
                 balance: pd.DataFrame,
@@ -51,12 +115,18 @@ def build_panel(prices: pd.DataFrame,
     panel["Close"] = prices["Close"]
     panel["AdjClose"] = prices.get("Adj Close", prices["Close"])
 
-    # Dividend add-back (deck slide 61): add paid dividends back into the price
-    # so the equity value series is a total-return series with no artificial
-    # ex-dividend drops. Cumulative additive add-back over the window.
-    panel["Dividends"] = prices.get("Dividends", 0.0)
-    panel["Dividends"] = panel["Dividends"].fillna(0.0)
-    panel["DivAddBackClose"] = panel["Close"] + panel["Dividends"].cumsum()
+    # Dividend add-back (deck slide 61): the equity series must be a total-return
+    # series, with no artificial drop on an ex-dividend date.
+    #
+    # A missing dividend is NOT zero. `NaN` means "we do not know what was paid";
+    # `0.0` means "nothing was paid that day". The previous code collapsed the
+    # two with `.fillna(0.0)`, so a vendor response with no dividend column was
+    # indistinguishable from a company that pays none.
+    if "Dividends" in prices:
+        panel["Dividends"] = prices["Dividends"]
+    else:
+        panel["Dividends"] = np.nan
+    panel["DivAddBackClose"] = total_return_close(panel["Close"], panel["Dividends"])
 
     # Equity value E using the constant one-day share count. E feeds the KMV/EM
     # option inversion, so it uses the dividend-added-back price per the deck.
