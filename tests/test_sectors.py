@@ -35,6 +35,27 @@ def test_financial_sector_without_a_known_industry_is_unknown_not_gated():
     assert reason is None
 
 
+@pytest.mark.parametrize("ticker", ["V", "MA", "PYPL"])
+def test_payment_networks_are_not_banks(ticker):
+    """Found by the universe run: 'Credit Services' misgated V/MA/PYPL.
+
+    A payment network has an ordinary corporate balance sheet and no
+    deposits; gating it as BANK_DEPOSIT_FUNDED was a misclassification.
+    """
+    t = sectors.classify(ticker, "Financial Services", "Credit Services")
+    assert t is sectors.FirmType.NONFINANCIAL
+    status, reason = sectors.applicability(t)
+    assert status is sectors.Applicability.APPLICABLE and reason is None
+
+
+@pytest.mark.parametrize("ticker", ["ALLY", "COF", "AXP"])
+def test_deposit_funded_credit_services_names_stay_gated(ticker):
+    """ALLY/COF are deposit-funded lenders; AXP funds through its own bank.
+    The 'Credit Services' marker must keep catching them."""
+    t = sectors.classify(ticker, "Financial Services", "Credit Services")
+    assert t is sectors.FirmType.BANK
+
+
 def test_ordinary_company_is_nonfinancial():
     assert sectors.classify("COST", "Consumer Defensive",
                             "Discount Stores") is sectors.FirmType.NONFINANCIAL

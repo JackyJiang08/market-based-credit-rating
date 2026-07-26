@@ -47,6 +47,16 @@ GATED_TYPES = (FirmType.BANK, FirmType.INSURER, FirmType.REIT)
 # are inconsistent and occasionally wrong, and a wrong classification here is
 # expensive in both directions.
 MANUAL_OVERRIDES: dict[str, FirmType] = {
+    # The vendor's "Credit Services" industry string lumps deposit-funded
+    # lenders (ALLY, COF -- correctly gated as banks) together with payment
+    # networks, which carry ordinary corporate balance sheets and no deposits.
+    # The marker must stay for the former, so the latter are pinned here.
+    # AXP is deliberately NOT pinned: it funds through its own bank charter.
+    # (Found by the 150-name universe run: V/MA/PYPL came back
+    # BANK_DEPOSIT_FUNDED.)
+    "V": FirmType.NONFINANCIAL,
+    "MA": FirmType.NONFINANCIAL,
+    "PYPL": FirmType.NONFINANCIAL,
     "PNC": FirmType.BANK,
     "JPM": FirmType.BANK,
     "BAC": FirmType.BANK,
