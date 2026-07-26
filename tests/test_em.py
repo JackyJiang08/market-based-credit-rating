@@ -54,3 +54,36 @@ def test_em_asset_exceeds_debt_everywhere():
     E, D, R, _ = _simulate_equity()
     res = em.estimate(E, D, R)
     assert (res.asset_values.to_numpy() > D.iloc[0]).all()
+
+
+# --- Bracket expansion must fail loudly, never bisect a rootless interval ----
+def test_inversion_raises_when_the_root_cannot_be_bracketed(monkeypatch):
+    """A `g` that never reaches E must raise, not return a bisection midpoint.
+
+    The loop previously fell through after its doublings and bisected an
+    interval known not to contain the root, producing a confident wrong asset
+    value with no error anywhere.
+    """
+    import numpy as np
+
+    from signal_construction import em as em_mod
+
+    # g(A) = 0 for all A, so g(hi) < E can never be satisfied.
+    monkeypatch.setattr(em_mod, "_bs_equity",
+                        lambda A, D, r, sigma, T: np.zeros_like(np.asarray(A, dtype=float)))
+    with pytest.raises(em_mod.EMError, match="failed to bracket"):
+        em_mod._invert_assets(np.array([100.0, 200.0]), np.array([50.0, 50.0]),
+                              np.array([0.04, 0.04]), 0.3, 1.0)
+
+
+def test_bracket_failure_message_counts_the_offending_days(monkeypatch):
+    import numpy as np
+
+    from signal_construction import em as em_mod
+
+    monkeypatch.setattr(em_mod, "_bs_equity",
+                        lambda A, D, r, sigma, T: np.zeros_like(np.asarray(A, dtype=float)))
+    with pytest.raises(em_mod.EMError) as exc:
+        em_mod._invert_assets(np.array([1.0, 2.0, 3.0]), np.array([1.0, 1.0, 1.0]),
+                              np.array([0.0, 0.0, 0.0]), 0.3, 1.0)
+    assert "3 of 3 day(s)" in str(exc.value)

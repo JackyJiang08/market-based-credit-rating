@@ -69,7 +69,8 @@ def _bs_equity(A: np.ndarray, D: np.ndarray, r: np.ndarray,
 
 
 def _invert_assets(E: np.ndarray, D: np.ndarray, r: np.ndarray,
-                   sigma: float, T: float, n_bisect: int = 80) -> np.ndarray:
+                   sigma: float, T: float,
+                   n_bisect: int = config.BISECTION_STEPS) -> np.ndarray:
     """Vectorized bisection: solve g(A) = E for A on every day at once.
 
     g is increasing in A and g(A) < A, so A lies in (E, hi]; expand hi until it
@@ -78,11 +79,20 @@ def _invert_assets(E: np.ndarray, D: np.ndarray, r: np.ndarray,
     E = np.asarray(E, dtype=float)
     lo = E.copy()                                  # g(E) < E  =>  f(lo) < 0
     hi = E + D * np.exp(-r * T) + 1.0
-    for _ in range(100):                           # grow hi until g(hi) >= E
+    for _ in range(config.BRACKET_MAX_DOUBLINGS):  # grow hi until g(hi) >= E
         need = _bs_equity(hi, D, r, sigma, T) < E
         if not need.any():
             break
         hi = np.where(need, hi * 2.0, hi)
+    else:
+        # The loop finished without bracketing the root on every day. Bisecting
+        # an interval that does not contain the solution returns a confident
+        # wrong asset value, so fail instead.
+        unbracketed = int(np.count_nonzero(_bs_equity(hi, D, r, sigma, T) < E))
+        raise EMError(
+            f"asset inversion failed to bracket the root on {unbracketed} of "
+            f"{E.size} day(s) after {config.BRACKET_MAX_DOUBLINGS} doublings "
+            f"(sigma={sigma:.4f}). Refusing to bisect an interval with no root.")
     for _ in range(n_bisect):
         mid = 0.5 * (lo + hi)
         val = _bs_equity(mid, D, r, sigma, T)
@@ -120,12 +130,12 @@ def estimate(equity: pd.Series, debt: pd.Series, rate: pd.Series,
     """
     df = pd.DataFrame({"E": equity, "D": debt, "r": rate}).dropna()
     df = df[(df["E"] > 0) & (df["D"] > 0)]
-    if len(df) < 30:
+    if len(df) < config.MIN_OBSERVATIONS:
         raise EMError(f"insufficient clean observations ({len(df)}) for EM.")
 
     # Volatility is estimated on the trailing window; the drift on everything.
     vol_df = df.tail(vol_window)
-    if len(vol_df) < 30:
+    if len(vol_df) < config.MIN_OBSERVATIONS:
         raise EMError(
             f"insufficient clean observations ({len(vol_df)}) in the volatility "
             f"window for EM.")

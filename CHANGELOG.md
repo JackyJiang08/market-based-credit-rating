@@ -47,3 +47,8 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   all and raised. Added a 72-cell property test against `scipy.stats.invgauss`
   over CCM ∈ [1e-3, 1e3] × µ ∈ [0.5, 1e4]; the old implementation fails 2 of
   those cells, the new one passes all.
+- **#10** `_invert_assets` now raises `EMError` when bracket expansion fails
+  instead of falling through and bisecting an interval known not to contain the
+  root, which returned a confident wrong asset value with no error. Named the
+  estimator's magic numbers: `BRACKET_MAX_DOUBLINGS`, `BISECTION_STEPS`,
+  `MIN_OBSERVATIONS`.
