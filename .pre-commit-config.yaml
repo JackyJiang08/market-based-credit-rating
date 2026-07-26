@@ -7,13 +7,13 @@ repos:
         entry: python3 -m ruff check --fix
         language: system
         types: [python]
-        files: ^(packages|tests)/
+        files: ^(packages|tests|services)/
       - id: black
         name: black
         entry: python3 -m black -q
         language: system
         types: [python]
-        files: ^(packages|tests)/
+        files: ^(packages|tests|services)/
       - id: mypy
         name: mypy
         entry: python3 -m mypy
