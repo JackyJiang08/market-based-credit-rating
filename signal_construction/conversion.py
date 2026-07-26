@@ -92,8 +92,16 @@ class RatingDetermination(enum.Enum):
     A rating basis (`RatingBasis`) says which *route* produced a number. This
     says whether that number carries information.
 
-    MODEL_DETERMINED     the TTC PD sits strictly inside the range the route can
-                         express, so the letter moves when the model moves.
+    SCALE_RESOLVED       the TTC PD sits strictly inside the range the route can
+                         express, so the scale could tell this value apart from
+                         its neighbours. **This is a statement about the scale's
+                         resolution, not about the estimate's precision.** DELL
+                         is the cautionary case: it has the strongest drift
+                         t-statistic in the universe and the *widest* bootstrap
+                         letter interval (10 notches), because it sits where the
+                         S&P scale is finely notched. The label was called
+                         MODEL_DETERMINED until 2026-07-26; that name implied a
+                         precision claim it never made.
     PINNED_AT_FLOOR      the grid lookup returned its smallest expressible value
                          (2bp in the shipped workbook). The model asked for
                          something smaller; the table had nothing left to say.
@@ -107,10 +115,12 @@ class RatingDetermination(enum.Enum):
     investment-grade issuers produces one-year default probabilities many orders
     of magnitude below anything a rating scale resolves -- see
     docs/RATING_DETERMINATION.md. Publishing the count is how the deliverable
-    stays honest about which of its ratings are measurements.
+    stays honest about which of its ratings the scale could resolve at all.
+    Whether the *estimate* behind a resolved letter is precise is a separate
+    question, answered by the drift t-statistic and the bootstrap interval.
     """
 
-    MODEL_DETERMINED = "MODEL_DETERMINED"
+    SCALE_RESOLVED = "SCALE_RESOLVED"
     PINNED_AT_FLOOR = "PINNED_AT_FLOOR"
     PINNED_AT_SCALE_TOP = "PINNED_AT_SCALE_TOP"
     NOT_RATED = "NOT_RATED"
@@ -126,9 +136,9 @@ def classify_determination(basis: "RatingBasis | None", at_floor: bool | None,
             return RatingDetermination.PINNED_AT_SCALE_TOP
         if at_floor:
             return RatingDetermination.PINNED_AT_SCALE_TOP
-        return RatingDetermination.MODEL_DETERMINED
+        return RatingDetermination.SCALE_RESOLVED
     return (RatingDetermination.PINNED_AT_FLOOR if at_floor
-            else RatingDetermination.MODEL_DETERMINED)
+            else RatingDetermination.SCALE_RESOLVED)
 
 
 class RatingBasis(enum.Enum):

@@ -385,9 +385,11 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
          "GRID_INTERIOR (lookup) | ANALYTICAL (Prop. 5.2.1, no table) | "
          "OFF_GRID or NOT_APPLICABLE (no letter reported)"),
         ("Rating Determination",
-         "MODEL_DETERMINED | PINNED_AT_FLOOR (grid's 2bp floor) | "
+         "SCALE_RESOLVED | PINNED_AT_FLOOR (grid's 2bp floor) | "
          "PINNED_AT_SCALE_TOP (RiskScore below the best published grade) | "
-         "NOT_RATED. Only MODEL_DETERMINED letters move when the model moves."),
+         "NOT_RATED. SCALE_RESOLVED means the scale could tell this value from "
+         "its neighbours -- it is NOT a claim that the estimate is precise. "
+         "For that, read Drift t and the Rating Interval."),
         ("Weakly Identified",
          f"|drift t| < {sig_config.WEAK_IDENTIFICATION_T}. The rating is still "
          "published, but mu and CCM divide by a drift indistinguishable from "

@@ -35,6 +35,25 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Rename MODEL_DETERMINED -> SCALE_RESOLVED
+
+- **Scope:** `RatingDetermination` enum value and the docstrings that define
+  the vocabulary. No logic changed; the classification function is identical.
+- **Why:** the label answers "could the scale tell this value from its
+  neighbours?", not "is this estimate precise?". DELL makes the difference
+  concrete -- it has the strongest drift t-statistic in the universe (2.01) and
+  the *widest* bootstrap letter interval (10 notches), because it sits where the
+  S&P scale is finely notched. Calling that MODEL_DETERMINED implied a precision
+  claim the classification never made, and the two questions are answered by
+  different fields: determination by the scale, precision by `Drift t` and the
+  rating interval.
+- **Breaking changes:** the `Rating Determination` column now emits
+  `SCALE_RESOLVED` where it emitted `MODEL_DETERMINED`. Any consumer matching
+  the old string will stop matching. Historical DEVLOG, CHANGELOG and ADR
+  entries keep the old name -- they record what was true when written.
+- **Validation:** `python -m pytest -q` -> 271 passed, run before this push.
+  Two new tests pin the new vocabulary and assert the old attribute is gone.
+
 ### 2026-07-26 - Two bootstrap bugs found by decomposing the uncertainty result
 
 - **Scope:** `signal_construction/bootstrap.py`. Changes every interval this

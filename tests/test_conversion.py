@@ -369,3 +369,29 @@ def test_analytical_route_refuses_undefined_inputs():
                      (0.1, -1.0)]:
         out = conversion.no_arb_convert(pit, ccm)
         assert math.isnan(out.risk_score) and math.isnan(out.ttc_pd)
+
+
+# --- Rating determination vocabulary ----------------------------------------
+def test_scale_resolved_is_the_name_not_model_determined():
+    """Renamed 2026-07-26: the label measures the scale, not the estimate.
+
+    DELL has the strongest drift t-statistic in the universe and the widest
+    bootstrap letter interval (10 notches). `MODEL_DETERMINED` implied a
+    precision claim the classification never made.
+    """
+    assert conversion.RatingDetermination.SCALE_RESOLVED.value == "SCALE_RESOLVED"
+    assert not hasattr(conversion.RatingDetermination, "MODEL_DETERMINED")
+    assert {d.value for d in conversion.RatingDetermination} == {
+        "SCALE_RESOLVED", "PINNED_AT_FLOOR", "PINNED_AT_SCALE_TOP", "NOT_RATED"}
+
+
+def test_determination_classification_uses_the_new_name():
+    D = conversion.RatingDetermination
+    B = conversion.RatingBasis
+    assert conversion.classify_determination(B.GRID_INTERIOR, False) is D.SCALE_RESOLVED
+    assert conversion.classify_determination(B.GRID_INTERIOR, True) is D.PINNED_AT_FLOOR
+    assert conversion.classify_determination(B.ANALYTICAL, False, 50.0) is D.SCALE_RESOLVED
+    assert conversion.classify_determination(B.ANALYTICAL, False, 0.5) is D.PINNED_AT_SCALE_TOP
+    assert conversion.classify_determination(B.OFF_GRID, False) is D.NOT_RATED
+    assert conversion.classify_determination(B.NOT_APPLICABLE, False) is D.NOT_RATED
+    assert conversion.classify_determination(None, None) is D.NOT_RATED
