@@ -35,6 +35,40 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Phase 12: the terminal (Next.js 15) + enforced bundle safety
+
+- **Scope:** apps/terminal (app, tests, static-data pipeline, bundle-safety
+  gate), frontend CI cells, docs/figures/terminal_company_orcl.png.
+- **Static data first:** make build-site-data exports universe.json (150),
+  147 per-company detail files (measures, intervals, flags, provenance,
+  downsampled EM path, bootstrap) and validation.json, every file stamped
+  with the producing git SHA + data vintage. The HARD CONSTRAINT is a gate,
+  not a promise: check_bundle_safety.py fails the export on any licensed-
+  grid content -- path, value (8,993 licensed reference values, zero matches
+  at 1e-12; single documented exception: the publicly-stated 2bp floor) and
+  shape (no grid-scale matrix) checks. It caught two floored-TTC
+  coincidences during development before the exception was justified in
+  writing; degraded mode without local/ states itself.
+- **App:** Next 15 App Router, TS strict, Tailwind, shadcn/ui (Base UI),
+  TanStack Query/Table, Zod on every load. Cmd+K / '/' command bar with
+  fuzzy universe search (the one-click requirement). Company view:
+  RiskScore + rank first, letter ONLY with its interval attached and a
+  derived-conversion badge, provenance popovers per input, flags as
+  first-class chips, EM sparkline, applicability/determination badges.
+  Dark, dense, tabular-nums, keyboard navigable, skeletons, explicit
+  error/empty states, and the site-wide footer (fixture-backed demo,
+  as-of date, not investment advice, methodology attribution).
+- **CI:** new frontend job = typecheck, lint, vitest, bundle-safety
+  (degraded, stated), build -- wired into ci.yml; GREEN MEANS CI GREEN
+  applies to these cells and this push was watched to green.
+- **Validation:** vitest 10/10 (schemas parse the real export; the
+  presentation rule; RatingCell renders 'BB (BBB-..BB-)'); tsc/eslint
+  clean; next build -> 150 SSG pages; Playwright screenshot of
+  /company/ORCL committed to docs/figures/ showing the interval-attached
+  letter; python suite 368 passed (unchanged).
+- **Follow-ups:** universe filters UI; validation-study page rendering
+  validation.json; deploy target for the static export.
+
 ### 2026-07-26 - Phase 11: the FastAPI service (offline-first, caveats mandatory)
 
 - **Scope:** services/api (creditrating_api package, Dockerfile, compose),
