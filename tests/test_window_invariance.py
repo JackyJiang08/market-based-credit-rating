@@ -231,3 +231,58 @@ def test_drift_span_saturates_and_then_stops_changing_the_drift(ticker):
             assert drifts[b] == pytest.approx(drifts[a], abs=DRIFT_TOL), (
                 f"{ticker}: identical drift span {spans[a]:.2f}y but the drift "
                 f"moved {drifts[b] - drifts[a]:+.4f}")
+
+
+# --- Bootstrap must mirror the estimator it claims to describe ---------------
+def test_bootstrap_sigma_is_centred_on_the_pipeline_sigma():
+    """The replicate median must track the point estimate, not another one.
+
+    sigma_A is estimated on the trailing EM_WINDOW_DAYS; the drift on the whole
+    span. A bootstrap computing sigma from the full span would report the
+    sampling distribution of an estimator the pipeline does not use -- and a
+    narrower one, since it would have ~5x the observations.
+    """
+    import numpy as np
+
+    from signal_construction import bootstrap as bs
+
+    rng = np.random.default_rng(11)
+    # A path whose recent volatility is deliberately unlike its full-span one.
+    early = rng.normal(0.0002, 0.004, size=1000)
+    recent = rng.normal(0.0002, 0.016, size=300)
+    u = np.concatenate([early, recent])
+
+    pipeline_sigma = float(np.std(u[-sig_config.EM_WINDOW_DAYS:], ddof=1)
+                           * np.sqrt(sig_config.TRADING_DAYS_PER_YEAR))
+    full_span_sigma = float(np.std(u, ddof=1)
+                            * np.sqrt(sig_config.TRADING_DAYS_PER_YEAR))
+    assert full_span_sigma < 0.75 * pipeline_sigma, "premise: the two differ a lot"
+
+    b = bs.run("TEST", u, 1.0e11, 1.0e10, None, n_replicates=300)
+    median = b.quantiles("sigma_A")[0.5]
+    assert median == pytest.approx(pipeline_sigma, rel=0.15), \
+        f"bootstrap centred on {median:.4f}, pipeline uses {pipeline_sigma:.4f}"
+    assert abs(median - pipeline_sigma) < abs(median - full_span_sigma)
+
+
+def test_bootstrap_records_drift_free_quantities_for_defective_replicates():
+    """RiskScore is drift-free, so excluding defective replicates biases it.
+
+    drift = eta - sigma^2/2, so a larger sigma makes DEFECTIVE more likely.
+    Conditioning RiskScore on drift > 0 would truncate its high-sigma tail and
+    report an interval narrower than the truth.
+    """
+    import numpy as np
+
+    from signal_construction import bootstrap as bs
+
+    rng = np.random.default_rng(5)
+    # Negative mean drift -> many defective replicates.
+    u = rng.normal(-0.0006, 0.02, size=800)
+    b = bs.run("TEST", u, 1.0e11, 1.0e10, None, n_replicates=300)
+
+    assert b.defective_fraction > 0.2, "premise: a good share must be defective"
+    n_rs = int(np.isfinite(b.risk_score).sum())
+    n_mu = int(np.isfinite(b.mu).sum())
+    assert n_rs > n_mu, "RiskScore must survive replicates where mu does not"
+    assert n_rs >= 0.99 * b.n_replicates, "RiskScore is defined in every replicate"

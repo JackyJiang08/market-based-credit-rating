@@ -64,6 +64,9 @@ class BootstrapResult:
     mu: np.ndarray
     ccm: np.ndarray
     risk_score: np.ndarray
+    tic: np.ndarray
+    dd: np.ndarray
+    edf: np.ndarray
     pit_pd: np.ndarray
     ttc_pd: np.ndarray
     notch: np.ndarray                  # index into the S&P label list
@@ -75,6 +78,19 @@ class BootstrapResult:
 
     # Share of replicates in which Prop. 4.4.1 fails.
     defective_fraction: float = float("nan")
+
+    def relative_width(self, name: str, lo: float = 0.05,
+                       hi: float = 0.95) -> float:
+        """Interval width as a fraction of the quantity's own median.
+
+        Dimensionless, so RiskScore (order 1-10) and PIT PD (order 1e-30) can be
+        compared on the same axis.
+        """
+        q = self.quantiles(name, (lo, 0.5, hi))
+        med = q[0.5]
+        if not np.isfinite(med) or med == 0:
+            return float("nan")
+        return float((q[hi] - q[lo]) / abs(med))
 
     def quantiles(self, name: str, qs=(0.05, 0.5, 0.95)) -> dict:
         arr = getattr(self, name)
@@ -131,8 +147,24 @@ def run(ticker: str,
         block_length: Optional[int] = None,
         seed: int = DEFAULT_SEED,
         trading_days: int = config.TRADING_DAYS_PER_YEAR,
+        vol_window: int = config.EM_WINDOW_DAYS,
         horizon: float = config.HORIZON_YEARS) -> BootstrapResult:
-    """Propagate estimation uncertainty through the whole measure chain."""
+    """Propagate estimation uncertainty through the whole measure chain.
+
+    The two parameters are estimated on **different windows**, exactly as
+    `em.estimate` does: `sigma_A` from the trailing `vol_window` observations
+    and the drift from the whole span. Each is therefore resampled from its own
+    window. A bootstrap that computed both from the full span would report the
+    sampling distribution of an estimator the pipeline does not use -- and a
+    narrower one, since it would have ~5x the observations for the volatility.
+
+    Consequence worth stating: the two resamples are drawn independently, while
+    the real estimators share the trailing year of data and are therefore
+    slightly dependent. Each marginal sampling distribution is right; their
+    joint dependence is not modelled. For the quantities reported here that
+    matters little -- RiskScore depends on sigma alone, and mu and CCM are
+    dominated by the drift -- but it is an approximation, not an identity.
+    """
     u = np.asarray(asset_returns, dtype=float)
     u = u[np.isfinite(u)]
     n = u.size
@@ -140,19 +172,27 @@ def run(ticker: str,
         raise ValueError(f"{ticker}: too few asset returns to bootstrap ({n})")
 
     L = block_length or block_length_for(n)
+    u_vol = u[-vol_window:] if u.size > vol_window else u
+    L_vol = block_length or block_length_for(u_vol.size)
     rng = np.random.default_rng(seed)
 
     nan = float("nan")
     out = {k: np.full(n_replicates, nan) for k in
-           ("sigma_A", "eta_A", "drift", "mu", "ccm", "risk_score",
-            "pit_pd", "ttc_pd", "notch")}
+           ("sigma_A", "eta_A", "drift", "mu", "ccm", "risk_score", "tic",
+            "dd", "edf", "pit_pd", "ttc_pd", "notch")}
     labels = list(tables.sp_labels) if tables is not None else []
     defective = 0
 
     for i in range(n_replicates):
-        us = moving_block_resample(u, rng, L)
-        sigma = float(np.std(us, ddof=1) * math.sqrt(trading_days))
-        drift = float(np.mean(us) * trading_days)
+        # Each parameter is resampled from the window its estimator actually
+        # uses. Taking a trailing slice of a full-span resample would NOT work:
+        # a moving-block resample draws blocks uniformly from the whole series,
+        # so every slice of it is the same regime-mixture, and a company whose
+        # recent volatility differs from its five-year volatility would be
+        # bootstrapped around the wrong centre.
+        sigma = float(np.std(moving_block_resample(u_vol, rng, L_vol), ddof=1)
+                      * math.sqrt(trading_days))
+        drift = float(np.mean(moving_block_resample(u, rng, L)) * trading_days)
         if not np.isfinite(sigma) or sigma <= 0:
             continue
         eta = drift + 0.5 * sigma ** 2
@@ -165,13 +205,32 @@ def run(ticker: str,
             m = compute(sigma, asset_value, debt, eta, horizon=horizon)
         except ValueError:
             continue
+
+        # Recorded for EVERY replicate, because these do not depend on the sign
+        # of the drift:
+        #   TiC = CCM/mu = sigma_A^2 / ln^2(A/D)  -- the (eta - sigma^2/2) terms
+        #   cancel exactly between Eq. (11) and Eq. (12), so RiskScore is a
+        #   function of sigma_A and A/D alone (Prop. 4.4.2).
+        #   DD and EDF use the signed drift directly and stay defined.
+        #
+        # Recording them after the DEFECTIVE check would condition their
+        # distributions on `drift > 0`. That is not a neutral filter: since
+        # drift = eta - sigma^2/2, a larger sigma makes DEFECTIVE more likely,
+        # so the surviving replicates would be a sigma-truncated sample and the
+        # RiskScore interval would be narrower than the truth. That bug was
+        # present in the first version of this module.
+        out["risk_score"][i] = m.risk_score
+        out["tic"][i] = m.tic
+        out["dd"][i] = m.dd
+        out["edf"][i] = m.edf
+
         if m.regime is DriftRegime.DEFECTIVE:
             defective += 1
             continue
 
+        # These genuinely do not exist in a defective regime.
         out["mu"][i] = m.mu
         out["ccm"][i] = m.ccm
-        out["risk_score"][i] = m.risk_score
         out["pit_pd"][i] = m.pit_pd
 
         if tables is None:
@@ -187,7 +246,7 @@ def run(ticker: str,
             out["notch"][i] = labels.index(label)
 
     point_drift = float(np.mean(u) * trading_days)
-    point_sigma = float(np.std(u, ddof=1) * math.sqrt(trading_days))
+    point_sigma = float(np.std(u[-vol_window:], ddof=1) * math.sqrt(trading_days))
     span_years = n / float(trading_days)
     point_se = point_sigma / math.sqrt(span_years) if span_years > 0 else nan
 

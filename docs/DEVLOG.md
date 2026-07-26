@@ -35,6 +35,46 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Two bootstrap bugs found by decomposing the uncertainty result
+
+- **Scope:** `signal_construction/bootstrap.py`. Changes every interval this
+  module reports. No point estimate and no rating moved.
+- **Why this was looked at:** "no rating survives uncertainty" is a suspicious
+  finding, and the algebra makes a falsifiable prediction -- TiC = CCM/mu =
+  sigma^2/ln^2(A/D), so RiskScore is drift-free and its interval should be
+  exactly what sigma implies. Checking that prediction found two bugs.
+- **Bug 1: drift-conditioned selection on drift-free quantities.** `risk_score`
+  was recorded *after* the `continue` on a DEFECTIVE replicate, so its
+  distribution was conditioned on `drift > 0`. That is not a neutral filter:
+  `drift = eta - sigma^2/2`, so a larger sigma makes DEFECTIVE more likely and
+  the surviving replicates were a sigma-truncated sample. Worst for the very
+  companies where it matters -- ORCL 44% defective, KHC 73%. `risk_score`,
+  `tic`, `dd` and `edf` are now recorded for every replicate.
+- **Bug 2: the bootstrap did not mirror the estimator.** It resampled the full
+  ~5y span and computed sigma from all of it, while the pipeline estimates
+  sigma from the trailing 252 days. For COST that is 0.231 against the
+  pipeline's 0.195 -- a different estimator, and a narrower one, since it had
+  ~5x the observations. Taking a trailing slice of a full-span resample does
+  not fix it either: a moving-block resample draws blocks uniformly, so every
+  slice is the same regime-mixture. Each parameter is now resampled from the
+  window its own estimator uses.
+- **Correction of record:** last session's DEVLOG entry claimed "bootstrap
+  calibration checked: replicate medians track the point estimates". That check
+  was wrong -- it compared a full-span sigma median (0.2288) against a
+  trailing-252 point estimate (0.1952) and read the gap as agreement.
+- **Validation:** `python -m pytest -q` -> 269 passed, run before this push.
+  Two new tests pin both fixes: one asserts the replicate median tracks the
+  pipeline sigma on a path whose recent volatility differs sharply from its
+  full-span volatility, the other that RiskScore is recorded in every replicate
+  while mu is not.
+- **Effect on the reported numbers:** intervals widen. Median relative width on
+  RiskScore 0.441 -> 0.479; DELL's letter span 8 -> 10 notches; ORCL 4 notches
+  but shifted to BBB-..BB-. The qualitative conclusion is unchanged.
+- **Findings:** RiskScore's relative interval width is 2.00x sigma's, exactly as
+  differentiating sigma^2 predicts -- no excess instability enters before the
+  conversion. PIT PD's is 4077x RiskScore's. Rank ordering on RiskScore is
+  stable (Kendall tau median 0.956; 99.9% of replicates >= 0.8).
+
 ### 2026-07-26 - Data-layer hardening: #17, #18, #20
 
 - **Scope:** Layers 1-2 defensive changes plus provenance fields. No formula
