@@ -480,6 +480,11 @@ def run(cfg: RunConfig) -> list[CompanyData]:
                   len(failures), ", ".join(t for t, _ in failures))
 
     if companies:
+        # Domain invariants (creditrating.domain), asserted loudly but
+        # non-fatally: the isolation contract says a bad company never takes
+        # down a batch, but a violation must never pass silently either.
+        from creditrating.diagnostics import checks
+        checks.check_batch(companies)
         _log_vol_comparison(companies)
         excel.write_master_workbook(companies, rates)
         longtable.write_long_table(longtable.build_long_table(companies, rates))
