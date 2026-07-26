@@ -59,7 +59,7 @@ LOG = logging.getLogger(__name__)
 
 
 # Analytical constants (paper Prop. 4.5.2-4.5.3, Section 5.3).
-CML = math.e ** 1.35
+CML = math.e**1.35
 SQRT_CML = math.sqrt(CML)
 
 # Constants of Rating System Q (Prop. 4.2). Prop. 4.2 quotes S&P as 0.626 and

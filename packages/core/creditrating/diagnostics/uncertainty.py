@@ -213,7 +213,7 @@ def run(
         drift = float(np.mean(moving_block_resample(u, rng, L)) * trading_days)
         if not np.isfinite(sigma) or sigma <= 0:
             continue
-        eta = drift + 0.5 * sigma ** 2
+        eta = drift + 0.5 * sigma**2
 
         out["sigma_A"][i] = sigma
         out["eta_A"][i] = eta

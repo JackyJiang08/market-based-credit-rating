@@ -323,7 +323,15 @@ def test_ttc_scale_tracks_the_published_column_outside_ccc(rs, ttc_pub):
 # --- The grid as an oracle for the analytical route -------------------------
 @needs_tables
 @pytest.mark.parametrize(
-    "ccm, mu", [(1.5, 5.0), (1.5, 10.0), (1.5, 15.0), (2.0, 20.0), (3.0, 15.0), (1.0, 25.0),]
+    "ccm, mu",
+    [
+        (1.5, 5.0),
+        (1.5, 10.0),
+        (1.5, 15.0),
+        (2.0, 20.0),
+        (3.0, 15.0),
+        (1.0, 25.0),
+    ],
 )
 def test_analytical_agrees_with_the_grid_where_the_scale_resolves(ccm, mu):
     """Both routes are defined here and must agree to within one notch.

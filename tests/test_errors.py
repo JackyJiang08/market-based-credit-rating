@@ -62,7 +62,13 @@ def test_delisting_recognised_from_the_message(message):
     assert isinstance(errors.classify(RuntimeError(message)), errors.DelistedError)
 
 
-@pytest.mark.parametrize("message", ["no price data found for this range", "empty response",])
+@pytest.mark.parametrize(
+    "message",
+    [
+        "no price data found for this range",
+        "empty response",
+    ],
+)
 def test_empty_result_recognised_from_the_message(message):
     assert isinstance(errors.classify(RuntimeError(message)), errors.NoDataError)
 

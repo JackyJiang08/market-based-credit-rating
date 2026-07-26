@@ -123,7 +123,13 @@ def test_assets_exactly_at_the_w1_barrier_are_gated():
 
 
 @pytest.mark.parametrize(
-    "a, d", [(None, 100e9), (100e9, None), (float("nan"), 100e9), (100e9, float("nan")),]
+    "a, d",
+    [
+        (None, 100e9),
+        (100e9, None),
+        (float("nan"), 100e9),
+        (100e9, float("nan")),
+    ],
 )
 def test_missing_market_inputs_do_not_gate(a, d):
     """Same philosophy as UNKNOWN firm types: absent data is not evidence."""

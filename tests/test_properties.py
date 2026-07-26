@@ -28,7 +28,7 @@ def test_tic_identity_and_probability_bounds(sigma, ratio, eta):
     d = 1.0e10
     m = measures.compute(sigma, ratio * d, d, eta)
 
-    tic_direct = sigma ** 2 / math.log(ratio) ** 2
+    tic_direct = sigma**2 / math.log(ratio) ** 2
     assert m.tic == pytest.approx(tic_direct, rel=1e-9)
     assert m.risk_score == pytest.approx(100.0 * m.tic, rel=1e-12)
 

@@ -14,7 +14,7 @@ def _simulate_equity(sigma_true=0.25, eta=0.08, D=100.0, r=0.04, A0=200.0, n=252
     rng = np.random.default_rng(seed)
     dt = 1.0 / 250.0
     z = rng.standard_normal(n)
-    log_ret = (eta - 0.5 * sigma_true ** 2) * dt + sigma_true * np.sqrt(dt) * z
+    log_ret = (eta - 0.5 * sigma_true**2) * dt + sigma_true * np.sqrt(dt) * z
     A = np.exp(np.log(A0) + np.cumsum(log_ret))
     idx = pd.bdate_range("2023-01-02", periods=n)
     D_arr = np.full(n, D)

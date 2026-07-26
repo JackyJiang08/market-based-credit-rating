@@ -62,7 +62,7 @@ def _bs_equity(
     A = np.asarray(A, dtype=float)
     sqrtT = np.sqrt(T)
     with np.errstate(divide="ignore", invalid="ignore"):
-        d1 = (np.log(A / D) + (r + 0.5 * sigma ** 2) * T) / (sigma * sqrtT)
+        d1 = (np.log(A / D) + (r + 0.5 * sigma**2) * T) / (sigma * sqrtT)
         d2 = d1 - sigma * sqrtT
         val = A * norm.cdf(d1) - D * np.exp(-r * T) * norm.cdf(d2)
     # Intrinsic-value floor guards the degenerate sigma*sqrtT -> 0 corner.
@@ -195,7 +195,7 @@ def estimate(
     )
     u = np.diff(np.log(A))
     drift = float(np.mean(u) * trading_days)  # = eta_A - sigma^2/2
-    eta_A = drift + 0.5 * sigma ** 2
+    eta_A = drift + 0.5 * sigma**2
 
     # Standard error of the drift estimate: sigma_A / sqrt(span in years).
     # Reported so a caller can see when eta is indistinguishable from zero.

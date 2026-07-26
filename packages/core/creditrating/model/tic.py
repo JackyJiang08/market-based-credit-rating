@@ -124,7 +124,7 @@ def compute(
         raise ValueError(f"require A ({asset:.3g}) > D ({debt:.3g}) > 0")
 
     ln_ad = math.log(asset / debt)
-    drift = eta_A - 0.5 * sigma_A ** 2  # signed, exactly as Eq. (11) uses it
+    drift = eta_A - 0.5 * sigma_A**2  # signed, exactly as Eq. (11) uses it
 
     # Prop. 4.4.1 assumes `eta - sigma_A^2/2 > 0`. When it does not hold the
     # first-passage time is defective -- default occurs almost surely and
@@ -135,7 +135,7 @@ def compute(
     regime = drift_regime(drift)
     if regime is DriftRegime.VALID:
         mu = ln_ad / drift
-        ccm = sigma_A ** 2 / (ln_ad * drift)
+        ccm = sigma_A**2 / (ln_ad * drift)
     else:
         mu = float("nan")
         ccm = float("nan")
@@ -143,7 +143,7 @@ def compute(
     # TiC rating is eta-independent (Q=1): sigma_A^2 / ln^2(A/D) (Eq. 12).
     # This one survives a defective regime: Prop. 4.4.2 makes it a function of
     # sigma_A and ln(A/D) only, so it is defined whatever the drift does.
-    tic = sigma_A ** 2 / ln_ad ** 2
+    tic = sigma_A**2 / ln_ad**2
     risk_score = 100.0 * tic
     lam = (ccm + 1.0) ** (-1.5) if math.isfinite(ccm) else float("nan")  # Eq. (6)
 

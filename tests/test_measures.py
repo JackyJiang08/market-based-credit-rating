@@ -33,10 +33,10 @@ def test_compute_hand_values():
 
     ln_ad = math.log(2.0)  # 0.693147
     assert m.ln_A_D == pytest.approx(ln_ad)
-    assert m.drift == pytest.approx(0.10 - 0.5 * 0.30 ** 2)  # 0.055
+    assert m.drift == pytest.approx(0.10 - 0.5 * 0.30**2)  # 0.055
 
     # TiC = sigma^2 / ln^2(A/D); RiskScore = 100*TiC (eta-independent).
-    assert m.tic == pytest.approx(0.09 / ln_ad ** 2)
+    assert m.tic == pytest.approx(0.09 / ln_ad**2)
     assert m.risk_score == pytest.approx(18.7315, abs=1e-3)
 
     # mu, CCM (Eq. 11) and TiC = CCM/mu consistency.
@@ -160,7 +160,7 @@ def test_dd_edf_and_tic_survive_a_defective_regime():
     assert math.isfinite(m.dd) and math.isfinite(m.edf)
     assert math.isfinite(m.tic) and math.isfinite(m.risk_score)
     # TiC depends only on sigma_A and ln(A/D).
-    assert m.tic == pytest.approx(0.30 ** 2 / math.log(2.0) ** 2)
+    assert m.tic == pytest.approx(0.30**2 / math.log(2.0) ** 2)
 
 
 def test_drift_regime_boundary_is_strictly_positive():

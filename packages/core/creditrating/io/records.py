@@ -183,9 +183,7 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
     below.
     """
     drift = (
-        c.eta_A - 0.5 * c.sigma_A ** 2
-        if c.eta_A is not None and c.sigma_A is not None
-        else None
+        c.eta_A - 0.5 * c.sigma_A**2 if c.eta_A is not None and c.sigma_A is not None else None
     )
     last_date = c.panel.index[-1].date() if c.panel is not None and not c.panel.empty else None
     # The statement the model ACTUALLY used on the valuation date, which since

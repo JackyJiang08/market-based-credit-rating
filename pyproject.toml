@@ -73,6 +73,7 @@ ignore = [
 
 [tool.black]
 line-length = 95
+target-version = ["py311"]
 include = "(packages|tests)/.*\\.py"
 
 [tool.mypy]

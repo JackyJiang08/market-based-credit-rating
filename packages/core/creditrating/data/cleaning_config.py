@@ -19,8 +19,14 @@ BALANCE_SHEET_MAP: dict[str, tuple[str, ...]] = {
         "Short Term Debt",
         "Short Long Term Debt",
     ),
-    "Short-term / Current Liabilities": ("Current Liabilities", "Total Current Liabilities",),
-    "Long-term Debt": ("Long Term Debt And Capital Lease Obligation", "Long Term Debt",),
+    "Short-term / Current Liabilities": (
+        "Current Liabilities",
+        "Total Current Liabilities",
+    ),
+    "Long-term Debt": (
+        "Long Term Debt And Capital Lease Obligation",
+        "Long Term Debt",
+    ),
     "Long-term Liabilities": (
         "Total Non Current Liabilities Net Minority Interest",
         "Total Non Current Liabilities",

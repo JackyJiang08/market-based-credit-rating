@@ -177,7 +177,7 @@ def test_asset_row_values(tmp_path, monkeypatch):
     assert asset.loc[0, "Symbol"] == "TST"
     assert asset.loc[0, "Total Debt"] == 300.0
     # R is the realized drift = eta - sigma^2/2 (the term inside DD).
-    assert asset.loc[0, "R"] == pytest.approx(0.08 - 0.5 * 0.25 ** 2)
+    assert asset.loc[0, "R"] == pytest.approx(0.08 - 0.5 * 0.25**2)
     assert asset.loc[0, "Rating Basis"] == "GRID_INTERIOR"
 
     validation = pd.read_excel(path, "validation")
