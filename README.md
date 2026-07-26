@@ -23,6 +23,7 @@ code docstrings cite the methodology by equation number.
 - **7 notches** — how far one company's letter (T) moves on the unargued long-term-debt weight alone → [convention uncertainty](#convention-uncertainty-the-debt-weight-sweep)
 - **7/10 rated, 3/10 scale-resolved** — coverage stated honestly: most letters are pinned by the scale, not resolved by the model → [what the scale could resolve](#what-the-scale-could-resolve)
 - **150-name universe, 0 unexplained failures** — every non-rating classified (gates, defective drift, data), two real bugs found and fixed by scale alone → [docs/UNIVERSE.md](docs/UNIVERSE.md)
+- **ρ = 0.79 against actual agency ratings** (0.73 restricted to scale-resolved names) — the ordering validates; the letter runs +5 notches optimistic and DD alone ties RiskScore → [validation study](docs/analysis/VALIDATION.md)
 
 ![Amplification ladder: median relative bootstrap interval width per quantity, log scale](docs/figures/amplification_ladder.svg)
 
@@ -266,6 +267,20 @@ The scale-pinned names complete the argument: COST, KO and WMT do not move under
 weight (span 1) — not because they are precisely measured, but because a pinned letter is
 insensitive to its inputs. **A letter that cannot move carries no information**; its
 immunity to an arbitrary convention is the same fact seen from the other side.
+
+### Validated against actual agency ratings
+
+The full study — sourced ratings, stratified discrimination with bootstrap CIs,
+calibration, baselines, sector stratification — is in
+[docs/analysis/VALIDATION.md](docs/analysis/VALIDATION.md). The two headline facts:
+the RiskScore ordering correlates ρ = 0.79 with the agency ordering (0.73 restricted
+to the 36 scale-resolved names — it is not carried by pinned letters, and it holds
+within every sector), while the letter conversion runs a median **+5 notches
+optimistic** with only 16% of names within two notches. And the honest baseline:
+**DD alone ties RiskScore on discrimination** (0.78 vs 0.79) — the TiC construction's
+advantages are stability properties, not ranking properties.
+
+![Model letters vs agency letters by broad grade](docs/analysis/letters_model_vs_agency.svg)
 
 ### How a rating must be presented
 

@@ -1,0 +1,138 @@
+symbol,sp,moodys,source,retrieved,verified
+AAPL,AA+,Aaa,verified: S&P AA+ affirmed 2025-05-19 (cbonds.com/news/3404097); Moody's upgraded to Aaa per press,2026-07-26,yes
+MSFT,AAA,,verified: S&P reaffirmed Jul 2026; press: 247wallst.com/investing/2026/05/13/the-2-us-companies-with-a-better-credit-rating-than-uncle-sam-belong-in-every-retirement-portfolio/,2026-07-26,yes
+JNJ,AAA,,verified: S&P AAA affirmed Apr 2026 (negative outlook); spglobal.com/ratings id/3359646,2026-07-26,yes
+GOOGL,AA+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AMZN,AA,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+META,AA-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+NVDA,AA,,verified: S&P upgraded AA Jun 2026: investing.com/news/stock-market-news/sp-global-ratings-upgrades-nvidia-to-aa-on-explosive-artificial-intelligence-dema-4738414,2026-07-26,yes
+CRM,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AVGO,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AMD,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MU,BBB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+INTC,BBB,,verified: S&P BBB Dec 2024 (spglobal id/3298874); Fitch BBB Aug 2025 (cnbc.com/2025/08/05),2026-07-26,yes
+IBM,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+ORCL,BBB-,,verified: S&P downgraded BBB- 2026-07-09: heise.de/en/news/S-P-downgrades-Oracle-to-BBB-only-one-notch-above-junk-level-11363472.html,2026-07-26,yes
+INTU,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+DELL,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MCD,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+SBUX,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+HD,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+LOW,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BA,BBB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+PM,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+YUM,BB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AZO,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+JPM,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BAC,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+WFC,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+C,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+GS,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MS,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+PNC,A,A2,verified: recorded in ADR 0003 at gate implementation (senior unsecured A/A2),2026-07-26,yes
+SCHW,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+COF,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+ALLY,BBB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+KEY,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AXP,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+V,AA-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MA,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+PYPL,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BLK,AA-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BX,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+SPGI,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BRK-B,AA,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AIG,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MET,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+ALL,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+PGR,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+PLD,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AMT,BBB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+SPG,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+O,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+EQIX,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+NEE,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+DUK,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+SO,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+D,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+XEL,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+PCG,BB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+VST,BB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+XOM,AA-,,verified: S&P AA- affirmed 2025-09-18: cbonds.com/news/3597699,2026-07-26,yes
+CVX,AA-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+COP,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+OXY,BBB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+SLB,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+KMI,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+APA,BB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BTU,B+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+RIG,CCC+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+LLY,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+UNH,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+PFE,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MRK,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+ABBV,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AMGN,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+CVS,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+HCA,BBB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+THC,B+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+CYH,CCC+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+KO,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+WMT,AA,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+COST,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+TGT,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+NKE,AA-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+DIS,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+DG,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+DLTR,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+KHC,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+GIS,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+KSS,BB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+M,BB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+W,B+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BYND,CCC-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+T,BBB,Baa2,verified: Moody's affirmed Baa2: ratings.moodys.com/ratings-news/449355; S&P outlook revision spglobal id/3432559,2026-07-26,yes
+VZ,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+TMUS,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+CHTR,BB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+WBD,BB+,,verified: S&P downgraded to BB+ May 2025: variety.com/2025/tv/news/warner-bros-discovery-credit-rating-junk-status-1236404973/,2026-07-26,yes
+PARA,BB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+LUMN,B-,B2,verified: upgraded by all three agencies Feb 2026: ir.lumen.com/news/news-details/2026/Lumen-Ratings-Upgraded-by-Top-3-Global-Ratings-Agencies,2026-07-26,yes
+SATS,CCC,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+CAT,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+DE,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+GE,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+LMT,A-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+RTX,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+FDX,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MMM,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+XRX,BB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+PBI,B+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+TSLA,BBB,,verified: S&P BBB affirmed 2025-03-18: cbonds.com/news/3317069,2026-07-26,yes
+F,BBB-,Ba1,"verified: dealcharts.org/blog/ford-credit-rating (2026): S&P BBB- negative, Moody's Ba1",2026-07-26,yes
+GM,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+RIVN,B-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+DAL,BBB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+UAL,BB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AAL,B+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+CCL,BBB-,,verified: S&P raised BB+ -> BBB- (investment grade) 2026: ad-hoc-news.de/boerse/news/ueberblick/carnival-corp-gets-s-and-p-investment-grade,2026-07-26,yes
+RCL,BB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+NCLH,B+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MGM,BB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+CZR,B,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+COIN,BB-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+MSTR,B-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AMC,CCC+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+KVUE,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BIRK,BB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+GEHC,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+SOLV,BBB,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+LINE,BBB+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+TSM,AA-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+BABA,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+NVO,AA-,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+SAP,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+TM,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+ASML,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+AZN,A,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no
+SHEL,A+,,compiled from public reporting as of mid-2026; unverified (seeded from config/universe.yaml),2026-07-26,no

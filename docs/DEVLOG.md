@@ -35,6 +35,46 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Validation study: the model against sourced agency ratings
+
+- **Scope:** `docs/analysis/` (sourced ratings file, study script, four SVGs,
+  data CSVs, VALIDATION.md), README results section, docs index, .gitignore
+  negation. No pipeline code.
+- **Ground truth:** `agency_ratings.csv`, one row per name with source and
+  retrieval date (2026-07-26). 14 anchor names press/agency-verified today
+  with citations -- including four live corrections to the indicative seeds
+  (ORCL cut to BBB- on 2026-07-09; NVDA raised to AA Jun 2026; LUMN raised
+  to B- Feb 2026; CCL restored to investment grade). The rest are labelled
+  compiled/unverified; 13 names have no public rating and are excluded, not
+  imputed. Comparison set: 137 names, 128 with estimates.
+- **Discrimination (stratified -- the stratification is the finding):**
+  Spearman rho vs the agency ordering 0.787 [90% CI 0.713-0.843] on all 128
+  names with estimates; 0.819 on the 77 rated; **0.726 [0.531-0.860] on the
+  36 SCALE_RESOLVED names** -- the correlation is not carried by pinned
+  letters. Kendall tau 0.58-0.66; Somers' D 0.61-0.69. Within-sector rho
+  mean 0.837 (range 0.73-0.95, every sector with n>=8) -- not riding the
+  sector effect.
+- **Calibration (a property of the letter conversion):** median error **+5
+  notches optimistic**, IQR [+3,+6]; 9% within 1 notch, 16% within 2; 42 of
+  77 names sit in the model's AAA/AA band that agencies place at A or BBB.
+- **Baselines (the honest one):** **DD alone ties RiskScore** (rho 0.779 vs
+  0.787 overall; 0.741 vs 0.726 in the resolved stratum -- nominally ahead).
+  The marginal ranking value of the TiC construction over its own DD
+  ingredient is ~0 on this universe, and VALIDATION.md says so; both beat
+  leverage alone (0.632, collapsing to 0.192 within the resolved stratum).
+  RiskScore's real advantages (drift-freeness, Girsanov invariance) are
+  stability properties, not discrimination properties.
+- **Charts** (regenerable, same validated palette): model-vs-agency letter
+  histograms (the money chart), rank scatter with SCALE_RESOLVED emphasis,
+  notch-error distribution, baseline comparison. Money chart embedded in the
+  README results section with the honest summary.
+- **Breaking changes:** None.
+- **Validation:** `python3 -m pytest -q` -> 322 passed, run before this
+  push. Study regenerated end to end from committed inputs; all four SVGs
+  rasterized and visually inspected.
+- **Follow-ups:** verify more of the compiled ratings; Moody's column is
+  sparse; re-run the study at each future universe refresh.
+
 ### 2026-07-26 - pandas-3 dtype fix, CI pandas matrix, final phrasing sweep
 
 - **Scope:** `raw_data_architecture/cache.py`, `tests/test_cache.py`,

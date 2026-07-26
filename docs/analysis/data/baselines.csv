@@ -1,0 +1,10 @@
+stratum,predictor,n,spearman
+all names with estimates,TiC RiskScore,128,0.7867232885211725
+all names with estimates,DD alone (neg),128,0.7791825798346207
+all names with estimates,leverage D/A alone,128,0.6316696247537681
+rated only,TiC RiskScore,77,0.8186125931645735
+rated only,DD alone (neg),77,0.823727930527402
+rated only,leverage D/A alone,77,0.6287238682178212
+SCALE_RESOLVED only,TiC RiskScore,36,0.7261776900167181
+SCALE_RESOLVED only,DD alone (neg),36,0.7413631752235019
+SCALE_RESOLVED only,leverage D/A alone,36,0.19247926975778243
