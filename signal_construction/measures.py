@@ -18,7 +18,8 @@ import enum
 import math
 from dataclasses import dataclass
 
-from scipy.stats import norm
+import numpy as np
+from scipy.special import log_ndtr, logsumexp
 
 
 class DriftRegime(enum.Enum):
@@ -70,6 +71,14 @@ def pit_pd_first_hitting(mu: float, ccm: float, horizon: float = 1.0) -> float:
 
     Verified against paper Table 13 (CCM=1.5: mu=1 -> 69.40%, mu=5 -> 12.60%)
     and Table 14 (CCM=5: mu=1 -> 77.70%).
+
+    Computed in log space. The `exp(2/CCM)` factor overflows a float64 above
+    CCM ~ 0.00276, and the claim that "the paired Phi underflows faster" is
+    false: the exponents are `2/CCM` and `-(1/CCM)(sqrt(T/mu)+sqrt(mu/T))^2/2`,
+    which cancel exactly at mu = T. The product tends to an O(1) quantity there,
+    so the old `except OverflowError: term2 = 0` discarded up to ~0.9 percentage
+    points of PD, always understating risk. Summing the two logs with logsumexp
+    removes the overflow and the fallback together.
     """
     # NaN reaches here from a defective drift regime, where (mu, CCM) are
     # undefined by construction. Return NaN explicitly rather than relying on
@@ -79,14 +88,15 @@ def pit_pd_first_hitting(mu: float, ccm: float, horizon: float = 1.0) -> float:
     a = math.sqrt(1.0 / ccm)
     s_t_mu = math.sqrt(horizon / mu)
     s_mu_t = math.sqrt(mu / horizon)
-    term1 = norm.cdf(a * (s_t_mu - s_mu_t))
-    # exp(2/CCM) can overflow for tiny CCM; the paired Phi underflows faster, so
-    # compute in log space and guard.
-    try:
-        term2 = math.exp(2.0 / ccm) * norm.cdf(-a * (s_t_mu + s_mu_t))
-    except OverflowError:
-        term2 = 0.0
-    pd = term1 + term2
+
+    log_term1 = log_ndtr(a * (s_t_mu - s_mu_t))
+    log_term2 = 2.0 / ccm + log_ndtr(-a * (s_t_mu + s_mu_t))
+    log_pd = logsumexp([log_term1, log_term2])
+    if not np.isfinite(log_pd):
+        raise ValueError(
+            f"non-finite log PD at mu={mu!r}, ccm={ccm!r}, horizon={horizon!r}")
+
+    pd = float(np.exp(log_pd))
     return float(min(max(pd, 0.0), 1.0))
 
 
@@ -121,9 +131,12 @@ def compute(sigma_A: float, asset: float, debt: float, eta_A: float,
     lam = (ccm + 1.0) ** (-1.5) if math.isfinite(ccm) else float("nan")  # Eq. (6)
 
     # Distance to default / EDF (Eq. 14), using the signed drift.
+    # EDF via log_ndtr: norm.cdf(-dd) returns exactly 0.0 from dd ~ 38 upward,
+    # while log_ndtr still resolves past 39. The exp() underflows to 0 only when
+    # the true value is genuinely below the smallest subnormal.
     sqrtT = math.sqrt(horizon)
     dd = (ln_ad + drift * horizon) / (sigma_A * sqrtT)
-    edf = float(norm.cdf(-dd))
+    edf = float(np.exp(log_ndtr(-dd)))
 
     # PIT PD is a function of (mu, CCM), so it is undefined in a defective
     # regime too. DD and EDF are not: Eq. (14) uses the signed drift directly

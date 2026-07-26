@@ -39,3 +39,11 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   implemented, Eq. (27) is not, and the route is reachable only from tests. Chose
   the docstring fix over wiring it in because Eq. (27) depends on the unimplemented
   rating half of Eq. (24) (#11), which is out of scope this week.
+- **#4, #5** Eq. (13) and Eq. (22) are now computed in log space with
+  `log_ndtr`/`logsumexp`, and EDF via `exp(log_ndtr(-DD))`. The old code claimed
+  log space in a comment while computing linearly; `exp(2/CCM)` overflowed below
+  CCM ≈ 0.00276 and the `except OverflowError` fallback dropped the second term
+  entirely, understating PD by up to 0.9pp. `alpha_first_hitting` had no guard at
+  all and raised. Added a 72-cell property test against `scipy.stats.invgauss`
+  over CCM ∈ [1e-3, 1e3] × µ ∈ [0.5, 1e4]; the old implementation fails 2 of
+  those cells, the new one passes all.

@@ -34,6 +34,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from scipy.optimize import brentq
+from scipy.special import log_ndtr, logsumexp
 from scipy.stats import norm
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -239,10 +240,17 @@ def alpha_first_hitting(ccm: float) -> float:
     """Capital confidence level for a first-hitting rating (Eq. 22, IG, theta=1).
 
     Verified: alpha_first_hitting(1.5) = 0.91906 (paper Section 5.3).
+
+    Computed in log space for the same reason as Eq. (13): this expression has
+    the same `exp(2/CCM) * Phi(...)` shape, and previously had no overflow guard
+    at all -- it raised OverflowError outright for CCM below ~0.00276.
     """
     a = SQRT_CML
-    return float(norm.cdf(a / ccm - 1 / a)
-                 + math.exp(2 / ccm) * norm.cdf(-a / ccm - 1 / a))
+    log_alpha = logsumexp([log_ndtr(a / ccm - 1 / a),
+                           2.0 / ccm + log_ndtr(-a / ccm - 1 / a)])
+    if not np.isfinite(log_alpha):
+        raise ValueError(f"non-finite log alpha at ccm={ccm!r}")
+    return float(np.exp(log_alpha))
 
 
 def alpha_sp(ccm: float) -> float:
