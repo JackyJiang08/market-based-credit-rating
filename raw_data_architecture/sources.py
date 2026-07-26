@@ -18,8 +18,14 @@ import requests
 import yfinance as yf
 
 from . import config
+from .errors import (DataSourceError, RateLimitedError,
+                     SourceUnavailableError, classify)
 
 LOG = logging.getLogger("pfpa.raw_data")
+
+# Waiting can only help these two: the source refused us, or the transport
+# failed. A delisted symbol and a successful-but-empty answer are terminal.
+RETRYABLE = (RateLimitedError, SourceUnavailableError)
 
 
 # --------------------------------------------------------------------------- #
@@ -30,18 +36,26 @@ def with_retry(label: str) -> Callable:
     def decorator(fn: Callable) -> Callable:
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            last_exc: Optional[Exception] = None
+            last: Optional[DataSourceError] = None
             for attempt in range(1, config.MAX_RETRIES + 1):
                 try:
                     return fn(*args, **kwargs)
-                except Exception as exc:  # noqa: BLE001 - intentional broad catch
-                    last_exc = exc
+                except Exception as exc:  # noqa: BLE001 - vendor raises bare types
+                    last = classify(exc)
+                    # A delisted symbol will not become listed by waiting, and a
+                    # successful empty answer is not a failure. Only throttling
+                    # and transport problems are worth retrying.
+                    if not isinstance(last, RETRYABLE):
+                        LOG.warning("%s: %s -- not retryable", label, last)
+                        raise last from exc
+                    if attempt == config.MAX_RETRIES:
+                        break
                     wait = config.BACKOFF_BASE_SECONDS * (2 ** (attempt - 1))
                     LOG.warning("%s failed (attempt %d/%d): %s -- retry in %.0fs",
-                                label, attempt, config.MAX_RETRIES, exc, wait)
+                                label, attempt, config.MAX_RETRIES, last, wait)
                     time.sleep(wait)
-            LOG.error("%s permanently failed: %s", label, last_exc)
-            raise last_exc  # type: ignore[misc]
+            LOG.error("%s permanently failed: %s", label, last)
+            raise last  # type: ignore[misc]
         return wrapper
     return decorator
 
@@ -77,8 +91,15 @@ def resolve_ticker(query: str) -> str:
             info = yf.Ticker(candidate).info or {}
             if info.get("symbol") or info.get("shortName") or info.get("regularMarketPrice"):
                 return str(info.get("symbol", candidate)).upper()
-        except Exception:  # noqa: BLE001 - fall through to search
-            pass
+        except Exception as exc:  # noqa: BLE001 - vendor raises bare types
+            err = classify(exc)
+            # A rate limit here is not evidence that the symbol is wrong, and
+            # falling through to a name search would resolve it to something
+            # else entirely. Only an actual lookup miss may fall through.
+            if isinstance(err, RateLimitedError):
+                raise err from exc
+            LOG.debug("symbol probe for %s failed (%s); trying name search",
+                      candidate, err.status.value)
 
     try:
         quotes = getattr(yf.Search(q, max_results=10), "quotes", []) or []

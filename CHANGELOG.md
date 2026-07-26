@@ -64,3 +64,11 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   that produce `ShortTermDebt = 0` for banks, `default_point_debt` returning NaN
   rather than 0 when both legs are missing, `union_balance_sheets`, a direct
   `alpha_sp` anchor pinning the `1/Q` reading, and monotonicity of α(CCM).
+- **#9** Replaced the broad `except Exception` blocks in `workflow.py` with a typed
+  hierarchy in `raw_data_architecture/errors.py`: `RateLimitedError`,
+  `DelistedError`, `NoDataError`, `SourceUnavailableError`. The outcome reaches the
+  validation sheet as `Data Status`, so a company that genuinely has no data
+  (`NO_DATA`) is now visibly different from a fetch that failed (`RATE_LIMITED` /
+  `DELISTED` / `SOURCE_ERROR`). Retries are limited to throttling and transport
+  failures — a delisted symbol is no longer retried four times. An unrecognised
+  failure becomes `SOURCE_ERROR`, never `NO_DATA`.

@@ -18,6 +18,7 @@ import pandas as pd
 import yfinance as yf
 
 from raw_data_architecture import config as raw_config
+from raw_data_architecture import errors as raw_errors
 from raw_data_architecture import sources
 
 from . import alignment, persistence, transforms
@@ -47,10 +48,17 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     data = CompanyData(ticker=ticker)
 
     # --- company info ---
+    # Each acquisition records why it failed. The worst status seen wins, so a
+    # rate limit is never reported as "this company has no data".
+    statuses: list[raw_errors.DataStatus] = []
     try:
         info = sources.get_info(tk)
-    except Exception:  # noqa: BLE001
+        if not info:
+            raise raw_errors.NoDataError("Ticker.info returned nothing")
+    except raw_errors.DataSourceError as exc:
         info = {}
+        statuses.append(exc.status)
+        LOG.warning("  info unavailable (%s): %s", exc.status.value, exc)
     data.name = info.get("longName") or info.get("shortName") or ticker
     data.currency = info.get("currency", "")
     data.sector = info.get("sector", "")
@@ -63,8 +71,12 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     # --- prices ---
     try:
         prices = sources.get_history(tk, cfg.cutoff_date)
-    except Exception:  # noqa: BLE001
+        if prices is None or prices.empty:
+            raise raw_errors.NoDataError("no price history returned")
+    except raw_errors.DataSourceError as exc:
         prices = pd.DataFrame()
+        statuses.append(exc.status)
+        LOG.warning("  prices unavailable (%s): %s", exc.status.value, exc)
     if not prices.empty:
         prices.index = prices.index.tz_localize(None)
         # The vendor sometimes appends a placeholder row for the current session
@@ -99,8 +111,12 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     # --- statements ---
     try:
         stmts = sources.get_statements(tk)
-    except Exception:  # noqa: BLE001
+        if not any(v is not None and not v.empty for v in (stmts or {}).values()):
+            raise raw_errors.NoDataError("no statements returned")
+    except raw_errors.DataSourceError as exc:
         stmts = {}
+        statuses.append(exc.status)
+        LOG.warning("  statements unavailable (%s): %s", exc.status.value, exc)
     data.q_income = transforms.trim_to_window(stmts.get("q_income"), cfg.cutoff_date)
     data.q_balance = transforms.trim_to_window(stmts.get("q_balance"), cfg.cutoff_date)
     data.q_cashflow = transforms.trim_to_window(stmts.get("q_cashflow"), cfg.cutoff_date)
@@ -119,6 +135,21 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     data.debt_schedule = transforms.build_debt_schedule(balance_for_debt)
     if not data.debt_schedule.empty:
         LOG.info("  debt schedule: %d metrics x %d periods", *data.debt_schedule.shape)
+
+    # Resolve the acquisition outcome. Severity order matters: a rate limit or
+    # transport failure means we do not KNOW whether the company has data, so it
+    # must never be reported as NO_DATA -- which is a statement about the
+    # company, not about us.
+    if not statuses:
+        data.data_status = raw_errors.DataStatus.OK.value
+    else:
+        severity = [raw_errors.DataStatus.RATE_LIMITED,
+                    raw_errors.DataStatus.SOURCE_ERROR,
+                    raw_errors.DataStatus.DELISTED,
+                    raw_errors.DataStatus.NO_DATA]
+        data.data_status = next(s.value for s in severity if s in statuses)
+    if data.data_status != raw_errors.DataStatus.OK.value:
+        LOG.warning("  data status: %s", data.data_status)
 
     # --- date-aligned model panel ---
     rf_series = None
