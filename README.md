@@ -193,10 +193,17 @@ value from its neighbours. As of the 2026-07-26 run, of ten companies:
 
 | Determination | Count | |
 |---|---:|---|
-| `SCALE_RESOLVED` | **4** | the value sits inside the range the route can express |
-| `PINNED_AT_SCALE_TOP` | **3** | RiskScore below the best published grade |
-| `PINNED_AT_FLOOR` | **1** | TTC PD at the conversion grid's 2bp floor |
-| `NOT_RATED` | **2** | defective drift regime (Prop. 4.4.1) |
+| `SCALE_RESOLVED` | **2** | ORCL, T — the value sits inside the range the route can express |
+| `PINNED_AT_SCALE_TOP` | **3** | COST, KO, WMT — RiskScore below the best published grade |
+| `PINNED_AT_FLOOR` | **1** | AMZN — TTC PD at the conversion grid's 2bp floor |
+| `MODEL_NOT_APPLICABLE` | **2** | DELL, PNC — see [ADR 0003](docs/adr/0003-financial-firms.md) |
+| `NOT_RATED` | **2** | INTU, KHC — defective drift regime (Prop. 4.4.1) |
+
+**PNC is the case that motivated the gate.** Its default point under the shipped rule is
+$33.3bn against **$539.4bn of total liabilities** — the model was looking at 6% of what the
+bank owes and returning `AAA`. Rating it on total liabilities instead gives `BB`. Its actual
+agency rating is **A / A2**, so the convention choice brackets the truth without landing on
+it, and no choice of barrier rescues the model for a deposit-funded firm.
 
 `SCALE_RESOLVED` is a statement about the scale, **not** about estimation precision. DELL
 is the case that proves it: strongest drift t-statistic in the universe (2.01) and the
@@ -204,7 +211,7 @@ is the case that proves it: strongest drift t-statistic in the universe (2.01) a
 notched. The field was called `MODEL_DETERMINED` until 2026-07-26; that name implied a
 precision claim it never made. Precision is answered by `Drift t` and the rating interval.
 
-"8 of 10 rated" without "4 of 10 scale-resolved" overstates coverage, and neither number
+"6 of 10 rated" without "2 of 10 scale-resolved" overstates coverage, and neither number
 says anything about precision. Full explanation:
 [`docs/RATING_DETERMINATION.md`](docs/RATING_DETERMINATION.md); the uncertainty method and
 its known limits: [`docs/UNCERTAINTY.md`](docs/UNCERTAINTY.md).

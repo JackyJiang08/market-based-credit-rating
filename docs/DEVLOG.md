@@ -35,6 +35,16 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - README standings updated for the gate
+
+- **Scope:** README only. No code.
+- **Summary:** the determination table now shows the post-gate standing (2
+  SCALE_RESOLVED, 3 scale-top, 1 floor, 2 MODEL_NOT_APPLICABLE, 2 NOT_RATED)
+  and carries the PNC evidence -- $33.3bn against $539.4bn of liabilities,
+  AAA under the shipped rule and BB under total liabilities, against an actual
+  A/A2 agency rating.
+- **Validation:** `python -m pytest -q` -> 294 passed, run before this push.
+
 ### 2026-07-26 - Financial firms, default-point variants, applicability gate (#16)
 
 - **Scope:** Layers 1-2 (new `sectors` module, provenance columns, default-point
