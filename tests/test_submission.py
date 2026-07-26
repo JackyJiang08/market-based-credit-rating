@@ -30,7 +30,8 @@ GOLDEN_ASSET_SCHEMA = (
 GOLDEN_VALIDATION_SCHEMA = (
     "Symbol", "Data Status", "EM converged", "EM iters", "sigma_A",
     "Drift regime", "Drift SE", "Drift span (y)", "Rating basis",
-    "TTC at floor", "Off-grid", "Warnings",
+    "TTC at floor", "Off-grid", "Statement available at", "Availability method",
+    "Warnings",
 )
 
 

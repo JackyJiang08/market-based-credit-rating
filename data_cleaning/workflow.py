@@ -22,6 +22,7 @@ from raw_data_architecture import errors as raw_errors
 from raw_data_architecture import sources
 
 from . import alignment, persistence, transforms
+from . import config as clean_config
 from .company import CompanyData
 
 LOG = logging.getLogger("pfpa.workflow")
@@ -155,8 +156,13 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     rf_series = None
     if rates is not None and not rates.empty and raw_config.RISK_FREE_SERIES in rates:
         rf_series = rates.set_index("Date")[raw_config.RISK_FREE_SERIES]
+    # available_at per statement period end (period end + conservative filing
+    # lag), so the as-of join below cannot see an unfiled statement.
+    available_at = transforms.statement_available_at(data.q_balance, data.a_balance)
     data.panel = alignment.build_panel(
-        data.prices, data.reference_shares, balance_for_debt, rf_series)
+        data.prices, data.reference_shares, balance_for_debt, rf_series,
+        available_at=available_at)
+    data.availability_method = clean_config.AVAILABILITY_METHOD
 
     # --- EM asset-value estimation (Layer 3) ---
     if cfg.run_credit_model and not data.panel.empty:

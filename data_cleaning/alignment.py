@@ -86,7 +86,8 @@ def total_return_close(close: pd.Series, dividends: pd.Series) -> pd.Series:
 def build_panel(prices: pd.DataFrame,
                 reference_shares: float | None,
                 balance: pd.DataFrame,
-                risk_free: pd.Series | None) -> pd.DataFrame:
+                risk_free: pd.Series | None,
+                available_at: dict | None = None) -> pd.DataFrame:
     """Construct the aligned daily panel for one company.
 
     Columns
@@ -146,18 +147,46 @@ def build_panel(prices: pd.DataFrame,
     if not term.empty:
         term = term.reset_index().rename(columns={"index": "Date"})
         term["Date"] = pd.to_datetime(term["Date"])
+        # `Date` here is the statement's PERIOD END. Joining on it would let a
+        # trading day see a balance sheet that was not yet public -- typically
+        # 30-45 days of look-ahead per quarter, on the input that sets D.
+        # Shift each statement to its `available_at` (period end + filing lag)
+        # before the as-of join, per docs/TIMING_PROTOCOL.md §3.
+        term["PeriodEnd"] = term["Date"]
+        if available_at:
+            term["Date"] = term["PeriodEnd"].map(
+                lambda d: available_at.get(pd.Timestamp(d), pd.NaT))
+            term = term[term["Date"].notna()]
+        # merge_asof's output `Date` is the LEFT (panel) date, so carry the
+        # statement's own availability across as its own column.
+        term["AvailableAt"] = term["Date"]
+        if term.empty:
+            panel["ShortTermDebt"] = np.nan
+            panel["LongTermDebt"] = np.nan
+            panel["DefaultPointDebt_D"] = np.nan
+            panel["StatementPeriodEnd"] = pd.NaT
+            panel["StatementAvailableAt"] = pd.NaT
+            panel["RiskFree_R"] = np.nan
+            panel["Horizon_T"] = config.HORIZON_YEARS
+            return panel
         left = panel.reset_index()[["Date"]].sort_values("Date")
         merged = pd.merge_asof(left, term.sort_values("Date"),
                                on="Date", direction="backward")
         merged = merged.set_index("Date")
         panel["ShortTermDebt"] = merged["ShortTermDebt"]
         panel["LongTermDebt"] = merged["LongTermDebt"]
+        # Audit fields (TIMING_PROTOCOL §8): which statement each row used and
+        # when it became knowable.
+        panel["StatementPeriodEnd"] = merged["PeriodEnd"]
+        panel["StatementAvailableAt"] = merged["AvailableAt"]
         panel["DefaultPointDebt_D"] = transforms.default_point_debt(
             panel["ShortTermDebt"], panel["LongTermDebt"])
     else:
         panel["ShortTermDebt"] = np.nan
         panel["LongTermDebt"] = np.nan
         panel["DefaultPointDebt_D"] = np.nan
+        panel["StatementPeriodEnd"] = pd.NaT
+        panel["StatementAvailableAt"] = pd.NaT
 
     # --- as-of join the risk-free rate onto trading days ---
     if risk_free is not None and not risk_free.empty:

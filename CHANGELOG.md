@@ -102,3 +102,12 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   dividend column now yields NaN rather than a silently price-only series.
   σ_A rose 0.9–3.8pp for dividend payers and A fell correspondingly; AMZN, which pays no
   dividend, is unchanged to every digit. PNC AAA-→AA+, T AAA-→AA.
+- **#19** Statements are now aligned on `available_at` (period end + a conservative
+  filing lag: 45 days for a 10-Q, 90 for a 10-K) rather than on `period_end`, per
+  TIMING_PROTOCOL §3, with `availability_method = "estimated_lag"` recorded. Added the
+  canary test: no row may use a statement whose `available_at` exceeds that row's date.
+  The panel now carries `StatementPeriodEnd` and `StatementAvailableAt` audit fields, and
+  `Last Statement Date` reports the statement the model actually used rather than the
+  latest one downloaded. On the valuation date only T is affected — its 2026-06-30
+  statement is 25 days old and therefore not yet public — moving D by −4.69% and its
+  rating AA→A+; PNC moves AA+→AAA- from the historical panel change.

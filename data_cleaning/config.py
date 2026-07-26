@@ -35,6 +35,22 @@ BALANCE_SHEET_MAP: dict[str, tuple[str, ...]] = {
 SHORT_TERM_DEBT_WEIGHT = 1.0
 LONG_TERM_DEBT_WEIGHT = 0.5
 
+# Publication lag: how long after a period end a statement is assumed to have
+# become public. docs/TIMING_PROTOCOL.md §3 requires that a statement is eligible
+# only from its filing time, and that where the true filing time is unavailable
+# we "use a documented conservative lag and set an explicit flag such as
+# availability_method='estimated_lag'". The data source publishes period ends,
+# not filing dates, so these are the conservative bounds.
+#
+# SEC deadlines: a 10-Q is due 40 days after quarter end for a large accelerated
+# filer and 45 for everyone else; a 10-K is due 60, 75 or 90 days after fiscal
+# year end by filer status. We take the *latest* deadline in each case, because
+# erring late means the model sees less information than it might have, which is
+# the safe direction for a no-look-ahead guarantee.
+QUARTERLY_FILING_LAG_DAYS = 45
+ANNUAL_FILING_LAG_DAYS = 90
+AVAILABILITY_METHOD = "estimated_lag"
+
 # Credit horizon in years, tied to the 1-year risk-free tenor (DGS1) used in
 # alignment. Owned by the cleaning layer that builds the daily panel.
 HORIZON_YEARS = 1.0

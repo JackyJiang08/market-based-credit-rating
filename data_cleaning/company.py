@@ -63,6 +63,8 @@ class CompanyData:
     # How data acquisition went: "OK", or a typed reason the company has no
     # (or partial) data. Populated by Layer 1/2; see #9.
     data_status: Optional[str] = None
+    # How available_at was derived (TIMING_PROTOCOL §3): "estimated_lag".
+    availability_method: Optional[str] = None
 
     # Drift provenance (Prop. 4.4.1). `drift_regime` is "VALID" or "DEFECTIVE";
     # DEFECTIVE means eta - sigma^2/2 <= 0, so mu/CCM/PIT/TTC/rating are

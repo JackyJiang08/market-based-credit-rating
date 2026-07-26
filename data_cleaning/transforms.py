@@ -136,6 +136,33 @@ def union_balance_sheets(quarterly: pd.DataFrame,
     return merged[sorted(merged.columns, reverse=True)]
 
 
+def statement_available_at(quarterly: pd.DataFrame,
+                           annual: pd.DataFrame) -> dict:
+    """Map each statement period end to the date it is assumed to be public.
+
+    `period_end` is when the accounting period closed; `available_at` is the
+    earliest date the figure could legitimately have been known. They differ by
+    the filing lag, and `docs/TIMING_PROTOCOL.md` §3 is explicit that the first
+    is not a substitute for the second.
+
+    A period end present in the quarterly sheet gets the 10-Q lag; one that only
+    appears in the annual sheet gets the longer 10-K lag. Returns
+    `{period_end: available_at}` as Timestamps.
+    """
+    out: dict = {}
+    a_cols = set(annual.columns) if annual is not None and not annual.empty else set()
+    q_cols = set(quarterly.columns) if quarterly is not None and not quarterly.empty else set()
+
+    for col in sorted(q_cols | a_cols):
+        period_end = pd.to_datetime(col, errors="coerce")
+        if pd.isna(period_end):
+            continue
+        lag = (config.QUARTERLY_FILING_LAG_DAYS if col in q_cols
+               else config.ANNUAL_FILING_LAG_DAYS)
+        out[period_end] = period_end + pd.Timedelta(days=lag)
+    return out
+
+
 def default_point_debt(short_term: pd.Series, long_term: pd.Series) -> pd.Series:
     """D = 100% short-term debt + 50% long-term debt (the model's strike).
 

@@ -51,7 +51,8 @@ ASSET_SCHEMA: tuple[str, ...] = CANONICAL_ASSET_COLUMNS + EXTENDED_ASSET_COLUMNS
 VALIDATION_SCHEMA: tuple[str, ...] = (
     "Symbol", "Data Status", "EM converged", "EM iters", "sigma_A",
     "Drift regime", "Drift SE", "Drift span (y)", "Rating basis",
-    "TTC at floor", "Off-grid", "Warnings",
+    "TTC at floor", "Off-grid", "Statement available at", "Availability method",
+    "Warnings",
 )
 
 
@@ -61,6 +62,14 @@ def _panel_last(c: CompanyData, col: str) -> Optional[float]:
         return None
     s = c.panel[col].dropna()
     return None if s.empty else float(s.iloc[-1])
+
+
+def _panel_last_value(c: CompanyData, col: str):
+    """Latest non-null value of a panel column, without coercing to float."""
+    if c.panel is None or c.panel.empty or col not in c.panel:
+        return None
+    s = c.panel[col].dropna()
+    return None if s.empty else s.iloc[-1]
 
 
 def _total_debt(c: CompanyData) -> Optional[float]:
@@ -92,9 +101,16 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
              if c.eta_A is not None and c.sigma_A is not None else None)
     last_date = (c.panel.index[-1].date()
                  if c.panel is not None and not c.panel.empty else None)
-    last_stmt = (c.debt_schedule.columns[0]
-                 if c.debt_schedule is not None and not c.debt_schedule.empty
-                 else None)
+    # The statement the model ACTUALLY used on the valuation date, which since
+    # #19 is not necessarily the latest one downloaded: a statement inside its
+    # filing window has not been published yet and is correctly invisible.
+    last_stmt = None
+    if c.panel is not None and not c.panel.empty and "StatementPeriodEnd" in c.panel:
+        used = c.panel["StatementPeriodEnd"].dropna()
+        if not used.empty:
+            last_stmt = pd.Timestamp(used.iloc[-1]).date()
+    if last_stmt is None and c.debt_schedule is not None and not c.debt_schedule.empty:
+        last_stmt = c.debt_schedule.columns[0]
     return {
         # Identity and inputs
         "company": c.name,
@@ -103,6 +119,8 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
         "last_date": last_date,
         "last_price": c.last_close,
         "last_statement_date": last_stmt,
+        "statement_available_at": _panel_last_value(c, "StatementAvailableAt"),
+        "availability_method": c.availability_method,
         "short_term_debt": _panel_last(c, "ShortTermDebt"),
         "long_term_debt": _panel_last(c, "LongTermDebt"),
         "total_debt": _total_debt(c),
@@ -208,6 +226,8 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
         "Rating basis": r["rating_basis"],
         "TTC at floor": bool(r["ttc_at_floor"]),
         "Off-grid": bool(r["rating_off_grid"]),
+        "Statement available at": r["statement_available_at"],
+        "Availability method": r["availability_method"],
         "Warnings": "; ".join(flags) if flags else "OK",
     }
     assert tuple(row) == VALIDATION_SCHEMA, "validation_row drifted from VALIDATION_SCHEMA"
