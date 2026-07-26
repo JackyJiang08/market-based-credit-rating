@@ -80,3 +80,11 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   ANALYTICAL and are rated AAA. Regression tests reproduce Tables 12, 13 and 14.
   Also fixed `no_arb_ccm_star` returning its solver bracket edge when α saturates,
   and made `at_floor` mean scale-floor for analytical ratings rather than grid-floor.
+
+### Proposed (not implemented)
+
+- **ADR 0002** Evaluated reporting a rating interval from `η ∈ [η̂ ± 1·SE]` for the two
+  DEFECTIVE names. Both intervals span the defective boundary, so both retain
+  `NOT_APPLICABLE` — the proposal un-blanks nothing today, and the interval it would
+  produce runs from unrateable to AAA-. Recommends a significance test in
+  `drift_regime()` instead. See `docs/adr/0002-defective-drift-interval-proposal.md`.
