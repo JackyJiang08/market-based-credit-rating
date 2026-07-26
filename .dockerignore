@@ -1,0 +1,13 @@
+# RED LINE: licensed material never enters an image.
+local/
+# VCS, envs, caches, generated artifacts
+.git/
+**/__pycache__/
+outputs/
+dashboard/output/
+raw_data_architecture/data/
+data_cleaning/data/
+notebooks/
+docs/deliverables/
+.venv/
+venv/

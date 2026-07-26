@@ -12,8 +12,8 @@ test:
 	$(PY) -m pytest -q
 
 lint:
-	$(PY) -m ruff check packages tests
-	$(PY) -m black --check -q packages tests
+	$(PY) -m ruff check packages tests services
+	$(PY) -m black --check -q packages tests services
 	$(PY) -m mypy
 
 run:
@@ -23,7 +23,11 @@ batch:
 	$(PY) -m mdt batch config/universe.yaml --workers $(or $(WORKERS),6)
 
 serve:
-	@echo "services/api arrives in phase 11 -- nothing to serve yet." && exit 1
+	docker compose up --build -d api
+	@echo "API on http://localhost:8000 (offline-first, from committed fixtures)"
+
+serve-local:
+	PYTHONPATH=packages/core:services/api $(PY) -m uvicorn creditrating_api.app:app --port 8000
 
 demo:
 	@echo "== offline demo from committed fixtures (no network) =="

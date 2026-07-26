@@ -1,0 +1,10 @@
+# `make serve`: the offline-first API from committed fixtures, no data vendor
+# required. Live refresh stays an explicit per-request flag.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
