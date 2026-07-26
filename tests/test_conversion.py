@@ -395,3 +395,13 @@ def test_determination_classification_uses_the_new_name():
     assert conversion.classify_determination(B.OFF_GRID, False) is D.NOT_RATED
     assert conversion.classify_determination(B.NOT_APPLICABLE, False) is D.NOT_RATED
     assert conversion.classify_determination(None, None) is D.NOT_RATED
+
+
+def test_loaded_tables_pass_structural_validation():
+    """tables.validation.validate: sound axes, grids in [0,1], ascending thresholds."""
+    if not HAS_TABLES:
+        pytest.skip("no local workbook")
+    from creditrating.tables import validation
+
+    problems = validation.validate(conversion.load_tables())
+    assert problems == [], problems

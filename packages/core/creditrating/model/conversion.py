@@ -37,7 +37,6 @@ the model. Those are flagged ``at_floor`` rather than presented as measurements.
 from __future__ import annotations
 
 import enum
-import functools
 import math
 import os
 from dataclasses import dataclass
@@ -53,8 +52,6 @@ from scipy.stats import norm
 LOG = logging.getLogger(__name__)
 
 from creditrating._paths import REPO_ROOT as _PROJECT_ROOT  # noqa: E501
-DEFAULT_XLSX = os.path.join(_PROJECT_ROOT, "local", "TiC_TTC_conversion.xlsx")
-CACHE_DIR = os.path.join(_PROJECT_ROOT, "local", "tables")
 
 # Analytical constants (paper Prop. 4.5.2-4.5.3, Section 5.3).
 CML = math.e ** 1.35
@@ -73,17 +70,10 @@ SP_TTC_RISK_SCORES = np.array([2.7, 3.5, 5.2, 9.9, 22.2, 50.7, 154.8])
 SP_TTC_PD1 = np.array([0.0001, 0.0003, 0.0007, 0.0023, 0.0088, 0.0441, 0.3359])
 
 
-# --------------------------------------------------------------------------- #
-# Lookup tables (loaded from the local, git-ignored workbook)
-# --------------------------------------------------------------------------- #
-@dataclass
-class ConversionTables:
-    ccm_axis: np.ndarray          # grid rows, ascending
-    mu_axis: np.ndarray           # grid columns, ascending
-    ttc_grid: np.ndarray          # TTC (S&P-equivalent) PD by [CCM, mu]
-    pit_grid: np.ndarray          # PIT PD by [CCM, mu] (cross-check)
-    sp_labels: list[str]          # S&P letters, best -> worst
-    sp_thresholds: np.ndarray     # ascending lower-bound PD per label
+# Re-exported on purpose: the pipeline, diagnostics, and tests import the
+# tables API from this module.
+from ..tables.loader import (CACHE_DIR, DEFAULT_XLSX,  # noqa: F401
+                             ConversionTables, load_tables)
 
 
 class RatingDetermination(enum.Enum):
@@ -172,62 +162,6 @@ class GridLookup:
     basis: RatingBasis = RatingBasis.GRID_INTERIOR
     at_floor: bool = False        # value sits at the edge of what the route expresses
     risk_score: float = float("nan")   # analytical route only: Eq. (27) output
-
-
-def _axis(series: pd.Series) -> np.ndarray:
-    return pd.to_numeric(series, errors="coerce").to_numpy()
-
-
-def _grid(block: pd.DataFrame) -> np.ndarray:
-    return block.apply(pd.to_numeric, errors="coerce").to_numpy()
-
-
-@functools.lru_cache(maxsize=1)
-def load_tables(xlsx_path: str = DEFAULT_XLSX) -> ConversionTables:
-    """Parse the conversion workbook and cache CSV copies under local/tables."""
-    if not os.path.exists(xlsx_path):
-        raise FileNotFoundError(
-            f"Conversion workbook not found at {xlsx_path}. It is proprietary "
-            "reference data kept out of git; place it under local/ to enable "
-            "the grid route.")
-    xl = pd.ExcelFile(xlsx_path)
-
-    def parse_grid(sheet: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        raw = pd.read_excel(xl, sheet, header=None)
-        ccm_axis = _axis(raw.iloc[2:, 0])      # rows = CCM
-        mu_axis = _axis(raw.iloc[1, 1:])       # cols = mu
-        grid = _grid(raw.iloc[2:, 1:])
-        return ccm_axis, mu_axis, grid
-
-    ccm_axis, mu_axis, ttc = parse_grid("TTC")
-    _, _, pit = parse_grid("PIT")
-
-    sp_raw = pd.read_excel(xl, "SP", header=None)
-    labels, thresholds = [], []
-    for _, row in sp_raw.iterrows():
-        label, thr = row.iloc[0], pd.to_numeric(row.iloc[1], errors="coerce")
-        if isinstance(label, str) and label.strip() and pd.notna(thr):
-            labels.append(label.strip())
-            thresholds.append(float(thr))
-
-    tables = ConversionTables(ccm_axis, mu_axis, ttc, pit,
-                              labels, np.asarray(thresholds))
-    _cache_csv(tables)
-    return tables
-
-
-def _cache_csv(tables: ConversionTables) -> None:
-    try:
-        os.makedirs(CACHE_DIR, exist_ok=True)
-        pd.DataFrame(tables.ttc_grid, index=tables.ccm_axis,
-                     columns=tables.mu_axis).to_csv(os.path.join(CACHE_DIR, "ttc.csv"))
-        pd.DataFrame({"SP": tables.sp_labels,
-                      "PD_threshold": tables.sp_thresholds}).to_csv(
-            os.path.join(CACHE_DIR, "sp_thresholds.csv"), index=False)
-    except OSError as exc:
-        # Caching is best-effort, but a read-only disk or a permissions problem
-        # should not be invisible -- it was silently swallowed before.
-        LOG.warning("conversion table cache not written to %s: %s", CACHE_DIR, exc)
 
 
 def _bilinear(grid: np.ndarray, xaxis: np.ndarray, yaxis: np.ndarray,
