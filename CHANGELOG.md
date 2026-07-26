@@ -34,3 +34,8 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   COST, KO and WMT are now unrated (OFF_GRID); of the 5 remaining ratings, 3
   (PNC, AMZN, T — all AAA-) are floor-determined and only DELL and ORCL are
   model-determined.
+- **#6** Corrected the `conversion.py` docstring, which claimed the analytical
+  no-arbitrage route "extends past the grid edges". It does not: only Eq. (26) is
+  implemented, Eq. (27) is not, and the route is reachable only from tests. Chose
+  the docstring fix over wiring it in because Eq. (27) depends on the unimplemented
+  rating half of Eq. (24) (#11), which is out of scope this week.

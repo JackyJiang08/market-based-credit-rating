@@ -8,13 +8,19 @@ Two consistent routes are provided:
    grids are proprietary and are read from the git-ignored ``local/``
    tree at runtime; nothing proprietary is committed.
 
-2. **Analytical no-arbitrage conversion** (Prop. 5.2.1-5.2.2): match the capital
-   confidence level ``alpha`` between the first-hitting and S&P systems
-   (Eq. 22, CML=e^1.35, theta=1, S&P Q=0.625913) to solve ``CCM*``. Verified to
-   reproduce the paper (alpha_FH(1.5)=0.91906, CCM*=1.35373).
+2. **Analytical no-arbitrage conversion**, step 1 only (Prop. 5.2.1 Eq. 26):
+   match the capital confidence level ``alpha`` between the first-hitting and
+   S&P systems (Eq. 22, CML=e^1.35, theta=1, S&P Q=0.625913) to solve ``CCM*``.
+   Verified to reproduce the paper (alpha_FH(1.5)=0.91906, CCM*=1.35373).
 
-The lookup route is authoritative for the submission; the analytical route
-validates it and extends past the grid edges.
+The lookup route is the only route that produces a rating. The analytical route
+is a **verification check against the paper's published anchors, and nothing
+more**: it is not reachable from the rating path and it does not extend past the
+grid edges. Turning ``CCM*`` into a rating requires Eq. (27),
+``RS_B = TiC_B(PD_A, CCM*)``, which in turn requires the S&P rating half of
+Eq. (24); neither is implemented (issue #11). Until they are, a point outside the
+grid has no rating and is reported as ``OFF_GRID`` (issue #12) rather than being
+clamped to an edge cell.
 """
 
 from __future__ import annotations
@@ -247,9 +253,13 @@ def alpha_sp(ccm: float) -> float:
 
 
 def no_arb_ccm_star(ccm_first_hitting: float) -> float:
-    """S&P CCM* matching the first-hitting confidence level (Prop. 5.2.1).
+    """S&P CCM* matching the first-hitting confidence level (Prop. 5.2.1 Eq. 26).
 
     Verified: no_arb_ccm_star(1.5) = 1.35373 (paper Section 5.3).
+
+    **Not on the rating path.** This is step 1 of the two-step conversion; step 2
+    (Eq. 27) is not implemented, so this cannot produce a rating on its own. Its
+    only caller is the test that pins the paper's anchor. See #11.
     """
     target = alpha_first_hitting(ccm_first_hitting)
     return float(brentq(lambda c: alpha_sp(c) - target, 1e-4, 1e4, maxiter=200))
