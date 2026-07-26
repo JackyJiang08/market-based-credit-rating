@@ -53,12 +53,13 @@ packages = [
 [tool.pytest.ini_options]
 # The package lives under packages/core; the repo root stays importable for
 # the mdt compatibility shim and the legacy run.py entry.
-pythonpath = ["packages/core", "."]
+pythonpath = ["packages/core", "services/api", "."]
+asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 95
 target-version = "py39"
-include = ["packages/**/*.py", "tests/**/*.py"]
+include = ["packages/**/*.py", "tests/**/*.py", "services/**/*.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]
@@ -74,11 +75,11 @@ ignore = [
 [tool.black]
 line-length = 95
 target-version = ["py311"]
-include = "(packages|tests)/.*\\.py"
+include = "(packages|tests|services)/.*\\.py"
 
 [tool.mypy]
 python_version = "3.11"
-files = ["packages/core/creditrating"]
+files = ["packages/core/creditrating", "services/api/creditrating_api"]
 strict = true
 ignore_missing_imports = true
 # Staged strictness, stated honestly: the new typed modules are fully strict;
@@ -91,5 +92,6 @@ module = [
     "creditrating.io.*",
     "creditrating.diagnostics.uncertainty",
     "creditrating.cli",
+    "creditrating_api.*",
 ]
 ignore_errors = true

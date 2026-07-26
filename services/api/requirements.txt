@@ -1,0 +1,4 @@
+# Runtime deps of the API service, on top of the core package's
+# requirements.txt. Installed together in the Dockerfile.
+fastapi>=0.115
+uvicorn>=0.30
