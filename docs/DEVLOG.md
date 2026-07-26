@@ -35,6 +35,30 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - The three uncertainty sources presented side by side
+
+- **Scope:** documentation only — `docs/UNCERTAINTY.md` and the README results
+  section. No code, no output changes.
+- **Summary:** the second finding is now documented with the same care as the
+  first. Both documents present the three uncertainty sources side by side:
+  **parameter** (bootstrap; DELL 10 notches, PD chain amplifies drift noise
+  ×4,077 vs RiskScore), **convention** (debt-weight sweep; T moves 7 notches on
+  the weight alone; convention span >= parameter span for ORCL, PNC and T), and
+  **specification** (PNC: AAA under standard D vs BB under total liabilities
+  against an actual agency A/A2 — the conventions bracket the truth without
+  landing on it; the model was looking at 6% of what PNC owes, and the honest
+  output is a gate, not a wider interval). Both state the combined conclusion:
+  the letter is dominated by drift noise AND an arbitrary convention; RiskScore
+  and the rank ordering are robust to both — and the scale-pinned names
+  (COST/KO/WMT, span 1 under every weight) are themselves the demonstration
+  that a pinned letter carries no information.
+- **Breaking changes:** None.
+- **Validation:** `python3 -m pytest -q` -> 270 passed, 30 skipped, run before
+  this push. Documentation-only change; the suite guards against accidental
+  code edits.
+- **Follow-ups:** README standings table still shows the pre-revision counts;
+  updated in the next commit alongside the history/14 capture.
+
 ### 2026-07-26 - DELL objection accepted: market-based test replaces the negative-equity gate
 
 - **Scope:** Layer 2 (`sectors.py`, `workflow.py`), tests, ADR 0003. Changes

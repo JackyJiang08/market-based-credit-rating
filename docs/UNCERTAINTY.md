@@ -23,11 +23,9 @@ A **moving-block bootstrap** over the EM-recovered **asset** log-returns.
 ### Stated limits
 
 1. **These are parameter-estimation intervals, and a lower bound on total uncertainty.**
-   Convention uncertainty — the 0.5 weight on long-term debt, the field choice, the
-   statement vintage — is not in them. `D` is a *choice* as much as an observation, and
-   `docs/reconciliation/convention_sweep.py` measures what that choice is worth: for ORCL,
-   PNC and T the convention span **equals or exceeds** the bootstrap span (T moves seven
-   notches on the debt weight alone). See the README results section.
+   Convention and specification uncertainty are not in them — see "The three sources of
+   uncertainty, side by side" below. `D` is a *choice* as much as an observation, and
+   `docs/reconciliation/convention_sweep.py` measures what that choice is worth.
 2. **The two resamples are drawn independently**, while the real estimators share the
    trailing year of data and are slightly dependent. Each marginal sampling distribution
    is right; their joint dependence is not modelled.
@@ -81,6 +79,45 @@ carries the drift term.
 **A model whose levels are uncertain but whose ordering is stable is a useful model used
 the wrong way.** This is how KMV is used in practice: DD is mapped to an *empirical*
 default frequency, not to a theoretical PD.
+
+## The three sources of uncertainty, side by side
+
+A published letter carries three distinct kinds of uncertainty, and they are of
+comparable size. Reporting only the first would overstate what the letter means.
+
+| Source | What varies | How it is measured | What it does to the letter |
+|---|---|---|---|
+| **Parameter** | Sampling noise in `σ_A` and `η` from ~1–5 years of returns, conventions held fixed | Moving-block bootstrap (this document) | DELL 10 notches, T 6, ORCL 4; the PD chain amplifies drift noise ×4,077 vs RiskScore |
+| **Convention** | The unargued `0.5` long-term debt weight, and the statement vintage | Debt-weight sweep, `w ∈ {0, 0.25, 0.5, 0.75, 1.0}` (`docs/reconciliation/convention_sweep.py`) | **T moves 7 notches on the weight alone**; ORCL from unrateable to B+; **convention span ≥ parameter span for ORCL, PNC and T** |
+| **Specification** | Whether `ST + w·LT` is the right barrier *at all* | Default-point variants under ADR 0003 | **PNC: AAA under standard `D`, BB under total liabilities — actual agency rating A / A2.** The conventions bracket the truth without landing on it; the standard barrier was 6% of what PNC owes |
+
+Three readings, one per row:
+
+- **Parameter uncertainty is drift noise.** The RiskScore interval is exactly ×2 the σ
+  interval — the square, nothing more — while the PD-based letter inherits the drift's
+  noise exponentiated. No instability enters before the conversion layer.
+- **Convention uncertainty is not smaller than parameter uncertainty.** For ORCL, PNC
+  and T the convention span equals or exceeds the bootstrap span. The bootstrap interval
+  is a lower bound, and the published letter is at least as much a statement about the
+  0.5 as about the company.
+- **Specification uncertainty is not an interval at all.** For PNC, no value of `w`
+  lands on the truth — the model was looking at 6% of what the bank owes, and sweeping
+  the weight spans AAA to BB around an actual A / A2. The honest output is a gate
+  (`MODEL_NOT_APPLICABLE`), not a wider interval.
+
+### The combined conclusion
+
+**The letter is dominated by drift noise AND an arbitrary convention — either alone is
+enough to move it several notches, and they act at once. RiskScore and the rank ordering
+are robust to both**: RiskScore is drift-free by Prop. 4.4.2 and moves by construction
+only with `σ_A` and `ln(A/D)`, and the ordering holds a Kendall's τ median of 0.956
+across replicates and is unchanged under every debt weight.
+
+The scale-pinned names close the argument. COST, KO and WMT do not move under **any**
+debt weight (convention span 1) — not because they are precisely measured, but because a
+pinned letter is insensitive to its inputs. **A letter that cannot move carries no
+information; that it also cannot be moved by an arbitrary convention is the same fact
+seen from the other side.**
 
 ## The episode: testing a prediction found two bugs in the test
 

@@ -91,8 +91,17 @@ clone is green.
 ## Results: what survives uncertainty, and what does not
 
 **The drift-free rating and the rank ordering survive uncertainty. The PD-based letter
-does not.** A moving-block bootstrap over the EM-recovered asset returns (2,000
-replicates, `signal_construction/bootstrap.py`) separates the two cleanly:
+does not.** A published letter carries **three distinct sources of uncertainty** —
+**parameter** (sampling noise, measured by the bootstrap), **convention** (the unargued
+0.5 debt weight, measured by the sweep), and **specification** (whether the barrier is
+right at all, exposed by PNC) — and they are of comparable size. Each is presented below;
+the combined conclusion follows them.
+
+### Parameter uncertainty: the bootstrap
+
+A moving-block bootstrap over the EM-recovered asset returns (2,000
+replicates, `signal_construction/bootstrap.py`) separates the drift-free quantities from
+the PD chain cleanly:
 
 | Quantity | Median relative interval width | Amplification |
 |---|---:|---|
@@ -134,7 +143,7 @@ the qualitative version of the same argument.
 Our contribution is the measurement: a ×4,077 amplification between two quantities computed
 from the same two parameters, on ten real companies.
 
-### Convention uncertainty rivals — and often exceeds — parameter uncertainty
+### Convention uncertainty: rivals — and often exceeds — parameter uncertainty
 
 The bootstrap holds `A₀` and `D` fixed because they are observations. **`D` is not an
 observation.** It is `1.0·ST + 0.5·LT`, and the 0.5 is a convention nobody has justified
@@ -155,10 +164,9 @@ scale as the bootstrap interval:
 | **T** | AAA- | AA+ | **A+** | A | A- | A+ | **7** | 6 |
 | KHC | — | — | **—** | — | — | — | 0 | 4 |
 
-**For three of the four scale-resolved names — ORCL, PNC and T — the convention span equals
-or exceeds the bootstrap span.** T moves seven notches (AAA− to A−) on the debt weight
-alone. ORCL moves from unrateable to B+. The published rating is at least as much a
-statement about the 0.5 as it is about the company.
+**For ORCL, PNC and T, the convention span equals or exceeds the bootstrap span.** T moves
+seven notches (AAA− to A−) on the debt weight alone. ORCL moves from unrateable to B+. The
+published rating is at least as much a statement about the 0.5 as it is about the company.
 
 Three further readings:
 
@@ -174,6 +182,36 @@ Three further readings:
 
 The honest total uncertainty on a letter is therefore **wider than the bootstrap interval
 alone**, and the bootstrap is correctly described as a lower bound.
+
+### Specification uncertainty: PNC, where no convention lands on the truth
+
+The sweep varies the weight *within* the barrier definition `ST + w·LT`. PNC shows the
+definition itself can be wrong:
+
+| Barrier definition | D | % of liabilities | Model letter |
+|---|---:|---:|---|
+| `standard` (`ST + 0.5·LT`) | $33.3bn | 6.2% | **AAA** |
+| `total_liabilities` | $539.4bn | 100% | **BB** |
+| Actual agency rating | — | — | **A / A2** |
+
+**The conventions bracket the truth without landing on it.** Under the shipped rule the
+model was looking at 6% of what PNC owes and returning AAA; treating everything it owes as
+the barrier swings ~10 notches past the truth to BB. This is not an interval to widen — no
+value of `w` is right — which is why the answer is a gate (`MODEL_NOT_APPLICABLE`,
+[ADR 0003](docs/adr/0003-financial-firms.md)), not a better number.
+
+### The combined conclusion
+
+**The letter is dominated by drift noise AND an arbitrary convention — either alone moves
+it several notches, and they act at once. RiskScore and the rank ordering are robust to
+both**: RiskScore is drift-free (Prop. 4.4.2) and independent of the PD chain, and the
+ordering holds Kendall's τ median 0.956 across bootstrap replicates and does not change
+under any debt weight.
+
+The scale-pinned names complete the argument: COST, KO and WMT do not move under **any**
+weight (span 1) — not because they are precisely measured, but because a pinned letter is
+insensitive to its inputs. **A letter that cannot move carries no information**; its
+immunity to an arbitrary convention is the same fact seen from the other side.
 
 ### How a rating must be presented
 
