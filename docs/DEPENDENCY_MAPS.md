@@ -1,5 +1,13 @@
 # Dependency Maps
 
+> **2026-07-26 package move.** The four top-level layers now live in
+> `packages/core/creditrating/` (data / model / io / diagnostics + tables);
+> the maps below predate the move and use the old module names. Translation:
+> sources→data/providers, transforms→data/cleaning, workflow→data/pipeline,
+> lineage→data/provenance, measures→model/tic, bootstrap→diagnostics/
+> uncertainty, submission→io/workbook, longtable→io/export. Layer semantics,
+> import direction, and runtime data paths are unchanged.
+
 These maps describe the current repository as implemented. Arrows in the code
 maps point from a caller or consumer to the module it depends on. Dotted edges
 identify optional, type-only, or transitional dependencies.
