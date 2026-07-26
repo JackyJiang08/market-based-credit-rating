@@ -1,6 +1,6 @@
 # Market-Based Credit-Rating Pipeline
 
-[![tests](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/tests.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/tests.yml)
+[![tests](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml)
 [![DEVLOG gate](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
