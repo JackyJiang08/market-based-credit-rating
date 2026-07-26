@@ -1,10 +1,13 @@
-"""`python -m mdt` entry point: `rate` a single company or run a `batch`."""
+"""Command-line interface: `rate` one company or run a `batch`.
+
+Typer-based; `mdt` and `creditrating` console scripts both land here, and
+`python -m mdt` still works through the compatibility shim."""
 
 from __future__ import annotations
 
-import argparse
 import logging
-from typing import Optional, Sequence
+
+import typer
 
 from creditrating.data.company import CompanyData
 from creditrating.data.pipeline import RunConfig, run
@@ -107,14 +110,14 @@ def _last(c: CompanyData, col: str):
     return None if s.empty else float(s.iloc[-1])
 
 
-def _rate(args) -> None:
+def _rate_impl(company: str, years: int) -> None:
     from datetime import datetime, timezone
 
     from creditrating.io import workbook as submission
 
-    companies = run(RunConfig(tickers=[args.company], years=args.years))
+    companies = run(RunConfig(tickers=[company], years=years))
     if not companies:
-        raise SystemExit(f"Could not process '{args.company}'.")
+        raise SystemExit(f"Could not process '{company}'.")
     c = companies[0]
     _print_company(c)
     # Stamped per the team standard (TIMING_PROTOCOL §10); a fixed name would
@@ -125,10 +128,10 @@ def _rate(args) -> None:
     print(f"Report written: {path}")
 
 
-def _batch(args) -> None:
+def _batch_impl(config: str, years: int, workers: int) -> None:
     import yaml
 
-    with open(args.config) as fh:
+    with open(config) as fh:
         data = yaml.safe_load(fh) or {}
     entries = data.get("companies") or []
     # Accept both the plain list (companies.yaml) and the annotated mapping
@@ -136,33 +139,42 @@ def _batch(args) -> None:
     tickers = [str(x.get("ticker") if isinstance(x, dict) else x).strip()
                for x in entries]
     if not tickers:
-        raise SystemExit(f"No 'companies:' list found in {args.config}")
-    run(RunConfig(tickers=tickers, years=args.years, workers=args.workers))
+        raise SystemExit(f"No 'companies:' list found in {config}")
+    run(RunConfig(tickers=tickers, years=years, workers=workers))
 
 
-def main(argv: Optional[Sequence[str]] = None) -> None:
+app = typer.Typer(add_completion=False, no_args_is_help=True,
+                  help=__doc__)
+
+
+def _setup_logging() -> None:
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s  %(levelname)-7s  %(message)s",
                         datefmt="%H:%M:%S")
-    p = argparse.ArgumentParser(prog="python -m mdt", description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--years", type=int, default=raw_config.DEFAULT_YEARS,
-                   help=f"History window in years (default {raw_config.DEFAULT_YEARS})")
-    sub = p.add_subparsers(dest="command", required=True)
 
-    pr = sub.add_parser("rate", help="rate one company (ticker or name)")
-    pr.add_argument("company")
-    pr.set_defaults(func=_rate)
 
-    pb = sub.add_parser("batch", help="run the batch from a companies.yaml")
-    pb.add_argument("config")
-    pb.add_argument("--workers", type=int, default=1,
-                    help="concurrent company fetches (default 1 = sequential; "
-                         "cached reruns tolerate higher values)")
-    pb.set_defaults(func=_batch)
+@app.command()
+def rate(company: str = typer.Argument(..., help="ticker or company name"),
+         years: int = typer.Option(raw_config.DEFAULT_YEARS, "--years",
+                                   help="history window in years")) -> None:
+    """Rate one company: full table to stdout + a per-ticker report."""
+    _setup_logging()
+    _rate_impl(company, years)
 
-    args = p.parse_args(argv)
-    args.func(args)
+
+@app.command()
+def batch(config: str = typer.Argument(..., help="path to a companies.yaml"),
+          years: int = typer.Option(raw_config.DEFAULT_YEARS, "--years"),
+          workers: int = typer.Option(1, "--workers",
+                                      help="concurrent company fetches "
+                                           "(cached reruns tolerate more)")) -> None:
+    """Run the batch from a YAML universe file."""
+    _setup_logging()
+    _batch_impl(config, years, workers)
+
+
+def main() -> None:
+    app()
 
 
 if __name__ == "__main__":
