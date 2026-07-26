@@ -37,6 +37,12 @@ CLAUDE.local.md
 !docs/deliverables/
 !docs/deliverables/*.xlsx
 
+# Narrow exception: the small CSVs behind docs/figures/*.svg -- our own
+# computed outputs (interval widths, rank fractions, recorded sweep letters),
+# committed so the figures regenerate deterministically from committed data.
+!docs/figures/data/
+!docs/figures/data/*.csv
+
 # macOS
 .DS_Store
 
