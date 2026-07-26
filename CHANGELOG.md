@@ -119,3 +119,7 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   standing: 4 model-determined, 3 scale-top-pinned, 1 floor-pinned, 2 not rated — the
   analytical route (#11) took rated coverage 5→8 without adding a single
   model-determined name.
+- **Part C (partial)** Measured ADR 0002's k·SE rule against the current run: at `k = 1`
+  ORCL and T become DEFECTIVE (rated 8→6, model-determined 4→2); at `k = 1.645` COST, KO
+  and AMZN also go (rated 8→3, model-determined still 2). ORCL's `t = 0.08` decides it.
+  Recommends `k = 1`, configurable. **Not switched on.** The full bootstrap is not built.

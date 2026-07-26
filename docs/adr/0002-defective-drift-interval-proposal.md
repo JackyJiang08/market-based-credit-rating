@@ -87,3 +87,62 @@ Do **not** implement the interval as specified. Instead:
    point the honest artifact is a distribution over ratings, not a two-point range.
 
 Awaiting a decision. Nothing in this ADR is implemented.
+
+---
+
+# Addendum — 2026-07-25: the k·SE rule measured against real numbers
+
+The recommendation above (a significance test instead of an interval) has now been
+evaluated on the current run. **Still not implemented — this is the table to decide from.**
+
+`t = drift / SE`. A company is DEFECTIVE under the rule when `drift ≤ k·SE`.
+
+| Ticker | drift | SE | t | Today | k = 1 | k = 1.645 | Rating | Determination |
+|---|---:|---:|---:|---|---|---|---|---|
+| COST | +0.1243 | 0.0904 | 1.37 | VALID | VALID | **DEFECTIVE** | AAA | scale-top |
+| KO | +0.1180 | 0.0949 | 1.24 | VALID | VALID | **DEFECTIVE** | AAA | scale-top |
+| DELL | +0.7048 | 0.3490 | **2.02** | VALID | VALID | VALID | A- | model |
+| ORCL | +0.0309 | 0.3661 | **0.08** | VALID | **DEFECTIVE** | **DEFECTIVE** | BB | model |
+| PNC | +0.1961 | 0.0948 | **2.07** | VALID | VALID | VALID | AAA- | model |
+| WMT | +0.2843 | 0.1417 | 2.01 | VALID | VALID | VALID | AAA | scale-top |
+| INTU | −0.1005 | 0.2555 | −0.39 | DEFECTIVE | DEFECTIVE | DEFECTIVE | — | not rated |
+| AMZN | +0.2574 | 0.1738 | 1.48 | VALID | VALID | **DEFECTIVE** | AAA- | floor |
+| T | +0.0952 | 0.1140 | **0.84** | VALID | **DEFECTIVE** | **DEFECTIVE** | A+ | model |
+| KHC | −0.0516 | 0.1081 | −0.48 | DEFECTIVE | DEFECTIVE | DEFECTIVE | — | not rated |
+
+## Impact
+
+| | Rated | Model-determined |
+|---|---:|---:|
+| Today | 8 / 10 | 4 |
+| k = 1 | **6 / 10** (−ORCL, −T) | **2** (DELL, PNC) |
+| k = 1.645 | **3 / 10** (−ORCL, −T, −COST, −KO, −AMZN) | **2** (DELL, PNC) |
+
+## Reading it
+
+**ORCL is the case that decides this.** Its `t = 0.08` — the drift is eight percent of one
+standard error, i.e. indistinguishable from zero by any standard. It is also our **only
+sub-investment-grade rating** and one of only four model-determined ones. A BB call resting
+on a drift that cannot be distinguished from zero is precisely the class of
+confident-but-unsupported output this audit has spent its time removing.
+
+T is the same problem less starkly (`t = 0.84`).
+
+The two that survive at either `k` are the two with real signal: DELL `t = 2.02` and PNC
+`t = 2.07`.
+
+`k = 1.645` (a one-sided 95% test) costs three more names — COST, KO and AMZN — but all
+three are pinned at a scale edge anyway, so removing them subtracts presentation without
+subtracting information. It does not improve model-determined coverage over `k = 1`.
+
+## Recommendation
+
+**Adopt `k = 1`.** It removes exactly the two ratings that cannot support their own drift
+and keeps the two that can. It halves model-determined coverage from 4 to 2, which is the
+real cost and should be stated plainly rather than absorbed quietly — but a coverage number
+that counts ORCL's BB is not measuring what it claims to.
+
+Make `k` configurable and record it in the run manifest, so the threshold is a documented
+choice rather than a constant.
+
+**Not switched on.** Awaiting a decision on the coverage trade-off.
