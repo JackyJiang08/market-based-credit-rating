@@ -1,0 +1,54 @@
+name: DEVLOG push gate
+
+# The server-side half of the gate in .githooks/pre-push. A local hook can be
+# skipped (not installed, or ALLOW_MISSING_DEVLOG=1); this check cannot, so a
+# bypass still surfaces here.
+#
+# Motivation: `.agents/README.md` requires a DEVLOG entry with every push, and
+# on 2026-07-25 five pushes went out without one. See .githooks/pre-push.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  devlog-entry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine the pushed range
+        id: range
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "base=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+            echo "head=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            base="${{ github.event.before }}"
+            # A new branch or a force-push reports an all-zero base.
+            if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+              base=$(git rev-parse "${{ github.sha }}^" 2>/dev/null || echo "${{ github.sha }}")
+            fi
+            echo "base=$base" >> "$GITHUB_OUTPUT"
+            echo "head=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Require a DEVLOG entry in the pushed range
+        run: |
+          base='${{ steps.range.outputs.base }}'
+          head='${{ steps.range.outputs.head }}'
+          echo "range: $base..$head"
+          changed=$(git diff --name-only "$base" "$head")
+          echo "$changed" | sed 's/^/  /'
+          if ! echo "$changed" | grep -qx 'docs/DEVLOG.md'; then
+            echo
+            echo "::error::No docs/DEVLOG.md entry in $base..$head."
+            echo ".agents/README.md requires a DEVLOG entry with every push,"
+            echo "recording scope, breaking changes, validation performed and follow-ups."
+            git log --oneline "$base..$head" | sed 's/^/  /'
+            exit 1
+          fi
+          echo "DEVLOG entry present."

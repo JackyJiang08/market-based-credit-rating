@@ -1,0 +1,25 @@
+name: tests
+
+# CLAUDE.md's git rules require main to be green at every commit. Until this
+# workflow existed that was enforced only by running pytest before each push.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run the offline suite
+        # local/ is absent on CI, so the proprietary-grid tests skip by design.
+        run: python -m pytest -q

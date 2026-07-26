@@ -35,6 +35,34 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Make the push gate enforceable
+
+- **Scope:** repository tooling only. No application code, no model output.
+- **Summary:**
+  - Added `.githooks/pre-push`, which rejects a push whose outgoing commit
+    range does not touch this file. It prints the offending commits and quotes
+    the gate from `.agents/README.md`. `ALLOW_MISSING_DEVLOG=1` bypasses it and
+    says loudly that it did.
+  - Added `scripts/install-hooks.sh`, which copies hooks into `.git/hooks/`
+    rather than setting `core.hooksPath` -- changing git config is the owner's
+    call under CLAUDE.md's git rules, so the shareable option is documented but
+    not applied.
+  - Added `.github/workflows/devlog.yml`, the same check server-side so a local
+    bypass still surfaces, and `.github/workflows/tests.yml`, which runs the
+    offline suite on push and PR. This is the repository's first CI.
+- **Motivation, recorded in the hook itself:** the gate existed but was enforced
+  by remembering it. Five pushes went out without an entry on 2026-07-25
+  (`9447d81`, `03a0bf8`, `75b0373`, `f9deb33`, and one earlier in that session).
+  They were recorded after the fact rather than backfilled quietly; this makes
+  the failure mode impossible rather than merely noted.
+- **Breaking changes:** a push with no DEVLOG entry now fails locally once
+  `scripts/install-hooks.sh` has been run, and fails in CI regardless.
+- **Validation:** `python -m pytest -q` -> 260 passed. Hook verified by
+  attempting a real `git push --dry-run` with a DEVLOG-less commit: rejected
+  with a non-zero exit and the commit listed. This entry is the positive case.
+- **Follow-ups:** `git config core.hooksPath .githooks` would make the hook
+  apply without the install step; left for the owner to decide.
+
 ### 2026-07-25 - Data-layer fixes, rating-determination accounting, issue reconciliation
 
 Covers commits `9447d81`, `03a0bf8`, `75b0373`, `f9deb33`. These were pushed

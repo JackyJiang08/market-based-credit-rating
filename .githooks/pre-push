@@ -1,0 +1,96 @@
+#!/bin/sh
+#
+# Reject a push whose outgoing commits do not touch docs/DEVLOG.md.
+#
+# WHY THIS EXISTS
+# ---------------
+# `.agents/README.md` has always carried a mandatory push gate: every push must
+# be accompanied by a DEVLOG entry recording its scope, breaking changes,
+# validation actually performed, and follow-ups. It was enforced by remembering
+# it, which is not enforcement. Five pushes went out without an entry on
+# 2026-07-25:
+#
+#     9447d81  fix(data): window-invariant total-return equity series
+#     03a0bf8  fix(data): align statements on available_at, not period_end
+#     75b0373  feat(dashboard): publish what determined each rating
+#     f9deb33  docs: measure the k*SE drift rule against the current run
+#     (and one earlier in the same session)
+#
+# They were caught and recorded after the fact rather than backfilled quietly,
+# but the point stands: the gate needs teeth. This hook is those teeth, and
+# .github/workflows/devlog.yml is the same check on the server side so a local
+# bypass still surfaces.
+#
+# INSTALL
+#     ./scripts/install-hooks.sh
+# which copies this into .git/hooks/. To share it via version control instead,
+# `git config core.hooksPath .githooks` -- that is a git-config change, so it is
+# the repository owner's call, not something an agent should do unasked.
+#
+# BYPASS
+# A genuine emergency can set ALLOW_MISSING_DEVLOG=1. The hook prints a loud
+# notice when it is used so the bypass is visible in the terminal history.
+
+set -eu
+
+DEVLOG="docs/DEVLOG.md"
+ZERO="0000000000000000000000000000000000000000"
+failed=0
+
+if [ "${ALLOW_MISSING_DEVLOG:-0}" = "1" ]; then
+    printf '\n\033[33m  ══ DEVLOG PUSH GATE BYPASSED (ALLOW_MISSING_DEVLOG=1) ══\033[0m\n'
+    printf '  This push is going out without a DEVLOG entry, on purpose.\n'
+    printf '  Record why in the next entry.\n\n'
+    exit 0
+fi
+
+# stdin: <local ref> <local sha> <remote ref> <remote sha>
+while read -r local_ref local_sha remote_ref remote_sha; do
+    # Nothing being pushed for this ref (a delete).
+    [ "$local_sha" = "$ZERO" ] && continue
+
+    if [ "$remote_sha" = "$ZERO" ]; then
+        # New remote branch: inspect only what is not already on another ref,
+        # falling back to the tip commit if that cannot be determined.
+        range=$(git rev-list "$local_sha" --not --remotes 2>/dev/null | tail -n 1)
+        if [ -n "$range" ]; then
+            base="${range}^"
+            git rev-parse --verify --quiet "$base" >/dev/null 2>&1 || base=""
+        else
+            base=""
+        fi
+        if [ -n "$base" ]; then
+            changed=$(git diff --name-only "$base" "$local_sha")
+        else
+            changed=$(git show --pretty=format: --name-only "$local_sha")
+        fi
+        count=$(git rev-list --count "$local_sha" --not --remotes 2>/dev/null || echo 1)
+    else
+        changed=$(git diff --name-only "$remote_sha" "$local_sha")
+        count=$(git rev-list --count "${remote_sha}..${local_sha}")
+    fi
+
+    [ "${count:-0}" -eq 0 ] && continue
+
+    if ! printf '%s\n' "$changed" | grep -qx "$DEVLOG"; then
+        failed=1
+        printf '\n\033[31m  ══ PUSH REJECTED: no DEVLOG entry ══\033[0m\n\n'
+        printf '  %s commit(s) on %s do not touch %s.\n\n' \
+            "$count" "${local_ref#refs/heads/}" "$DEVLOG"
+        printf '  Outgoing commits:\n'
+        if [ "$remote_sha" = "$ZERO" ]; then
+            git log --oneline "$local_sha" --not --remotes | sed 's/^/    /'
+        else
+            git log --oneline "${remote_sha}..${local_sha}" | sed 's/^/    /'
+        fi
+        printf '\n  .agents/README.md, "Mandatory push gate":\n'
+        printf '    "An agent must not push when docs/DEVLOG.md has not been\n'
+        printf '     synchronized for that push. This requirement applies even when\n'
+        printf '     the pushed change is documentation, configuration, or repository\n'
+        printf '     maintenance rather than application code."\n\n'
+        printf '  Add an entry under "Recent changes" using the template at the\n'
+        printf '  bottom of %s, then amend or add a commit.\n\n' "$DEVLOG"
+    fi
+done
+
+exit "$failed"
