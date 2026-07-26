@@ -131,3 +131,9 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   threshold was considered and rejected (ADR 0002). The Asset sheet publishes `Drift SE`,
   `Drift t`, `Weakly Identified` and the rating interval. **7 of 10 are weakly identified;
   ORCL is unrateable in 40.6% of replicates and spans BBB..BB where it is rateable.**
+- **Part C** The submission workbook now opens on a README sheet: provenance (model
+  version, git SHA, data vintage, statement dates used), the conventions in force
+  (total-return equity series, NaN-not-zero dividends, `available_at` alignment and its
+  lag constants, default point, LT debt field, share method, both estimation windows),
+  how to read the rating basis / determination / weak-identification flags, and an
+  explicit statement of the Asset sheet's deviation from the reference 23-column layout.

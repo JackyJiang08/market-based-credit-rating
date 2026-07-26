@@ -27,11 +27,16 @@ cell is empty defeats the point of the headline cell. It sits after the canonica
 
 from __future__ import annotations
 
+import os
+import subprocess
+from datetime import datetime
 from typing import Any, Optional
 
 import pandas as pd
 
+from data_cleaning import config as clean_config
 from data_cleaning.company import CompanyData
+from signal_construction import config as sig_config
 
 # The reference workbook's `Asset` sheet, in order. Do not reorder: downstream
 # consumers diff against this prefix.
@@ -288,3 +293,126 @@ def asset_frame(companies: list[CompanyData]) -> pd.DataFrame:
 def validation_frame(companies: list[CompanyData]) -> pd.DataFrame:
     frame = pd.DataFrame([validation_row(c) for c in companies])
     return frame.reindex(columns=list(VALIDATION_SCHEMA))
+
+
+# --------------------------------------------------------------------------- #
+# Workbook README sheet
+# --------------------------------------------------------------------------- #
+def _git_sha() -> str:
+    """Short SHA of the commit this run was produced from, or 'unknown'."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    try:
+        out = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                             cwd=root, capture_output=True, text=True, timeout=5)
+        sha = out.stdout.strip()
+        if out.returncode != 0 or not sha:
+            return "unknown"
+        dirty = subprocess.run(["git", "status", "--porcelain"], cwd=root,
+                               capture_output=True, text=True, timeout=5)
+        return f"{sha}-dirty" if dirty.stdout.strip() else sha
+    except Exception:  # noqa: BLE001 - provenance is best-effort, never fatal
+        return "unknown"
+
+
+def _model_version() -> str:
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    try:
+        with open(os.path.join(root, "pyproject.toml"), encoding="utf-8") as fh:
+            for line in fh:
+                if line.strip().startswith("version"):
+                    return line.split("=", 1)[1].strip().strip('"\'')
+    except Exception:  # noqa: BLE001
+        pass
+    return "unknown"
+
+
+def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
+    """The workbook's own README: provenance and the conventions in force.
+
+    The Asset sheet deviates from the reference workbook's 23-column layout by
+    appending nine columns. That deviation is deliberate and is documented here
+    so a reader of the file does not have to consult the repository to discover
+    it -- a contract change that is only recorded outside the artifact is a
+    silent contract change.
+    """
+    dates = [c.panel.index[-1].date() for c in companies
+             if c.panel is not None and not c.panel.empty]
+    vintage = max(dates).isoformat() if dates else "n/a"
+    stmts = [r for c in companies
+             for r in [credit_record(c)["last_statement_date"]] if r]
+
+    rows: list[tuple[str, str]] = [
+        ("— PROVENANCE —", ""),
+        ("Generated", datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+        ("Model version", _model_version()),
+        ("Git commit", _git_sha()),
+        ("Data vintage (latest priced day)", vintage),
+        ("Statement dates used", ", ".join(sorted({str(s) for s in stmts}))),
+        ("Companies", str(len(companies))),
+        ("", ""),
+
+        ("— CONVENTIONS IN FORCE —", ""),
+        ("Equity series",
+         "Reinvested total-return index anchored at the valuation date: "
+         "r_t = (Close_t + Div_t)/Close_{t-1} - 1, normalised so the last value "
+         "equals the observed market cap. Window-invariant."),
+        ("Missing dividends",
+         "NaN, never 0. A missing dividend is unknown, not 'none paid'."),
+        ("Statement alignment",
+         f"as-of on available_at = period_end + filing lag "
+         f"({clean_config.QUARTERLY_FILING_LAG_DAYS}d for a 10-Q, "
+         f"{clean_config.ANNUAL_FILING_LAG_DAYS}d for a 10-K). "
+         f"availability_method = {clean_config.AVAILABILITY_METHOD}. "
+         "No row sees a statement not yet public on that date."),
+        ("Default point D", "1.0 x short-term debt + 0.5 x long-term debt"),
+        ("Long-term debt field",
+         "'Long Term Debt And Capital Lease Obligation' in preference to plain "
+         "'Long Term Debt' (includes capitalised leases)"),
+        ("Shares outstanding",
+         "market cap / price on the valuation date, held constant across "
+         "history (a modelling assumption; see docs)"),
+        ("Volatility window", f"{sig_config.EM_WINDOW_DAYS} trading days"),
+        ("Drift window",
+         f"{sig_config.DRIFT_WINDOW_DAYS} trading days (~5y); the drift's "
+         f"standard error falls with calendar span, volatility's does not"),
+        ("Trading days per year", str(sig_config.TRADING_DAYS_PER_YEAR)),
+        ("Risk-free rate", "FRED DGS1 (1-year), horizon T = 1 year"),
+        ("Outlook", "PIT PD - TTC PD, per Prop. 5.3 Eq. (28)"),
+        ("", ""),
+
+        ("— HOW TO READ A RATING —", ""),
+        ("Rating Basis",
+         "GRID_INTERIOR (lookup) | ANALYTICAL (Prop. 5.2.1, no table) | "
+         "OFF_GRID or NOT_APPLICABLE (no letter reported)"),
+        ("Rating Determination",
+         "MODEL_DETERMINED | PINNED_AT_FLOOR (grid's 2bp floor) | "
+         "PINNED_AT_SCALE_TOP (RiskScore below the best published grade) | "
+         "NOT_RATED. Only MODEL_DETERMINED letters move when the model moves."),
+        ("Weakly Identified",
+         f"|drift t| < {sig_config.WEAK_IDENTIFICATION_T}. The rating is still "
+         "published, but mu and CCM divide by a drift indistinguishable from "
+         "zero. Read the rating interval, not the point rating."),
+        ("Rating Interval",
+         f"{int(sig_config.BOOTSTRAP_INTERVAL[0]*100)}th-"
+         f"{int(sig_config.BOOTSTRAP_INTERVAL[1]*100)}th percentile over "
+         f"{sig_config.BOOTSTRAP_REPLICATES} moving-block bootstrap replicates "
+         "of the asset returns. Covers estimation error in sigma and eta only; "
+         "A and D are held at their observed values."),
+        ("", ""),
+
+        ("— SHEET LAYOUT (contract deviation) —", ""),
+        ("Asset columns 1-23",
+         "the reference workbook's canonical set, in its exact order: "
+         + ", ".join(CANONICAL_ASSET_COLUMNS)),
+        ("Asset columns 24+",
+         "deliberate additions, not in the reference layout: "
+         + ", ".join(EXTENDED_ASSET_COLUMNS)),
+        ("Why they were added",
+         "a blank SP Rating is uninterpretable without Rating Basis and Rating "
+         "Determination; lambda (Eq. 3/6) was computed and reached no output; "
+         "and a point rating without its interval overstates precision."),
+        ("Diagnostics",
+         "EM iters and every other diagnostic live on the validation sheet, "
+         "never on the deliverable sheet."),
+    ]
+    return pd.DataFrame(rows, columns=["Field", "Value"])

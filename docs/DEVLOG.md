@@ -35,6 +35,27 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Workbook README sheet
+
+- **Scope:** Layer 4 only. No model output changed.
+- **Summary:** the submission workbook now opens on a README sheet carrying
+  provenance (generation time, model version, git SHA with a `-dirty` marker,
+  data vintage, the statement dates actually used), the conventions in force
+  (total-return equity construction, NaN-not-zero dividends, `available_at`
+  alignment with its lag constants, default point, LT debt field, share method,
+  both estimation windows, outlook direction), how to read the four basis and
+  four determination values, and an explicit statement of the Asset sheet's
+  deviation from the reference 23-column layout.
+- **Breaking changes:** the workbook has three sheets rather than two; README
+  is first. Anything reading sheet-by-position rather than by name will move.
+- **Validation:** `python -m pytest -q` -> 263 passed, run before this push.
+  Three new tests assert README is the first sheet, that the provenance and
+  convention fields are present, and that both column blocks are listed by
+  name. Live batch re-run, captured to
+  `docs/reconciliation/history/11_after_partC_readme.csv`.
+- **Follow-ups:** Part D (#17, #18, #20) is not started. The README still
+  presents ORCL's BB without its interval.
+
 ### 2026-07-26 - Bootstrap uncertainty propagation; WEAKLY_IDENTIFIED
 
 - **Scope:** Layer 3 (new `bootstrap` module, weak-identification test) and

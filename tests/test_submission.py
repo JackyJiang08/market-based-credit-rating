@@ -166,3 +166,47 @@ def test_all_writers_project_from_the_same_record():
     for key in ("asset_value", "risk_score", "lam", "ccm", "mu", "drift",
                 "rating_basis", "drift_regime"):
         assert key in r
+
+
+# --- Workbook README sheet (Part C) -----------------------------------------
+def test_workbook_carries_a_readme_sheet_first(tmp_path, monkeypatch):
+    monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
+    path = submission.write_submission([_minimal_company()])
+    book = pd.ExcelFile(path)
+    assert book.sheet_names[0] == "README", "README must be the first sheet"
+    assert set(book.sheet_names) == {"README", "Asset", "validation"}
+
+
+def test_readme_records_provenance_and_conventions(tmp_path, monkeypatch):
+    monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
+    path = submission.write_submission([_minimal_company()])
+    readme = pd.read_excel(path, "README")
+    fields = set(readme["Field"].dropna())
+
+    for required in ("Model version", "Git commit",
+                     "Data vintage (latest priced day)", "Equity series",
+                     "Statement alignment", "Default point D",
+                     "Weakly Identified", "Rating Interval"):
+        assert required in fields, f"README is missing {required!r}"
+
+    text = " ".join(str(v) for v in readme["Value"].dropna())
+    # The conventions that changed model output must be stated in the artifact.
+    assert "available_at" in text
+    assert "total-return" in text.lower()
+    assert "NaN, never 0" in text
+
+
+def test_readme_documents_the_schema_deviation(tmp_path, monkeypatch):
+    """A contract change recorded only outside the artifact is a silent one."""
+    monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
+    path = submission.write_submission([_minimal_company()])
+    readme = pd.read_excel(path, "README")
+    joined = dict(zip(readme["Field"].astype(str), readme["Value"].astype(str)))
+
+    canonical = joined["Asset columns 1-23"]
+    for col in records.CANONICAL_ASSET_COLUMNS:
+        assert col in canonical
+    additions = joined["Asset columns 24+"]
+    for col in records.EXTENDED_ASSET_COLUMNS:
+        assert col in additions
+    assert "EM iters" in joined["Diagnostics"]

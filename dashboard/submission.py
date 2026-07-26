@@ -57,14 +57,25 @@ def write_submission(companies: list[CompanyData],
     # Both frames come from dashboard.records, the single source of truth for
     # every published credit field. The Asset sheet is guaranteed to carry
     # exactly records.ASSET_SCHEMA, in order.
+    readme = records.readme_frame(companies)
     asset = records.asset_frame(companies)
     validation = records.validation_frame(companies)
 
     with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        # README first: a reader opening the file lands on the provenance and
+        # the conventions before the numbers.
+        readme.to_excel(writer, sheet_name="README", index=False)
         asset.to_excel(writer, sheet_name="Asset", index=False)
         validation.to_excel(writer, sheet_name="validation", index=False)
+        _format(writer.book["README"])
         _format(writer.book["Asset"])
         _format(writer.book["validation"])
+        # The README is prose; give it room rather than content-fitting.
+        ws = writer.book["README"]
+        ws.column_dimensions["A"].width = 34
+        ws.column_dimensions["B"].width = 110
+        for row in ws.iter_rows(min_row=2):
+            row[1].alignment = row[1].alignment.copy(wrap_text=True, vertical="top")
 
     LOG.info("submission workbook -> %s", os.path.relpath(path, _PROJECT_ROOT))
     return path
