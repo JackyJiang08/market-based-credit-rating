@@ -201,6 +201,31 @@ The repository does not yet fully satisfy this protocol:
 Until these issues are fixed and covered by tests, existing aligned panels must
 be described as research prototypes and not as backtest-safe datasets.
 
+## 10. Team timestamp standard
+
+Adopted 2026-07-26, at the project owner's direction, for the deliverable-v1
+freeze. Before this section existed, every artifact stamp in the repository was
+naive local machine time in whatever format its writer chose.
+
+- **Timezone: UTC.** All newly generated artifact timestamps are timezone-aware
+  UTC (`datetime.now(timezone.utc)`), never naive local time. Local time
+  depends on which contributor's machine ran the pipeline; UTC does not.
+- **Format: ISO 8601.** Human-readable stamps use `YYYY-MM-DDTHH:MM:SSZ`.
+  Filename-embedded stamps use the compact form `YYYYMMDDTHHMMSSZ` (colons are
+  not filename-safe).
+- **Scope: new stamps only.** Existing artifacts and their historical names are
+  not renamed or restamped. DEVLOG entry headings remain date-only
+  (`YYYY-MM-DD`). Panel and statement date columns remain calendar dates
+  (`%Y-%m-%d`) — they identify trading days and period ends, not instants.
+- **First application:** the deliverable workbook filename
+  (`outputs/submission_<YYYYMMDDTHHMMSSZ>.xlsx`) and the workbook README
+  sheet's `Generated` field, from `dashboard/submission.py` /
+  `dashboard/records.py`.
+
+`event_time`, `available_at`, and the other §1 fields are unaffected: they are
+data semantics, not artifact stamps, and carry whatever precision and zone
+their source defines (documented per source in §3).
+
 ## Contributor checklist
 
 Before merging or pushing a time-dependent change, confirm:

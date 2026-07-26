@@ -35,6 +35,52 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Deliverable v1 frozen
+
+- **Scope:** Layer 4 (submission writer, records), Layer 2 (provenance columns
+  through the as-of join), `docs/TIMING_PROTOCOL.md` §10, CLAUDE.md,
+  `.gitignore`, CHANGELOG, tests; then the frozen artifact itself under
+  `docs/deliverables/` with a DIFF.md, and the `deliverable-v1` tag.
+- **Summary:**
+  - **Team timestamp standard adopted** (`docs/TIMING_PROTOCOL.md` §10,
+    owner-directed): new artifact stamps are tz-aware UTC ISO 8601; filenames
+    use the compact `YYYYMMDDTHHMMSSZ` form. First applied to the submission
+    filename and the workbook's `Generated (UTC)` field. Existing artifacts
+    are not restamped; naive-local writers migrate when next touched.
+  - **Writer:** the single writer gains a never-overwrite guard (an existing
+    path raises) and a `Ratings` sheet implementing the presentation rule —
+    sorted by RiskScore, the letter only ever with its interval attached or
+    with the reason there is none.
+  - **Validation sheet** now carries drift regime and t, the bootstrap rating
+    interval, the convention span from the 2026-07-26 sweep (a dated, recorded
+    result — regenerate via the script if the vintage moves; unswept tickers
+    report no span), explicit `TTC at floor` / `At scale top` flags, EM
+    iterations, and debt field provenance (`ShortTermDebtSource` /
+    `LongTermDebtSource` carried through the as-of join, with the
+    CONTRADICTORY flag).
+  - **README sheet** now states the applicability gates (both of them, with
+    reason codes), the sweep range of the debt-weight convention, which
+    conventions have NOT been swept, how to read span-vs-interval, and the
+    Ratings-sheet reading rule, alongside the existing model version, git SHA,
+    data vintage, conventions, and canonical-columns deviation note.
+  - **Archive:** `docs/deliverables/` holds the frozen v1 workbook beside the
+    pre-look-ahead version (`submission_20260725_234922.xlsx`, identified by
+    content match against `history/07`) and a `DIFF.md`. `.gitignore` gains a
+    narrow `!docs/deliverables/*.xlsx` exception, mirroring the reconciliation
+    CSV one; CLAUDE.md's acceptance-gate line updated to match.
+- **Breaking changes:** submission filenames change format
+  (`submission_YYYYMMDDTHHMMSSZ.xlsx`); VALIDATION_SCHEMA gains five columns;
+  the workbook gains a Ratings sheet. Consumers keyed to the old validation
+  layout must re-key.
+- **Validation:** `python3 -m pytest -q` -> 304 passed, run before this push
+  (new tests: UTC stamp format, overwrite guard raises, Ratings ordering and
+  never-bare letters, validation freeze diagnostics). Live batch re-run from
+  the freeze commit to generate the artifact; 10/10 succeeded; standing
+  unchanged from `history/14` (7/10 rated, 3/10 scale-resolved, PNC gated).
+- **Follow-ups:** `lineage.py` still stamps naive local time (migrate on next
+  touch); the sweep span constant must be regenerated if the data vintage
+  moves; deposits source and GICS/SIC feed remain open from ADR 0003.
+
 ### 2026-07-26 - Live batch confirms the revision-1 standing; history/14 captured
 
 - **Scope:** README standings, `docs/reconciliation/history/14_after_dell_market_gate.csv`.

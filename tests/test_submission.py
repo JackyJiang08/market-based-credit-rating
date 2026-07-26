@@ -32,10 +32,12 @@ GOLDEN_ASSET_SCHEMA = (
 
 GOLDEN_VALIDATION_SCHEMA = (
     "Symbol", "Data Status", "EM converged", "EM iters", "sigma_A",
-    "Drift regime", "Drift SE", "Drift span (y)", "Rating basis",
-    "TTC at floor", "Off-grid", "Rating determination", "S&P RiskScore",
-    "Bootstrap defective %", "sigma 5%", "sigma 95%",
-    "Statement available at", "Availability method", "Warnings",
+    "Drift regime", "Drift SE", "Drift t", "Drift span (y)", "Rating basis",
+    "TTC at floor", "At scale top", "Off-grid", "Rating determination",
+    "S&P RiskScore", "Bootstrap defective %", "sigma 5%", "sigma 95%",
+    "Rating interval", "Convention span (notches)",
+    "Debt field provenance", "Statement available at", "Availability method",
+    "Warnings",
 )
 
 
@@ -175,7 +177,67 @@ def test_workbook_carries_a_readme_sheet_first(tmp_path, monkeypatch):
     path = submission.write_submission([_minimal_company()])
     book = pd.ExcelFile(path)
     assert book.sheet_names[0] == "README", "README must be the first sheet"
-    assert set(book.sheet_names) == {"README", "Asset", "validation"}
+    assert set(book.sheet_names) == {"README", "Ratings", "Asset", "validation"}
+
+
+# --- Deliverable freeze: stamp, overwrite guard, Ratings sheet ---------------
+def test_default_filename_is_utc_iso_and_never_overwrites(tmp_path, monkeypatch):
+    """TIMING_PROTOCOL §10: UTC compact ISO stamp; an existing path raises."""
+    import re
+
+    monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
+    path = submission.write_submission([_minimal_company()])
+    name = path.split("/")[-1]
+    assert re.fullmatch(r"submission_\d{8}T\d{6}Z\.xlsx", name), name
+
+    with pytest.raises(FileExistsError):
+        submission.write_submission([_minimal_company()], filename=name)
+
+
+def test_ratings_sheet_leads_with_riskscore_and_never_a_bare_letter(tmp_path,
+                                                                    monkeypatch):
+    """The presentation rule: RiskScore-ordered, letter with interval attached."""
+    monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
+    safe = _minimal_company()
+    risky = _minimal_company()
+    risky.ticker, risky.risk_score = "RSK", 40.0
+    risky.rating_interval_low, risky.rating_interval_high = "BBB-", "BB-"
+    risky.rating_interval_notches = 4
+    path = submission.write_submission([risky, safe])
+
+    ratings = pd.read_excel(path, "Ratings")
+    assert tuple(ratings.columns) == records.RATINGS_SCHEMA
+    # Sorted by RiskScore ascending (safest first), regardless of input order.
+    assert list(ratings["Symbol"]) == ["TST", "RSK"]
+    assert list(ratings["Rank"]) == [1, 2]
+    # The letter is never bare: interval attached when one exists.
+    assert ratings.loc[1, "Rating (with interval)"] == "BB (BBB-..BB-)"
+
+
+def test_ratings_sheet_explains_a_missing_letter(tmp_path, monkeypatch):
+    monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
+    gated = _minimal_company()
+    gated.sp_rating, gated.model_applicable = None, False
+    gated.applicability_reason = "BANK_DEPOSIT_FUNDED"
+    gated.rating_determination = "MODEL_NOT_APPLICABLE"
+    path = submission.write_submission([gated])
+    ratings = pd.read_excel(path, "Ratings")
+    assert ratings.loc[0, "Rating (with interval)"] == \
+        "MODEL_NOT_APPLICABLE (BANK_DEPOSIT_FUNDED)"
+
+
+def test_validation_carries_the_freeze_diagnostics(tmp_path, monkeypatch):
+    monkeypatch.setattr(submission, "OUTPUT_DIR", str(tmp_path))
+    c = _minimal_company()
+    c.drift_t_stat = 2.01
+    c.rating_interval_low, c.rating_interval_high = "AAA", "BBB"
+    c.rating_interval_notches = 10
+    path = submission.write_submission([c])
+    v = pd.read_excel(path, "validation")
+    assert v.loc[0, "Drift t"] == pytest.approx(2.01)
+    assert v.loc[0, "Rating interval"] == "AAA..BBB (10 notches)"
+    # TST is not in the sweep universe: no span is reported, never a guess.
+    assert pd.isna(v.loc[0, "Convention span (notches)"])
 
 
 def test_readme_records_provenance_and_conventions(tmp_path, monkeypatch):

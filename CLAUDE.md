@@ -104,23 +104,24 @@ Rules that bind every time-dependent change:
 Use the §Contributor checklist at the end of `docs/TIMING_PROTOCOL.md` before pushing any
 time-dependent change.
 
-### Timestamp formats (no canonical standard is defined — do not invent one)
+### Timestamp formats — team standard adopted 2026-07-26 for NEW artifact stamps
 
-Neither `.agents/` nor `docs/` specifies a team timezone or a canonical timestamp format.
-The de-facto formats in the code today are:
+`docs/TIMING_PROTOCOL.md` §10 (adopted 2026-07-26, owner-directed, for the deliverable-v1
+freeze): **new artifact stamps are timezone-aware UTC, ISO 8601** — `YYYY-MM-DDTHH:MM:SSZ`
+human-readable, `YYYYMMDDTHHMMSSZ` in filenames. First applied to the submission workbook
+filename and its README-sheet `Generated (UTC)` field.
+
+Formats still in force elsewhere (existing artifacts are not renamed or restamped):
 
 | Use | Format | Where |
 |---|---|---|
 | DEVLOG entry headings | `YYYY-MM-DD` (date only) | `docs/DEVLOG.md` entry template |
-| Output workbook filename | `submission_%Y%m%d_%H%M%S.xlsx` | `dashboard/submission.py:131` |
-| Run provenance stamp | `%Y-%m-%d %H:%M:%S` | `raw_data_architecture/lineage.py:20` |
-| Panel/period columns | `%Y-%m-%d` | `data_cleaning/transforms.py:66`, `dashboard/longtable.py` |
+| Output workbook filename | `submission_%Y%m%dT%H%M%SZ.xlsx` (UTC, §10) | `dashboard/submission.py` |
+| Run provenance stamp | `%Y-%m-%d %H:%M:%S` naive local (**pre-standard; migrate when touched**) | `raw_data_architecture/lineage.py:20` |
+| Panel/period columns | `%Y-%m-%d` (calendar dates, not instants — stays) | `data_cleaning/transforms.py:66`, `dashboard/longtable.py` |
 
-All of these are **naive local machine time** (`datetime.now()` with no tzinfo), and there is
-no `clock.py` helper in this repo. Match the existing format for the artifact you are
-touching. If you need a single team standard — a canonical timezone, or tz-aware stamps —
-raise it and get it written into `docs/TIMING_PROTOCOL.md` first; do not silently change how
-existing artifacts are stamped.
+When touching a writer that still stamps naive local time, migrate it to §10 in that
+change; do not add new naive-local stamps anywhere.
 
 ## AGENT PROTOCOL
 
@@ -349,8 +350,10 @@ Run them, and record in the commit body and `docs/DEVLOG.md` what you actually r
 - Paper Tables 13/14 and the `alpha_FH(1.5) = 0.91906` / `CCM* = 1.35373` anchors still
   reproduce (`tests/test_measures.py`, `tests/test_conversion.py`).
 - `tests/test_no_lookahead.py` passes, and any alignment change adds to it.
-- `git ls-files --cached` contains no `.pdf`, `.xlsx`, `.csv`, or `.parquet`, and nothing
-  under `local/`.
+- `git ls-files --cached` contains no `.pdf` or `.parquet`, no `.csv` outside
+  `docs/reconciliation/history/`, no `.xlsx` outside `docs/deliverables/`, and nothing
+  under `local/`. (The two exceptions are our own generated outputs, negated explicitly
+  in `.gitignore`; everything else with those extensions stays out.)
 - `docs/DEVLOG.md` is updated in the same push.
 - Invariants above hold across the 10-company batch — this needs a live network run
   (`python -m mdt batch config/companies.yaml`), so it is a release check rather than a

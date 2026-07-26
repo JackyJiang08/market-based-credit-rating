@@ -1,10 +1,18 @@
 """Submission workbook: the deliverable.
 
-Writes one timestamped workbook per run (never overwriting a prior submission)
-with two sheets:
+Writes one timestamped workbook per run (never overwriting -- an existing path
+raises rather than being replaced) with four sheets:
+  - `README`     : provenance (model version, git SHA, data vintage) and every
+                   convention in force, with its sweep range where one exists.
+  - `Ratings`    : the presentation rule -- RiskScore first, letter only with
+                   its interval attached.
   - `Asset`      : one row per company, exactly `records.ASSET_SCHEMA` in order.
   - `validation` : diagnostics per company -- data status, EM convergence, drift
-                   regime and standard error, rating basis, floor flag.
+                   regime/t, rating basis, determination, floor/scale-top flags,
+                   bootstrap interval, convention span, field provenance.
+
+Filename stamps follow the team timestamp standard (docs/TIMING_PROTOCOL.md
+§10): tz-aware UTC, compact ISO 8601.
 
 This module owns the file; it does not own the schema. Every field comes from
 `dashboard.records`, so the deliverable, the per-company workbooks and the long
@@ -15,7 +23,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -50,24 +58,34 @@ def write_submission(companies: list[CompanyData],
                      filename: str | None = None) -> str:
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     if filename is None:
-        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Team timestamp standard (docs/TIMING_PROTOCOL.md §10): UTC, compact
+        # ISO 8601 -- never naive local machine time.
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         filename = f"submission_{stamp}.xlsx"
     path = os.path.join(OUTPUT_DIR, filename)
+    if os.path.exists(path):
+        raise FileExistsError(
+            f"{path} already exists; a submission is never overwritten. "
+            "Re-run to get a fresh stamp, or pass a different filename.")
 
-    # Both frames come from dashboard.records, the single source of truth for
+    # All frames come from dashboard.records, the single source of truth for
     # every published credit field. The Asset sheet is guaranteed to carry
     # exactly records.ASSET_SCHEMA, in order.
     readme = records.readme_frame(companies)
+    ratings = records.ratings_frame(companies)
     asset = records.asset_frame(companies)
     validation = records.validation_frame(companies)
 
     with pd.ExcelWriter(path, engine="openpyxl") as writer:
         # README first: a reader opening the file lands on the provenance and
-        # the conventions before the numbers.
+        # the conventions before the numbers. Ratings second: the presentation
+        # rule (RiskScore first, letter with interval) before the canonical form.
         readme.to_excel(writer, sheet_name="README", index=False)
+        ratings.to_excel(writer, sheet_name="Ratings", index=False)
         asset.to_excel(writer, sheet_name="Asset", index=False)
         validation.to_excel(writer, sheet_name="validation", index=False)
         _format(writer.book["README"])
+        _format(writer.book["Ratings"])
         _format(writer.book["Asset"])
         _format(writer.book["validation"])
         # The README is prose; give it room rather than content-fitting.

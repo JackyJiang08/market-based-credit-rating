@@ -30,6 +30,13 @@ CLAUDE.local.md
 !docs/reconciliation/history/
 !docs/reconciliation/history/*.csv
 
+# Narrow exception to the blanket *.xlsx rule: frozen deliverables. These are
+# our own generated workbooks (README/Ratings/Asset/validation sheets), not
+# local/ material -- no grid, no lookup table. Archived beside a DIFF.md so a
+# reviewer can see what moved between frozen versions.
+!docs/deliverables/
+!docs/deliverables/*.xlsx
+
 # macOS
 .DS_Store
 

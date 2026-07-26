@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import os
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import pandas as pd
@@ -64,11 +64,26 @@ ASSET_SCHEMA: tuple[str, ...] = CANONICAL_ASSET_COLUMNS + EXTENDED_ASSET_COLUMNS
 # Diagnostics live here, never on the deliverable sheet.
 VALIDATION_SCHEMA: tuple[str, ...] = (
     "Symbol", "Data Status", "EM converged", "EM iters", "sigma_A",
-    "Drift regime", "Drift SE", "Drift span (y)", "Rating basis",
-    "TTC at floor", "Off-grid", "Rating determination", "S&P RiskScore",
-    "Bootstrap defective %", "sigma 5%", "sigma 95%",
-    "Statement available at", "Availability method", "Warnings",
+    "Drift regime", "Drift SE", "Drift t", "Drift span (y)", "Rating basis",
+    "TTC at floor", "At scale top", "Off-grid", "Rating determination",
+    "S&P RiskScore", "Bootstrap defective %", "sigma 5%", "sigma 95%",
+    "Rating interval", "Convention span (notches)",
+    "Debt field provenance", "Statement available at", "Availability method",
+    "Warnings",
 )
+
+# Per-company rating span (in notches) of the debt-weight convention sweep,
+# w in {0, 0.25, 0.5, 0.75, 1.0} on the long-term leg plus the prior statement
+# vintage. Source: docs/reconciliation/convention_sweep.py, run 2026-07-26 at
+# the same data vintage as history/13-14 (prices through the 2026-07-24 close);
+# the full table is in the README results section. A recorded sweep result with
+# its date, not a live computation -- regenerate with the script if the data
+# vintage moves. A ticker not swept reports no span rather than a guess.
+CONVENTION_SWEEP_DATE = "2026-07-26"
+CONVENTION_SPANS: dict[str, int] = {
+    "COST": 1, "KO": 1, "DELL": 4, "ORCL": 5, "PNC": 5,
+    "WMT": 1, "INTU": 0, "AMZN": 2, "T": 7, "KHC": 0,
+}
 
 
 def _panel_last(c: CompanyData, col: str) -> Optional[float]:
@@ -136,6 +151,9 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
         "last_statement_date": last_stmt,
         "statement_available_at": _panel_last_value(c, "StatementAvailableAt"),
         "availability_method": c.availability_method,
+        "st_debt_source": _panel_last_value(c, "ShortTermDebtSource"),
+        "lt_debt_source": _panel_last_value(c, "LongTermDebtSource"),
+        "debt_source_contradictory": _panel_last_value(c, "DebtSourceContradictory"),
         "short_term_debt": _panel_last(c, "ShortTermDebt"),
         "long_term_debt": _panel_last(c, "LongTermDebt"),
         "total_debt": _total_debt(c),
@@ -270,6 +288,18 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
             f"({r['rating_interval_low']}..{r['rating_interval_high']})")
     flags.extend(r["em_warnings"] or [])
 
+    interval = None
+    if r["rating_interval_low"] is not None or r["rating_interval_high"] is not None:
+        interval = (f"{r['rating_interval_low']}..{r['rating_interval_high']} "
+                    f"({r['rating_interval_notches']} notches)")
+    prov_bits = []
+    if r["st_debt_source"] is not None:
+        prov_bits.append(f"ST: {r['st_debt_source']}")
+    if r["lt_debt_source"] is not None:
+        prov_bits.append(f"LT: {r['lt_debt_source']}")
+    if r["debt_source_contradictory"]:
+        prov_bits.append("CONTRADICTORY (Total < LT in source)")
+
     row = {
         "Symbol": r["symbol"],
         "Data Status": r["data_status"],
@@ -278,9 +308,11 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
         "sigma_A": r["sigma_A"],
         "Drift regime": r["drift_regime"],
         "Drift SE": r["drift_se"],
+        "Drift t": r["drift_t_stat"],
         "Drift span (y)": r["drift_span_years"],
         "Rating basis": r["rating_basis"],
         "TTC at floor": bool(r["ttc_at_floor"]),
+        "At scale top": r["rating_determination"] == "PINNED_AT_SCALE_TOP",
         "Off-grid": bool(r["rating_off_grid"]),
         "Rating determination": r["rating_determination"],
         "S&P RiskScore": r["sp_risk_score"],
@@ -288,6 +320,9 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
                                   if r["boot_defective_fraction"] is not None else None),
         "sigma 5%": r["boot_sigma_lo"],
         "sigma 95%": r["boot_sigma_hi"],
+        "Rating interval": interval,
+        "Convention span (notches)": CONVENTION_SPANS.get(r["symbol"]),
+        "Debt field provenance": "; ".join(prov_bits) if prov_bits else None,
         "Statement available at": r["statement_available_at"],
         "Availability method": r["availability_method"],
         "Warnings": "; ".join(flags) if flags else "OK",
@@ -305,6 +340,60 @@ def asset_frame(companies: list[CompanyData]) -> pd.DataFrame:
 def validation_frame(companies: list[CompanyData]) -> pd.DataFrame:
     frame = pd.DataFrame([validation_row(c) for c in companies])
     return frame.reindex(columns=list(VALIDATION_SCHEMA))
+
+
+# --------------------------------------------------------------------------- #
+# Ratings sheet: the presentation rule, applied
+# --------------------------------------------------------------------------- #
+RATINGS_SCHEMA: tuple[str, ...] = (
+    "Rank", "Symbol", "Company", "TiC Risk Score",
+    "Rating (with interval)", "Rating Determination", "Drift t",
+    "Weakly Identified", "Convention span (notches)",
+)
+
+
+def _rating_with_interval(r: dict[str, Any]) -> str:
+    """The letter, never bare: interval attached, or the reason there is none."""
+    if r["sp_rating"]:
+        iv = ""
+        if r["rating_interval_low"] is not None:
+            iv = f" ({r['rating_interval_low']}..{r['rating_interval_high']})"
+        return f"{r['sp_rating']}{iv}"
+    if r["model_applicable"] is False:
+        return f"MODEL_NOT_APPLICABLE ({r['applicability_reason']})"
+    if r["rating_determination"] == "NOT_RATED":
+        return "NOT_RATED (defective drift, Prop. 4.4.1)"
+    return "NOT_RATED"
+
+
+def ratings_frame(companies: list[CompanyData]) -> pd.DataFrame:
+    """The presentation-rule sheet: RiskScore first, letter with interval.
+
+    A letter rating is a derived, wide-interval conversion and is never the
+    headline (README results section; docs/UNCERTAINTY.md). This sheet leads
+    with RiskScore and the rank ordering -- the quantities that survive both
+    parameter and convention uncertainty -- and renders the letter only with
+    its interval attached, or with the reason there is none.
+    """
+    recs = [credit_record(c) for c in companies]
+    recs.sort(key=lambda r: (r["risk_score"] is None,
+                             r["risk_score"] if r["risk_score"] is not None else 0.0))
+    rows = []
+    for i, r in enumerate(recs, start=1):
+        rows.append({
+            "Rank": i if r["risk_score"] is not None else None,
+            "Symbol": r["symbol"],
+            "Company": r["company"],
+            "TiC Risk Score": r["risk_score"],
+            "Rating (with interval)": _rating_with_interval(r),
+            "Rating Determination": r["rating_determination"],
+            "Drift t": r["drift_t_stat"],
+            "Weakly Identified": r["weakly_identified"],
+            "Convention span (notches)": CONVENTION_SPANS.get(r["symbol"]),
+        })
+        assert tuple(rows[-1]) == RATINGS_SCHEMA, "ratings row drifted from RATINGS_SCHEMA"
+    frame = pd.DataFrame(rows)
+    return frame.reindex(columns=list(RATINGS_SCHEMA))
 
 
 # --------------------------------------------------------------------------- #
@@ -355,7 +444,9 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
 
     rows: list[tuple[str, str]] = [
         ("— PROVENANCE —", ""),
-        ("Generated", datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+        # Team timestamp standard (docs/TIMING_PROTOCOL.md §10): tz-aware UTC.
+        ("Generated (UTC)",
+         datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")),
         ("Model version", _model_version()),
         ("Git commit", _git_sha()),
         ("Data vintage (latest priced day)", vintage),
@@ -376,7 +467,14 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
          f"{clean_config.ANNUAL_FILING_LAG_DAYS}d for a 10-K). "
          f"availability_method = {clean_config.AVAILABILITY_METHOD}. "
          "No row sees a statement not yet public on that date."),
-        ("Default point D", "1.0 x short-term debt + 0.5 x long-term debt"),
+        ("Default point D",
+         "1.0 x short-term debt + 0.5 x long-term debt. The 0.5 is a "
+         "convention, not a measurement; its sweep range is w in "
+         "{0, 0.25, 0.5, 0.75, 1.0} on the long-term leg plus the prior "
+         "statement vintage (docs/reconciliation/convention_sweep.py, run "
+         + CONVENTION_SWEEP_DATE + "). Per-company rating span from that "
+         "sweep is the 'Convention span (notches)' column on the validation "
+         "and Ratings sheets."),
         ("Long-term debt field",
          "'Long Term Debt And Capital Lease Obligation' in preference to plain "
          "'Long Term Debt' (includes capitalised leases)"),
@@ -390,6 +488,11 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
         ("Trading days per year", str(sig_config.TRADING_DAYS_PER_YEAR)),
         ("Risk-free rate", "FRED DGS1 (1-year), horizon T = 1 year"),
         ("Outlook", "PIT PD - TTC PD, per Prop. 5.3 Eq. (28)"),
+        ("Conventions not swept",
+         "EM window, drift window, trading-day count, risk-free tenor and the "
+         "long-term-debt field preference are single values; no sweep has "
+         "measured their span. Only the debt weight and statement vintage "
+         "have been."),
         ("", ""),
 
         ("— HOW TO READ A RATING —", ""),
@@ -399,9 +502,27 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
         ("Rating Determination",
          "SCALE_RESOLVED | PINNED_AT_FLOOR (grid's 2bp floor) | "
          "PINNED_AT_SCALE_TOP (RiskScore below the best published grade) | "
-         "NOT_RATED. SCALE_RESOLVED means the scale could tell this value from "
+         "MODEL_NOT_APPLICABLE (see Applicability) | NOT_RATED (defective "
+         "drift). SCALE_RESOLVED means the scale could tell this value from "
          "its neighbours -- it is NOT a claim that the estimate is precise. "
-         "For that, read Drift t and the Rating Interval."),
+         "For that, read Drift t and the Rating Interval. The explicit "
+         "'TTC at floor' and 'At scale top' flags are on the validation "
+         "sheet."),
+        ("Applicability",
+         "Two gates suppress the letter, never the measures (ADR 0003, rev 1): "
+         "a firm-type gate (BANK_DEPOSIT_FUNDED / INSURER_RESERVE_LIABILITIES "
+         "/ REIT_ASSET_STRUCTURE -- the debt-barrier construction does not "
+         "describe these balance sheets), and a market-based test "
+         "(ASSETS_BELOW_TOTAL_DEBT: market-implied A must strictly exceed "
+         "ST + 1.0*LT, the most conservative debt convention, so that "
+         "applicability cannot depend on the arbitrary long-term weight). "
+         "The reason code is in 'Applicability Reason'."),
+        ("Convention span",
+         "Notch span of the letter over the debt-weight/vintage sweep of "
+         + CONVENTION_SWEEP_DATE + ". Read it beside the Rating Interval: "
+         "the bootstrap interval is parameter uncertainty only and is a lower "
+         "bound on total uncertainty. Span 1 with a pinned determination "
+         "means the letter is insensitive to its inputs, not precise."),
         ("Weakly Identified",
          f"|drift t| < {sig_config.WEAK_IDENTIFICATION_T}. The rating is still "
          "published, but mu and CCM divide by a drift indistinguishable from "
@@ -415,6 +536,13 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
         ("", ""),
 
         ("— SHEET LAYOUT (contract deviation) —", ""),
+        ("Ratings sheet",
+         "The presentation rule, applied: RiskScore first (the sheet is sorted "
+         "by it -- it is the quantity robust to both drift noise and the debt "
+         "convention), and the letter only ever appears with its bootstrap "
+         "interval attached, or with the reason there is none. The Asset "
+         "sheet is the canonical submission form; the Ratings sheet is how "
+         "the result should be read."),
         ("Asset columns 1-23",
          "the reference workbook's canonical set, in its exact order: "
          + ", ".join(CANONICAL_ASSET_COLUMNS)),

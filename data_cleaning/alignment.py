@@ -189,6 +189,12 @@ def build_panel(prices: pd.DataFrame,
         # when it became knowable.
         panel["StatementPeriodEnd"] = merged["PeriodEnd"]
         panel["StatementAvailableAt"] = merged["AvailableAt"]
+        # Field provenance (#16) rides the same as-of join so the validation
+        # sheet can say which line item supplied each debt leg on each row.
+        for prov in ("ShortTermDebtSource", "LongTermDebtSource",
+                     "DebtSourceContradictory"):
+            if prov in merged:
+                panel[prov] = merged[prov]
         panel["DefaultPointDebt_D"] = transforms.default_point_debt(
             panel["ShortTermDebt"], panel["LongTermDebt"])
     else:
