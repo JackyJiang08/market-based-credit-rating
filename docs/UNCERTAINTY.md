@@ -24,7 +24,10 @@ A **moving-block bootstrap** over the EM-recovered **asset** log-returns.
 
 1. **These are parameter-estimation intervals, and a lower bound on total uncertainty.**
    Convention uncertainty — the 0.5 weight on long-term debt, the field choice, the
-   statement vintage — is not in them. `D` is a *choice* as much as an observation.
+   statement vintage — is not in them. `D` is a *choice* as much as an observation, and
+   `docs/reconciliation/convention_sweep.py` measures what that choice is worth: for ORCL,
+   PNC and T the convention span **equals or exceeds** the bootstrap span (T moves seven
+   notches on the debt weight alone). See the README results section.
 2. **The two resamples are drawn independently**, while the real estimators share the
    trailing year of data and are slightly dependent. Each marginal sampling distribution
    is right; their joint dependence is not modelled.

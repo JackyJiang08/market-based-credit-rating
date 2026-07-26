@@ -150,3 +150,8 @@ Entries reference the GitHub issue they close. Detailed rationale lives in
   demonstration of Prop. 4.4.2. Added the rule that a letter is never a headline and always
   carries its interval and flags. Added `docs/UNCERTAINTY.md` recording the method, its
   limits, and the two bootstrap bugs that testing the algebraic prediction exposed.
+- **Part B** Added `docs/reconciliation/convention_sweep.py`, which sweeps the long-term
+  debt weight and the statement vintage and reports the rating range per company beside the
+  bootstrap interval. **For ORCL, PNC and T the convention span equals or exceeds the
+  parameter span** — T moves seven notches on the debt weight alone. Recorded in the README
+  results section; the bootstrap is confirmed as a lower bound on total uncertainty.

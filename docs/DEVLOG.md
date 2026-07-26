@@ -35,6 +35,35 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Convention uncertainty sweep
+
+- **Scope:** new analysis script under `docs/reconciliation/`; README and
+  UNCERTAINTY.md updated with the result. No pipeline code, no model output.
+- **Summary:** `docs/reconciliation/convention_sweep.py` sweeps the long-term
+  debt weight over {0, 0.25, 0.5, 0.75, 1.0} and the statement vintage, and
+  reports the resulting rating range per company on the same notch scale as the
+  bootstrap interval.
+- **Findings of record:**
+  - **For three of the four scale-resolved names -- ORCL, PNC and T -- the
+    convention span equals or exceeds the bootstrap span.** T moves seven
+    notches (AAA- to A-) on the debt weight alone; ORCL moves from unrateable
+    to B+. The published letter is at least as much a statement about the 0.5
+    weight as about the company.
+  - PNC and AMZN yield `D = 0` at w = 0 because their short-term debt is zero.
+    For AMZN that is real; for PNC it is the missing current-debt row (#16), so
+    PNC's entire default point is the long-term weight.
+  - INTU and KHC are unrated under every convention -- a robustness result,
+    since their defective drift is not an artifact of the debt rule.
+  - The scale-pinned names (COST, KO, WMT) do not move at all, span 1. A pinned
+    letter is insensitive to its inputs, which is why it carries no information.
+  - Consequence: total uncertainty on a letter is **wider** than the bootstrap
+    interval, and the bootstrap is correctly labelled a lower bound.
+- **Validation:** `python -m pytest -q` -> 271 passed, run before this push. The
+  sweep itself is an analysis script, not covered by the suite; its output is
+  committed as `convention_sweep.csv` is git-ignored, so the table lives in the
+  README.
+- **Follow-ups:** Part C (financial firms, #16) not started.
+
 ### 2026-07-26 - Documentation rewritten around the decomposition finding
 
 - **Scope:** documentation only. No code, no model output.

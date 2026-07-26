@@ -134,6 +134,47 @@ the qualitative version of the same argument.
 Our contribution is the measurement: a ×4,077 amplification between two quantities computed
 from the same two parameters, on ten real companies.
 
+### Convention uncertainty rivals — and often exceeds — parameter uncertainty
+
+The bootstrap holds `A₀` and `D` fixed because they are observations. **`D` is not an
+observation.** It is `1.0·ST + 0.5·LT`, and the 0.5 is a convention nobody has justified
+from data. Sweeping the long-term weight over {0, 0.25, 0.5, 0.75, 1.0} and the statement
+vintage (`docs/reconciliation/convention_sweep.py`) puts that choice on the same notch
+scale as the bootstrap interval:
+
+| | w=0 | w=0.25 | **w=0.5** | w=0.75 | w=1.0 | prev vintage | Convention span | Bootstrap span |
+|---|---|---|---|---|---|---|---:|---:|
+| COST | AAA | AAA | **AAA** | AAA | AAA | AAA | 1 | 2 |
+| KO | AAA | AAA | **AAA** | AAA | AAA | AAA | 1 | 2 |
+| DELL | A | A- | **A-** | BBB+ | BBB+ | BBB | 4 | **10** |
+| **ORCL** | NOT_RATED | BBB- | **BB** | BB- | B+ | NOT_RATED | **5** | 4 |
+| **PNC** | *D=0* | AAA | **AAA-** | AA | AA- | AAA | **5** | 3 |
+| WMT | AAA | AAA | **AAA** | AAA | AAA | AAA | 1 | 2 |
+| INTU | — | — | **—** | — | — | — | 0 | 5 |
+| AMZN | *D=0* | AAA | **AAA-** | AAA- | AAA- | AAA- | 2 | 2 |
+| **T** | AAA- | AA+ | **A+** | A | A- | A+ | **7** | 6 |
+| KHC | — | — | **—** | — | — | — | 0 | 4 |
+
+**For three of the four scale-resolved names — ORCL, PNC and T — the convention span equals
+or exceeds the bootstrap span.** T moves seven notches (AAA− to A−) on the debt weight
+alone. ORCL moves from unrateable to B+. The published rating is at least as much a
+statement about the 0.5 as it is about the company.
+
+Three further readings:
+
+- **PNC and AMZN produce `D = 0` at w=0**, because their short-term debt is zero. For AMZN
+  that is real; for PNC it is an artifact of a missing current-debt row (see
+  [#16](https://github.com/JackyJiang08/market-based-credit-rating/issues/16)), so **PNC's
+  entire default point is the long-term weight**.
+- **INTU and KHC are unrated under every convention**, which is a robustness result: their
+  defective drift is not an artifact of the debt rule.
+- **The scale-pinned names do not move at all** (span 1). Another demonstration that a
+  pinned letter is insensitive to its inputs — which is exactly why it carries no
+  information.
+
+The honest total uncertainty on a letter is therefore **wider than the bootstrap interval
+alone**, and the bootstrap is correctly described as a lower bound.
+
 ### How a rating must be presented
 
 **A letter rating is a derived, wide-interval conversion. It is never the headline.**
