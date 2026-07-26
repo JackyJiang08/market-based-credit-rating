@@ -1,0 +1,754 @@
+{
+ "meta": {
+  "git_sha": "55f96f3",
+  "generated_utc": "2026-07-26T21:15:40Z",
+  "package_version": "0.4.0",
+  "data_vintage": "2026-07-24",
+  "source": "committed fixtures and committed run-of-record results"
+ },
+ "discrimination": [
+  {
+   "stratum": "all names with estimates",
+   "n": 128,
+   "spearman": 0.7867232885,
+   "spearman_ci05": 0.7131520896,
+   "spearman_ci95": 0.8426189019,
+   "kendall": 0.6202145028,
+   "somers_d": 0.6497434513
+  },
+  {
+   "stratum": "rated only",
+   "n": 77,
+   "spearman": 0.8186125932,
+   "spearman_ci05": 0.7254599458,
+   "spearman_ci95": 0.8787933854,
+   "kendall": 0.6565928685,
+   "somers_d": 0.6859380828
+  },
+  {
+   "stratum": "SCALE_RESOLVED only",
+   "n": 36,
+   "spearman": 0.72617769,
+   "spearman_ci05": 0.5305573622,
+   "spearman_ci95": 0.8603585112,
+   "kendall": 0.5829066622,
+   "somers_d": 0.6133567663
+  }
+ ],
+ "baselines": [
+  {
+   "stratum": "all names with estimates",
+   "predictor": "TiC RiskScore",
+   "n": 128,
+   "spearman": 0.7867232885
+  },
+  {
+   "stratum": "all names with estimates",
+   "predictor": "DD alone (neg)",
+   "n": 128,
+   "spearman": 0.7791825798
+  },
+  {
+   "stratum": "all names with estimates",
+   "predictor": "leverage D/A alone",
+   "n": 128,
+   "spearman": 0.6316696248
+  },
+  {
+   "stratum": "rated only",
+   "predictor": "TiC RiskScore",
+   "n": 77,
+   "spearman": 0.8186125932
+  },
+  {
+   "stratum": "rated only",
+   "predictor": "DD alone (neg)",
+   "n": 77,
+   "spearman": 0.8237279305
+  },
+  {
+   "stratum": "rated only",
+   "predictor": "leverage D/A alone",
+   "n": 77,
+   "spearman": 0.6287238682
+  },
+  {
+   "stratum": "SCALE_RESOLVED only",
+   "predictor": "TiC RiskScore",
+   "n": 36,
+   "spearman": 0.72617769
+  },
+  {
+   "stratum": "SCALE_RESOLVED only",
+   "predictor": "DD alone (neg)",
+   "n": 36,
+   "spearman": 0.7413631752
+  },
+  {
+   "stratum": "SCALE_RESOLVED only",
+   "predictor": "leverage D/A alone",
+   "n": 36,
+   "spearman": 0.1924792698
+  }
+ ],
+ "sector_correlations": [
+  {
+   "sector": "Energy",
+   "n": 10,
+   "spearman": 0.9483326481
+  },
+  {
+   "sector": "Communication Services",
+   "n": 10,
+   "spearman": 0.9451395216
+  },
+  {
+   "sector": "Consumer Defensive",
+   "n": 11,
+   "spearman": 0.9373711308
+  },
+  {
+   "sector": "Healthcare",
+   "n": 14,
+   "spearman": 0.8289400596
+  },
+  {
+   "sector": "Financial Services",
+   "n": 24,
+   "spearman": 0.8050949719
+  },
+  {
+   "sector": "Industrials",
+   "n": 13,
+   "spearman": 0.7607374172
+  },
+  {
+   "sector": "Technology",
+   "n": 13,
+   "spearman": 0.7368675498
+  },
+  {
+   "sector": "Consumer Cyclical",
+   "n": 20,
+   "spearman": 0.7312026845
+  }
+ ],
+ "notch_errors": [
+  {
+   "symbol": "AAPL",
+   "model_letter": "AAA",
+   "sp": "AA+",
+   "notch_error": 2,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "yes"
+  },
+  {
+   "symbol": "MSFT",
+   "model_letter": "AAA-",
+   "sp": "AAA",
+   "notch_error": -1,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "yes"
+  },
+  {
+   "symbol": "JNJ",
+   "model_letter": "AAA",
+   "sp": "AAA",
+   "notch_error": 0,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "yes"
+  },
+  {
+   "symbol": "GOOGL",
+   "model_letter": "AAA-",
+   "sp": "AA+",
+   "notch_error": 1,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "AMZN",
+   "model_letter": "AAA-",
+   "sp": "AA",
+   "notch_error": 2,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "META",
+   "model_letter": "AAA-",
+   "sp": "AA-",
+   "notch_error": 3,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "NVDA",
+   "model_letter": "AAA",
+   "sp": "AA",
+   "notch_error": 3,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "yes"
+  },
+  {
+   "symbol": "AVGO",
+   "model_letter": "AAA",
+   "sp": "BBB+",
+   "notch_error": 8,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "AMD",
+   "model_letter": "AAA-",
+   "sp": "A-",
+   "notch_error": 6,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "MU",
+   "model_letter": "AA+",
+   "sp": "BBB-",
+   "notch_error": 8,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "INTC",
+   "model_letter": "BBB+",
+   "sp": "BBB",
+   "notch_error": 1,
+   "determination": "SCALE_RESOLVED",
+   "verified": "yes"
+  },
+  {
+   "symbol": "IBM",
+   "model_letter": "BBB",
+   "sp": "A-",
+   "notch_error": -2,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "ORCL",
+   "model_letter": "BB",
+   "sp": "BBB-",
+   "notch_error": -2,
+   "determination": "SCALE_RESOLVED",
+   "verified": "yes"
+  },
+  {
+   "symbol": "DELL",
+   "model_letter": "A-",
+   "sp": "BBB",
+   "notch_error": 2,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "MCD",
+   "model_letter": "AAA",
+   "sp": "BBB+",
+   "notch_error": 8,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "SBUX",
+   "model_letter": "AAA-",
+   "sp": "BBB",
+   "notch_error": 8,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "HD",
+   "model_letter": "AAA-",
+   "sp": "A",
+   "notch_error": 5,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "LOW",
+   "model_letter": "AAA-",
+   "sp": "BBB+",
+   "notch_error": 7,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "PM",
+   "model_letter": "AA+",
+   "sp": "A-",
+   "notch_error": 5,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "YUM",
+   "model_letter": "AAA-",
+   "sp": "BB+",
+   "notch_error": 10,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "AZO",
+   "model_letter": "AAA-",
+   "sp": "BBB",
+   "notch_error": 8,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "V",
+   "model_letter": "AAA",
+   "sp": "AA-",
+   "notch_error": 4,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "MA",
+   "model_letter": "AAA",
+   "sp": "A+",
+   "notch_error": 5,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "BLK",
+   "model_letter": "AAA-",
+   "sp": "AA-",
+   "notch_error": 3,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "BX",
+   "model_letter": "AAA-",
+   "sp": "A+",
+   "notch_error": 4,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "SPGI",
+   "model_letter": "AAA-",
+   "sp": "A-",
+   "notch_error": 6,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "NEE",
+   "model_letter": "AAA-",
+   "sp": "A-",
+   "notch_error": 6,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "DUK",
+   "model_letter": "AAA",
+   "sp": "BBB+",
+   "notch_error": 8,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "SO",
+   "model_letter": "AAA-",
+   "sp": "A-",
+   "notch_error": 6,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "D",
+   "model_letter": "AAA-",
+   "sp": "BBB+",
+   "notch_error": 7,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "XEL",
+   "model_letter": "AAA-",
+   "sp": "BBB+",
+   "notch_error": 7,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "PCG",
+   "model_letter": "AA-",
+   "sp": "BB+",
+   "notch_error": 7,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "VST",
+   "model_letter": "BBB+",
+   "sp": "BB+",
+   "notch_error": 3,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "XOM",
+   "model_letter": "AAA-",
+   "sp": "AA-",
+   "notch_error": 3,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "yes"
+  },
+  {
+   "symbol": "CVX",
+   "model_letter": "AAA-",
+   "sp": "AA-",
+   "notch_error": 3,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "COP",
+   "model_letter": "AAA-",
+   "sp": "A-",
+   "notch_error": 6,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "SLB",
+   "model_letter": "AAA-",
+   "sp": "A",
+   "notch_error": 5,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "KMI",
+   "model_letter": "AAA",
+   "sp": "BBB",
+   "notch_error": 9,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "APA",
+   "model_letter": "A+",
+   "sp": "BB+",
+   "notch_error": 6,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "LLY",
+   "model_letter": "AAA",
+   "sp": "A+",
+   "notch_error": 5,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "MRK",
+   "model_letter": "AAA-",
+   "sp": "A+",
+   "notch_error": 4,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "ABBV",
+   "model_letter": "AAA-",
+   "sp": "BBB+",
+   "notch_error": 7,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "AMGN",
+   "model_letter": "AAA-",
+   "sp": "BBB+",
+   "notch_error": 7,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "CVS",
+   "model_letter": "AA",
+   "sp": "BBB",
+   "notch_error": 6,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "HCA",
+   "model_letter": "AA-",
+   "sp": "BBB-",
+   "notch_error": 6,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "THC",
+   "model_letter": "BBB+",
+   "sp": "B+",
+   "notch_error": 6,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "KO",
+   "model_letter": "AAA",
+   "sp": "A+",
+   "notch_error": 5,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "WMT",
+   "model_letter": "AAA",
+   "sp": "AA",
+   "notch_error": 3,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "COST",
+   "model_letter": "AAA",
+   "sp": "A+",
+   "notch_error": 5,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "DIS",
+   "model_letter": "AAA-",
+   "sp": "A-",
+   "notch_error": 6,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "M",
+   "model_letter": "BBB",
+   "sp": "BB-",
+   "notch_error": 4,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "W",
+   "model_letter": "BBB-",
+   "sp": "B+",
+   "notch_error": 4,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "T",
+   "model_letter": "A+",
+   "sp": "BBB",
+   "notch_error": 4,
+   "determination": "SCALE_RESOLVED",
+   "verified": "yes"
+  },
+  {
+   "symbol": "VZ",
+   "model_letter": "AA-",
+   "sp": "BBB+",
+   "notch_error": 4,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "TMUS",
+   "model_letter": "AA",
+   "sp": "BBB",
+   "notch_error": 6,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "WBD",
+   "model_letter": "A",
+   "sp": "BB+",
+   "notch_error": 5,
+   "determination": "SCALE_RESOLVED",
+   "verified": "yes"
+  },
+  {
+   "symbol": "CAT",
+   "model_letter": "AA+",
+   "sp": "A",
+   "notch_error": 4,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "DE",
+   "model_letter": "AA+",
+   "sp": "A",
+   "notch_error": 4,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "GE",
+   "model_letter": "AAA",
+   "sp": "A-",
+   "notch_error": 7,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "LMT",
+   "model_letter": "AAA-",
+   "sp": "A-",
+   "notch_error": 6,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "RTX",
+   "model_letter": "AAA-",
+   "sp": "BBB+",
+   "notch_error": 7,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "FDX",
+   "model_letter": "AA",
+   "sp": "BBB",
+   "notch_error": 6,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "MMM",
+   "model_letter": "AAA",
+   "sp": "BBB+",
+   "notch_error": 8,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "PBI",
+   "model_letter": "BBB+",
+   "sp": "B+",
+   "notch_error": 6,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "TSLA",
+   "model_letter": "AAA-",
+   "sp": "BBB",
+   "notch_error": 8,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "yes"
+  },
+  {
+   "symbol": "GM",
+   "model_letter": "BBB-",
+   "sp": "BBB",
+   "notch_error": -1,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "RIVN",
+   "model_letter": "BB",
+   "sp": "B-",
+   "notch_error": 4,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "DAL",
+   "model_letter": "A",
+   "sp": "BBB-",
+   "notch_error": 4,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "UAL",
+   "model_letter": "BBB",
+   "sp": "BB",
+   "notch_error": 3,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "CCL",
+   "model_letter": "BBB",
+   "sp": "BBB-",
+   "notch_error": 1,
+   "determination": "SCALE_RESOLVED",
+   "verified": "yes"
+  },
+  {
+   "symbol": "RCL",
+   "model_letter": "A",
+   "sp": "BB+",
+   "notch_error": 5,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "NCLH",
+   "model_letter": "BB-",
+   "sp": "B+",
+   "notch_error": 1,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "COIN",
+   "model_letter": "BBB-",
+   "sp": "BB-",
+   "notch_error": 3,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "MSTR",
+   "model_letter": "BB+",
+   "sp": "B-",
+   "notch_error": 5,
+   "determination": "SCALE_RESOLVED",
+   "verified": "no"
+  },
+  {
+   "symbol": "SOLV",
+   "model_letter": "AAA",
+   "sp": "BBB",
+   "notch_error": 9,
+   "determination": "PINNED_AT_SCALE_TOP",
+   "verified": "no"
+  },
+  {
+   "symbol": "AZN",
+   "model_letter": "AAA-",
+   "sp": "A",
+   "notch_error": 5,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  },
+  {
+   "symbol": "SHEL",
+   "model_letter": "AAA-",
+   "sp": "A+",
+   "notch_error": 4,
+   "determination": "PINNED_AT_FLOOR",
+   "verified": "no"
+  }
+ ]
+}

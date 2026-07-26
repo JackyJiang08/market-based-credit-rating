@@ -104,3 +104,9 @@ env/
 
 # Stray legacy output dir (branch uses dashboard/output/)
 /output/
+
+# Frontend (apps/terminal)
+apps/terminal/node_modules/
+apps/terminal/.next/
+apps/terminal/out/
+apps/terminal/tsconfig.tsbuildinfo

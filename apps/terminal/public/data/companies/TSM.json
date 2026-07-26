@@ -1,0 +1,71 @@
+{
+ "meta": {
+  "git_sha": "55f96f3",
+  "generated_utc": "2026-07-26T21:15:40Z",
+  "package_version": "0.4.0",
+  "data_vintage": "2026-07-24",
+  "source": "committed fixtures and committed run-of-record results"
+ },
+ "ticker": "TSM",
+ "name": "Taiwan Semiconductor Manufacturing Company Limited",
+ "sector": "Technology",
+ "industry": "Semiconductors",
+ "firm_type": "NONFINANCIAL",
+ "as_of": "2026-07-23",
+ "measures": {
+  "risk_score": null,
+  "sigma_a": null,
+  "asset_value": null,
+  "eta_a": null,
+  "dd": null,
+  "edf": null,
+  "pit_pd": null,
+  "ttc_pd": null,
+  "ccm": null,
+  "mu": null,
+  "lambda": null
+ },
+ "rating": {
+  "letter": null,
+  "basis": null,
+  "determination": "MODEL_NOT_APPLICABLE",
+  "interval_low": null,
+  "interval_high": null,
+  "interval_notches": null,
+  "outlook": null
+ },
+ "drift": {
+  "regime": null,
+  "t_stat": null,
+  "se": null,
+  "span_years": null
+ },
+ "applicability": {
+  "model_applicable": false,
+  "reason_code": "REPORTING_CURRENCY_MISMATCH",
+  "reason_text": "The statements report in a different currency than the listed price (an ADR filing in its home currency). Equity and the debt barrier would enter the inversion in different units, so EM and the measures are skipped entirely rather than published unit-corrupt. No FX conversion is attempted: a converted statement at a chosen rate would be a fabricated input."
+ },
+ "flags": [
+  {
+   "code": "REPORTING_CURRENCY_MISMATCH",
+   "text": "The statements report in a different currency than the listed price (an ADR filing in its home currency). Equity and the debt barrier would enter the inversion in different units, so EM and the measures are skipped entirely rather than published unit-corrupt. No FX conversion is attempted: a converted statement at a chosen rate would be a fabricated input."
+  }
+ ],
+ "provenance": {
+  "statement_period_end": "2026-03-31",
+  "statement_available_at": "2026-05-15T00:00:00",
+  "availability_method": "estimated_lag",
+  "st_debt_source": "Current Debt And Capital Lease Obligation",
+  "lt_debt_source": "Long Term Debt And Capital Lease Obligation",
+  "debt_source_contradictory": false,
+  "shares_method": "market_cap_over_price",
+  "shares_reference_date": "2026-07-23",
+  "cache_fetched_at": "2026-07-26T08:19:22Z"
+ },
+ "bootstrap": {
+  "sigma_p05": null,
+  "sigma_p95": null,
+  "defective_fraction": null
+ },
+ "em_path": []
+}

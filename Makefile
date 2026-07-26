@@ -29,6 +29,12 @@ serve:
 serve-local:
 	PYTHONPATH=packages/core:services/api $(PY) -m uvicorn creditrating_api.app:app --port 8000
 
+build-site-data:
+	$(PY) apps/terminal/scripts/build_site_data.py
+
+site:
+	cd apps/terminal && npm run build
+
 demo:
 	@echo "== offline demo from committed fixtures (no network) =="
 	$(PY) -m mdt rate COST
