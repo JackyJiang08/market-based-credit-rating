@@ -10,12 +10,21 @@
 150-name universe, the µ–CCM plane, and a sensitivity playground, all computed
 offline from committed data.
 
-<!-- GitHub does not inline committed video files in READMEs, so the poster
-     links to the WebM (21 s, 2×-DPI). Recorded by a committed script:
-     apps/terminal/scripts/record_demo.mjs -->
-[![Terminal demo — landing stat cards, command bar to the ORCL company view, then the µ–CCM plane with the bootstrap cloud (click for the 21-second video)](docs/figures/terminal_landing.png)](https://raw.githubusercontent.com/JackyJiang08/market-based-credit-rating/main/docs/figures/terminal_demo.webm)
+<!-- INLINE-VIDEO PLACEHOLDER — to make the demo autoplay inline on GitHub:
+     1. open any issue/PR comment box on github.com and drag in
+        docs/figures/terminal_demo.mp4 (H.264, 21 s, 1.4 MB)
+     2. copy the generated github.com/user-attachments/assets/… URL
+     3. replace the INLINE_VIDEO_URL line below with that bare URL on its own
+        line (no markdown around it) — GitHub renders an inline player.
+     The video is recorded by a committed script (apps/terminal/scripts/
+     record_demo.mjs) and transcoded with ffmpeg; the poster screenshot below
+     stays as the fallback for renderers without the player. -->
 
-▶ [21-second demo video (WebM)](https://raw.githubusercontent.com/JackyJiang08/market-based-credit-rating/main/docs/figures/terminal_demo.webm) — landing → ⌘K `ORCL` → interval-attached letter → µ–CCM plane.
+INLINE_VIDEO_URL
+
+[![Terminal demo — landing stat cards, command bar to the ORCL company view, then the µ–CCM plane with the bootstrap cloud (click for the 21-second video)](docs/figures/terminal_landing.png)](https://raw.githubusercontent.com/JackyJiang08/market-based-credit-rating/main/docs/figures/terminal_demo.mp4)
+
+▶ [21-second demo video (MP4)](https://raw.githubusercontent.com/JackyJiang08/market-based-credit-rating/main/docs/figures/terminal_demo.mp4) — landing → ⌘K `ORCL` → interval-attached letter → µ–CCM plane.
 
 A market-based credit-rating pipeline for public companies. It downloads equity
 and rate data, estimates a **KMV/Merton** structural model by **EM** (recovering
