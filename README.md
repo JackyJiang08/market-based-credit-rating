@@ -1,4 +1,4 @@
-# Market-based Credit Rating
+# Market-based Credit Ratings
 
 [![tests](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml)
 [![DEVLOG gate](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml)

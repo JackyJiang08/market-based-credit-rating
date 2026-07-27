@@ -35,6 +35,21 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-27 - README title (owner edit + pluralization)
+
+- `ae97c82` (owner, via the GitHub web UI, previously unlogged): README H1
+  changed from "Credit Rating Terminal -- market-based ratings with honest
+  uncertainty" to "Market-based Credit Rating". This entry retroactively
+  records that push.
+- This commit pluralizes it to "Market-based Credit Ratings" (H1 only). A
+  repo-wide sweep found no other use of the phrase as a project title; the
+  similar strings in GAP_ANALYSIS/DEVLOG are citations of the reference
+  material's own title and are untouched, as are the repo slug, URLs, badges,
+  and NOTICE/LICENSE.
+- Validation: pytest tests/test_headline_numbers.py green (the guard greps
+  README content, not the title); full suite green before push.
+- Follow-ups: None.
+
 ### 2026-07-27 - Repo metadata (post-release housekeeping, no code)
 
 - GitHub About set via gh repo edit: description ("KMV/Merton structural
