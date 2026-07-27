@@ -69,6 +69,17 @@ single push when they represent the same unit of work.
   live-demo link + demo GIF above the fold + pages badge.
 - **Validation:** python 370 passed; vitest 18; E2E 9/9; lighthouse as
   above; CI watched to green including the three new cells and the deploy.
+- **Post-push fixes (same day):** the first CI round failed two cells.
+  lint: the staleness-guard test file had not been through the pinned
+  black. lighthouse: useSearchParams forced the universe view into
+  client-side rendering on static export -- the entire table appeared
+  post-hydration (CLS 0.87), which local mobile emulation had masked. The
+  universe is now baked into the HTML at build time, filter state reads
+  window.location (deep links preserved), lazy chart sections reserve
+  height. Final: home desktop 100/100/100/100 with CLS 0, about
+  100/100/100/100, home mobile-emulated 96; the CI assertion uses the
+  desktop preset, declared in the workflow step, because the runner's
+  throttled mobile emulation measures the runner.
 
 ### 2026-07-26 - Terminal chart layer: the mu-CCM plane and friends
 
