@@ -1,6 +1,6 @@
 # Development Log
 
-Last updated: 2026-07-25
+Last updated: 2026-07-27
 
 This file under `docs/` is the shared, human-readable status record for the repository. It
 must be updated as part of every push so contributors can understand what
@@ -34,6 +34,46 @@ single push when they represent the same unit of work.
   true publication-time `available_at` field (documented limitation).
 
 ## Recent changes
+
+### 2026-07-27 - Design polish: landing overview, humanized enums, static-first charts
+
+- **Landing is an overview, not a table dump:** hero sentence + primary search,
+  four stat cards linking to their evidence (rho = 0.79, x4,073, tau = 0.956,
+  +5 notches), a "why is everything AAA?" callout, and top-10 safest/riskiest
+  strips. The full table moved to `/universe`; the validation study got its own
+  `/validation` page with the four SVG figures baked into the export.
+- **No machine constant reaches the UI:** `src/lib/labels.ts` maps every
+  determination / gate / flag / basis enum to a human label + tone
+  (green resolved, grey pinned, amber weak, red gated) + definition; tooltips
+  carry the definition AND the machine constant for grep-ability. Flags render
+  as spaced chips capped at 2 visible (+n overflow); the letter cell shows
+  letter + interval only, with the conversion basis on an icon-badge.
+- **Table defaults:** rated names first (rank asc); the 11 names without
+  estimates group at the bottom under a subdued divider linking to the failure
+  taxonomy; sticky header, sort indicators, right-aligned tabular numerics;
+  collapses to cards on mobile.
+- **Static-first charts:** `/plane`, `/sensitivity`, and company pages now bake
+  build-time data into the exported HTML (no `useSearchParams` CSR bailout
+  anywhere); the plane page renders its base SVG without JavaScript (E2E-tested
+  with JS disabled) and gained a "how to read this" caption plus preset focus
+  buttons (ORCL cloud / pinned names / grid box). A persistent nav is mounted
+  in the layout on every page.
+- **Data fixes:** delisted names (PARA, NKLA, FSR, SPWR) get their last-known
+  company name and a "(delisted)" label from a documented map in the exporter;
+  XOM's vendor-verbatim legal name is left as sourced.
+- **Media:** the README GIF is replaced by a script-recorded 21 s 2x-DPI WebM
+  (`apps/terminal/scripts/record_demo.mjs`, one narrative: landing -> command
+  bar ORCL -> interval-attached letter -> plane cloud) behind a poster-image
+  link, since GitHub does not inline committed video files. Committed
+  screenshots: landing, universe, plane (`scripts/shoot_figures.mjs`).
+- **Validation run:** vitest 18/18; Playwright E2E 19/19 across desktop + a new
+  390x844 mobile project (cards, visible search button, no horizontal body
+  scroll, axe clean on landing + universe); `tsc --noEmit`, `next lint`,
+  `next build` clean; python suite 370/370 on the pinned py3.11 toolchain;
+  bundle-safety full mode OK (SVG figure copies allowed alongside JSON); local
+  Lighthouse desktop preset 100/100/100/100 on `/`, `/universe/`, `/plane/`.
+  The CI lighthouse cell now audits `/universe/` and `/plane/` too.
+- Follow-ups: none.
 
 ### 2026-07-26 - House style, sensitivity playground, E2E, public deployment
 
