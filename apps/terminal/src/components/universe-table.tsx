@@ -68,7 +68,10 @@ const columns = [
   }),
 ];
 
+const INITIAL_ROWS = 40;
+
 export function UniverseTable({ rows }: { rows?: UniverseRow[] }) {
+  const [showAll, setShowAll] = useState(false);
   const { data, isLoading, error } = useQuery({
     queryKey: ["universe"],
     queryFn: loadUniverse,
@@ -77,8 +80,9 @@ export function UniverseTable({ rows }: { rows?: UniverseRow[] }) {
   const [sorting, setSorting] = useState<SortingState>([{ id: "risk_rank", desc: false }]);
   const router = useRouter();
 
+  const allRows = rows ?? data?.rows ?? [];
   const table = useReactTable({
-    data: rows ?? data?.rows ?? [],
+    data: allRows,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -127,7 +131,10 @@ export function UniverseTable({ rows }: { rows?: UniverseRow[] }) {
         ))}
       </thead>
       <tbody>
-        {table.getRowModel().rows.map((row) => (
+        {(showAll
+          ? table.getRowModel().rows
+          : table.getRowModel().rows.slice(0, INITIAL_ROWS)
+        ).map((row) => (
           <tr
             key={row.id}
             tabIndex={0}
@@ -145,6 +152,20 @@ export function UniverseTable({ rows }: { rows?: UniverseRow[] }) {
           </tr>
         ))}
       </tbody>
+      {!showAll && table.getRowModel().rows.length > INITIAL_ROWS ? (
+        <tfoot>
+          <tr>
+            <td colSpan={9} className="px-2 py-2">
+              <button
+                className="w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 text-xs text-zinc-300 hover:border-zinc-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                onClick={() => setShowAll(true)}
+              >
+                show all {table.getRowModel().rows.length} names (first {INITIAL_ROWS} shown)
+              </button>
+            </td>
+          </tr>
+        </tfoot>
+      ) : null}
     </table>
   );
 }

@@ -67,6 +67,12 @@ single push when they represent the same unit of work.
   Lighthouse gate >= 90 asserted in CI; measured home 92/100/100/100 and
   about 98/100/100/100 (LCP fixed by preloading universe.json). README:
   live-demo link + demo GIF above the fold + pages badge.
+- **Third CI round:** median-of-3 still failed (51) -- the runner renders
+  without a GPU, and a 150-row baked table under software raster is a real
+  LCP cost, not noise. Honest fix: the universe table initially renders 40
+  rows with an accessible "show all 150" control (smaller first paint,
+  better UX), charts stay lazy; lighthouse JSONs upload as artifacts on any
+  future failure. Local desktop with GPU disabled: 100/100/100/100.
 - **Validation:** python 370 passed; vitest 18; E2E 9/9; lighthouse as
   above; CI watched to green including the three new cells and the deploy.
 - **Post-push fixes (same day):** the first CI round failed two cells.
