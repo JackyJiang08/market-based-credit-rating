@@ -1,5 +1,7 @@
 # Documentation
 
+- [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md): the two-page register write-up —
+  problem, method, the two central results, validation, limitations.
 - [`DEVLOG.md`](DEVLOG.md): shared status log; update it with every push.
 - [`TIMING_PROTOCOL.md`](TIMING_PROTOCOL.md): mandatory point-in-time and
   no-look-ahead rules for data, features, models, and evaluation.

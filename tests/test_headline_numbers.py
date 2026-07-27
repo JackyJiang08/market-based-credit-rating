@@ -30,6 +30,7 @@ HEADLINE = json.loads((REPO / "docs" / "analysis" / "data" / "headline.json").re
 SURFACES = [
     "README.md",
     "docs/UNCERTAINTY.md",
+    "docs/PROJECT_SUMMARY.md",
     "docs/analysis/VALIDATION.md",
     "apps/terminal/src/app/page.tsx",
     "apps/terminal/src/app/layout.tsx",
@@ -41,6 +42,7 @@ CITATIONS = {
     "amplification_display": [
         "README.md",
         "docs/UNCERTAINTY.md",
+        "docs/PROJECT_SUMMARY.md",
         "docs/analysis/VALIDATION.md",
         "apps/terminal/src/app/page.tsx",
         "apps/terminal/src/app/layout.tsx",
@@ -48,14 +50,17 @@ CITATIONS = {
     ],
     "spearman_display": [
         "README.md",
+        "docs/PROJECT_SUMMARY.md",
         "apps/terminal/src/app/page.tsx",
     ],
     "tau_display": [
         "README.md",
+        "docs/PROJECT_SUMMARY.md",
         "apps/terminal/src/app/page.tsx",
     ],
     "notch_display": [
         "README.md",
+        "docs/PROJECT_SUMMARY.md",
         "apps/terminal/src/app/page.tsx",
     ],
 }
