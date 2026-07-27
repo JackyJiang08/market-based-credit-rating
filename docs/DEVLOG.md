@@ -35,6 +35,20 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-27 - Repo metadata (post-release housekeeping, no code)
+
+- GitHub About set via gh repo edit: description ("KMV/Merton structural
+  credit ratings with quantified uncertainty -- 150-name universe,
+  bootstrap-validated, benchmarked against agency ratings. Live terminal +
+  Python pipeline."), homepage (the live Pages URL), and twelve topics added
+  (credit-risk, quantitative-finance, credit-rating, merton-model,
+  structural-credit-model, uncertainty-quantification, python, pandas,
+  fastapi, nextjs, typescript, github-pages); the three pre-existing topics
+  (kmv, probability-of-default, yfinance) were left in place.
+- No code, tags, or workflow changes.
+- Validation: gh repo view confirms all three fields as set.
+- Follow-ups: None.
+
 ### 2026-07-27 - v1.0.0: final acceptance sweep, deliverable-final, release
 
 - **README review fixes:** the inline-video placeholder moved inside the HTML
