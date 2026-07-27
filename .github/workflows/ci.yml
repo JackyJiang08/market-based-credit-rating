@@ -151,7 +151,7 @@ jobs:
         run: |
           npx serve out -l 4180 -n &
           until curl -sf http://localhost:4180/ > /dev/null; do sleep 0.5; done
-          for path in "/" "/about/"; do
+          for path in "/" "/universe/" "/plane/" "/about/"; do
             for i in 1 2 3; do
               npx -y lighthouse "http://localhost:4180$path" \
                 --preset=desktop \
