@@ -35,6 +35,41 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-27 - README for the 90-second reader, headline-number pinning, PROJECT_SUMMARY
+
+- **Inline demo video:** committed docs/figures/terminal_demo.mp4 (H.264,
+  21 s, 1.4 MB, transcoded from the recorded WebM); the README embed is an
+  INLINE_VIDEO_URL placeholder with owner instructions (GitHub only renders
+  inline players for user-attachment assets, which need the account owner to
+  upload), with the poster-screenshot link kept as the fallback.
+- **Headline-number audit:** x4,073 confirmed as the run-of-record
+  amplification (the 2026-07-26 re-run superseding x4,077; the one straggler
+  was a chart comment). docs/analysis/data/headline.json is now the single
+  source of truth for the four headline numbers; tests/test_headline_numbers.py
+  recomputes them from the committed CSVs, greps every user-facing surface for
+  the display strings, and rejects the superseded value anywhere.
+- **Branding:** <title>/OG become "Credit Rating Terminal - market-based
+  ratings with honest uncertainty"; per-page titles follow; company pages get
+  per-ticker titles. The on-page masthead keeps the lowercase aesthetic.
+- **Platform-aware shortcut:** Command-K on Apple platforms, Ctrl K elsewhere
+  (SSR renders the Apple form; an effect corrects it post-hydration).
+- **README rebuilt top-to-bottom** for a hiring manager with 90 seconds:
+  positioning sentence + live link + video above the fold; results-at-a-glance
+  as a four-row table linking each number to its section, chart, and
+  interactive site version; quickstart leads with the live site; findings keep
+  their content with site links; limitations split into resolved (each row
+  linking fix commit + regression guard) and open; architecture gains the ADR
+  index, static-site pipeline, and licensed-materials boundary.
+- **docs/PROJECT_SUMMARY.md:** the two-page register write-up (abstract,
+  problem, data, method, two central results, validation, limitations, next),
+  indexed in docs/README.md and covered by the headline test.
+- **Validation run:** pytest 377/377 (7 new headline tests); pinned
+  ruff/black/mypy clean; tsc / next lint / next build (160 pages) / vitest
+  18/18 / Playwright 19/19 after the site changes; README relative links
+  verified by script; cited fix commits verified to exist.
+- Follow-ups: the owner uploads terminal_demo.mp4 as a GitHub user-attachment
+  and replaces INLINE_VIDEO_URL in the README.
+
 ### 2026-07-27 - Design polish: landing overview, humanized enums, static-first charts
 
 - **Landing is an overview, not a table dump:** hero sentence + primary search,
