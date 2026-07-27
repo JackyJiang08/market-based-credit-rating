@@ -35,6 +35,28 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - Terminal chart layer: the mu-CCM plane and friends
+
+- **Scope:** apps/terminal charts + export additions; two screenshots under
+  docs/figures. No pipeline behavior changes.
+- **mu-CCM plane** (the signature visual): ln-ln plane, iso-rating lines of
+  slope Q at the published Table-8 RiskScores, published grid-domain box,
+  scale-top labelling -- pinned names visibly cluster on the AAA iso line.
+  Shape + colour encoding (never colour alone), hover/focus company card,
+  ?focus= overlays the 250-point bootstrap cloud from the static JSON.
+- **Amplification ladder** (per company vs universe median, log dot ladder)
+  and **rating bridge** (PIT -> TTC -> letter with explicit floor/scale-top
+  binding) as company panels behind ?panel= deep links.
+- **Universe view:** URL-state filters, model-vs-agency two-histogram, rank
+  scatter with SCALE_RESOLVED emphasis, notch-error distribution.
+- Export gains bootstrap_cloud + per-company interval widths +
+  at_floor/at_scale_top + mu/ccm universe columns + universe-median widths;
+  bundle-safety unchanged and green (zero licensed matches).
+- Charts are hand-rolled SVG on the docs/figures dark palette --
+  visx/recharts were offered "as needed" and were not needed at these forms.
+- **Validation:** tsc/eslint/vitest/next build green; python 368 passed;
+  bundle safety OK; CI (incl. the frontend cell) watched to green.
+
 ### 2026-07-26 - Phase 12: the terminal (Next.js 15) + enforced bundle safety
 
 - **Scope:** apps/terminal (app, tests, static-data pipeline, bundle-safety
