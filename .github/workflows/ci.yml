@@ -76,7 +76,7 @@ jobs:
         run: test -d data_cleaning/data/COST
       - name: Anchors and invariance
         # Tables 12-14 anchors (analytical route, no workbook needed),
-        # alpha_FH(1.5)=0.91906, CCM*=1.35373, and the phase-5
+        # alpha_FH(1.5)=0.91906, CCM*=1.35373, and the
         # DEFAULT_YEARS window-invariance result.
         run: |
           python -m pytest -q -rs \

@@ -1,5 +1,9 @@
 # Three-way reconciliation: our submission, a peer implementation, and the screenshot figures
 
+**Orientation:** this directory reconciles our implementation against a peer
+implementation of the same methodology, claim by claim; `history/` holds the
+per-fix Asset-sheet snapshots that show which change moved which number.
+
 Read-only analysis. No file under the four workflow layers was changed by this work.
 
 Generated 2026-07-25 from `crossover.py`. Sources:

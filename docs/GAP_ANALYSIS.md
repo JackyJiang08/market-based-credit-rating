@@ -1,4 +1,8 @@
-# Methodology Coverage — TiC / Market-Based Credit Rating
+# Methodology coverage
+
+**Orientation:** this is the audit map from the reference methodology to the
+code — which equations are implemented, how faithfully, and where the gaps
+are; every open finding is a GitHub issue referenced by number.
 
 This document maps the credit-rating methodology (*Universal Time-Consistent (TiC) Credit
 Rating* and the *Market-Based Credit Risk Rating Model for Public Companies* reference

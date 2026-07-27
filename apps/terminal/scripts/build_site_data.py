@@ -4,7 +4,7 @@ Writes apps/terminal/public/data/:
 
     manifest.json            what was exported, by whom, from what
     universe.json            the 150-name run (history/15 + taxonomy merge)
-    validation.json          the phase-9 study payloads
+    validation.json          the agency-validation study payloads
     companies/<TICKER>.json  full detail for every fixture-cached ticker:
                              measures, intervals, flags, provenance, EM path,
                              bootstrap summary

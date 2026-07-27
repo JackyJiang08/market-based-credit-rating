@@ -1,4 +1,4 @@
-# services/api — the creditrating API (phase 11)
+# services/api — the creditrating API
 
 FastAPI over `creditrating`, **offline-first**: every endpoint serves from the
 committed/populated cache under `data/cache/` with no network; a live fetch
@@ -20,7 +20,7 @@ provenance — a client cannot render a number without its caveat.
 | `GET /api/v1/batch/{job_id}/events` | **SSE**: per-company progress incl. EM convergence |
 | `GET /api/v1/companies/{t}/diagnostics` | EM asset path, bootstrap CIs, flags |
 | `GET /api/v1/universe` | the 150-name run with sector/determination/rated filters |
-| `GET /api/v1/validation` | the phase-9 study (discrimination, baselines, sectors) |
+| `GET /api/v1/validation` | the agency-validation study (discrimination, baselines, sectors) |
 | `GET /api/v1/export/workbook?tickers=` | the four-sheet workbook, generated on demand |
 
 Errors are a machine-readable envelope `{error: {code, message,

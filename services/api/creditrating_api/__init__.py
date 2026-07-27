@@ -1,1 +1,1 @@
-"""creditrating API service (phase 11)."""
+"""creditrating API service."""

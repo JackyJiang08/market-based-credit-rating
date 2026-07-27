@@ -10,7 +10,7 @@ details, editing files, running project commands, or proposing changes:
 3. Read the current documentation set referenced there, including at minimum:
    - [`docs/DEVLOG.md`](../docs/DEVLOG.md)
    - [`docs/TIMING_PROTOCOL.md`](../docs/TIMING_PROTOCOL.md)
-   - [`docs/DEPENDENCY_MAPS.md`](../docs/DEPENDENCY_MAPS.md)
+   - [`docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md)
    - [`docs/GAP_ANALYSIS.md`](../docs/GAP_ANALYSIS.md)
 
 This is a hard prerequisite, not an optional orientation step. If any required

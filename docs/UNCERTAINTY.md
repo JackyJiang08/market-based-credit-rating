@@ -1,6 +1,6 @@
-# Uncertainty propagation: method, findings, and the bugs it took to get here
+# Uncertainty propagation
 
-How `signal_construction/bootstrap.py` works, what it established, and — because the
+How `creditrating.diagnostics.uncertainty` works, what it established, and — because the
 process matters as much as the result — the episode in which testing an algebraic
 prediction found two bugs in the bootstrap itself.
 
@@ -23,8 +23,8 @@ A **moving-block bootstrap** over the EM-recovered **asset** log-returns.
 ### Stated limits
 
 1. **These are parameter-estimation intervals, and a lower bound on total uncertainty.**
-   Convention and specification uncertainty are not in them — see "The three sources of
-   uncertainty, side by side" below. `D` is a *choice* as much as an observation, and
+   Convention and specification uncertainty are not in them — see "Uncertainty
+   sources" below. `D` is a *choice* as much as an observation, and
    `docs/reconciliation/convention_sweep.py` measures what that choice is worth.
 2. **The two resamples are drawn independently**, while the real estimators share the
    trailing year of data and are slightly dependent. Each marginal sampling distribution
@@ -34,7 +34,7 @@ A **moving-block bootstrap** over the EM-recovered **asset** log-returns.
 
 ## Findings
 
-### RiskScore is unamplified; the letter is not
+### Amplification
 
 | Quantity | Median relative width | Amplification |
 |---|---:|---|
@@ -54,7 +54,7 @@ drift in the denominator, and Eq. (13) exponentiates it.
 **RiskScore at 48% is unamplified, not tight.** ±24% is material. The claim is that no
 instability enters before the conversion, not that the number is precise.
 
-### Discrimination survives; calibration does not
+### Rank stability
 
 Kendall's τ between each replicate's ordering and the point ordering, on RiskScore:
 **median 0.956**, 5th percentile 0.867, minimum 0.778; 99.9% of replicates ≥ 0.8.
@@ -80,7 +80,7 @@ carries the drift term.
 the wrong way.** This is how KMV is used in practice: DD is mapped to an *empirical*
 default frequency, not to a theoretical PD.
 
-## The three sources of uncertainty, side by side
+## Uncertainty sources
 
 A published letter carries three distinct kinds of uncertainty, and they are of
 comparable size. Reporting only the first would overstate what the letter means.
@@ -105,7 +105,7 @@ Three readings, one per row:
   the weight spans AAA to BB around an actual A / A2. The honest output is a gate
   (`MODEL_NOT_APPLICABLE`), not a wider interval.
 
-### The combined conclusion
+### Combined conclusion
 
 **The letter is dominated by drift noise AND an arbitrary convention — either alone is
 enough to move it several notches, and they act at once. RiskScore and the rank ordering
@@ -119,7 +119,7 @@ pinned letter is insensitive to its inputs. **A letter that cannot move carries 
 information; that it also cannot be moved by an arbitrary convention is the same fact
 seen from the other side.**
 
-## The episode: testing a prediction found two bugs in the test
+## Bootstrap bug postmortem
 
 Worth recording as it happened, because the workflow is the transferable part.
 

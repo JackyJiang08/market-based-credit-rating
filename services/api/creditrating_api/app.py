@@ -1,4 +1,4 @@
-"""FastAPI service over the creditrating package (phase 11).
+"""FastAPI service over the creditrating package.
 
 Offline-first: every read endpoint serves from the committed/populated cache
 under ``data/cache/`` with no network; a live fetch requires the explicit

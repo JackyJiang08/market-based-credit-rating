@@ -4,7 +4,7 @@ Builds the typed domain models (creditrating.domain) from each finished
 CompanyData and reports every violation. Deliberately non-fatal in the
 pipeline -- a violation is a loud diagnostic, not an abort -- because the
 run's isolation contract says one bad company never takes down a batch. The
-same models ARE fatal at any service boundary (phase 11).
+same models ARE fatal at the API service boundary (services/api).
 """
 
 from __future__ import annotations

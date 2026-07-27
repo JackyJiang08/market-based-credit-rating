@@ -11,7 +11,7 @@ These are the contracts the engineering rules state in prose, as code:
 The pipeline itself still degrades gracefully (statuses and flags, per
 engineering rule 3); these models are the *assertion layer* used by
 diagnostics.checks to verify a finished run and by any future service
-boundary (phase 11) to refuse malformed payloads at the edge.
+boundary (services/api) to refuse malformed payloads at the edge.
 """
 
 from __future__ import annotations

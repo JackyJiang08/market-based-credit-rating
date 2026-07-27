@@ -3,7 +3,7 @@
 - [`DEVLOG.md`](DEVLOG.md): shared status log; update it with every push.
 - [`TIMING_PROTOCOL.md`](TIMING_PROTOCOL.md): mandatory point-in-time and
   no-look-ahead rules for data, features, models, and evaluation.
-- [`DEPENDENCY_MAPS.md`](DEPENDENCY_MAPS.md): current code, runtime, data, and
+- [`ARCHITECTURE.md`](ARCHITECTURE.md): current code, runtime, data, and
   external-package dependency maps.
 - [`UNCERTAINTY.md`](UNCERTAINTY.md): bootstrap method, what survives uncertainty
   and what does not, and the bug episode that produced the current numbers.

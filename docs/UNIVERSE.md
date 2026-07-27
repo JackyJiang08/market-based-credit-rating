@@ -11,7 +11,7 @@ Run of record: 2026-07-26, prices through the 2026-07-24 close, captured as
 `docs/reconciliation/history/15_universe_150.csv`. Analysis:
 `docs/reconciliation/universe_taxonomy.py` → `docs/reconciliation/universe/*.csv`.
 
-## Failure taxonomy (n = 150)
+## Failure taxonomy
 
 Every company that does not produce a rating, classified by exact reason:
 
@@ -24,7 +24,7 @@ Every company that does not produce a rating, classified by exact reason:
 | **OFF_SCALE** | **0** | the analytical route (Eq. 26/27) now covers off-grid points |
 | **BUG** | **0** | after the two fixes below — the first pass had 1 loud BUG and 5 silent ones |
 
-## Bugs the run surfaced (fixed, one commit each)
+## Bugs surfaced
 
 1. **Reporting-currency mismatch** (`1661304`). TM files in JPY and prices in
    USD; EM raised `A <= D` because the debt barrier arrived in yen against
@@ -47,7 +47,7 @@ Not bugs, verified as data conditions: SATS (one price row from the vendor,
 reproduced live), PARA/NKLA/FSR (delisted — the failure paths those names
 were selected to exercise).
 
-## σ_A by sector — the sanity check with a real sample
+## Volatility by sector
 
 Median annualized asset volatility, names with estimates (n = 139):
 
@@ -75,7 +75,7 @@ Drift regimes across the 139 names with estimates: **VALID 108, DEFECTIVE
 first-passage PD chain is undefined for them. At universe scale this is a
 structural property of the drift estimator, not a small-sample accident.
 
-## Determination split (n = 150)
+## Determination split
 
 | Determination | Count | Share |
 |---|---:|---:|
@@ -91,7 +91,7 @@ further 30% gets a letter pinned by the grid floor or the scale top. The
 10-name universe's "7/10 rated, 3/10 scale-resolved" generalizes — the
 proportions hold at 15× the sample.
 
-## Model letters vs the approximate agency distribution
+## Letters vs agency ratings
 
 Agency column: APPROXIMATE senior-unsecured ratings recorded in
 `config/universe.yaml` (public sources, mid-2026, indicative only, never a

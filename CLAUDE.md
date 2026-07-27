@@ -134,7 +134,7 @@ optional orientation step."
 1. Read `README.md` completely.
 2. Read `docs/README.md` completely.
 3. Read the documentation set referenced there, at minimum: `docs/DEVLOG.md`,
-   `docs/TIMING_PROTOCOL.md`, `docs/DEPENDENCY_MAPS.md`, `docs/GAP_ANALYSIS.md`.
+   `docs/TIMING_PROTOCOL.md`, `docs/ARCHITECTURE.md`, `docs/GAP_ANALYSIS.md`.
 
 If any required document changes during the task, re-read the changed sections before
 continuing.
@@ -158,12 +158,12 @@ changes**, using the template at the bottom of `docs/DEVLOG.md`.
 - No backward imports from an earlier layer to a later layer.
 - Layer 1 and Layer 2 are the **only active implementation scope** until the project owner
   explicitly activates signal-construction or dashboard work. **Conflict — do not resolve
-  silently:** Layers 3 and 4 are fully implemented, and `docs/DEPENDENCY_MAPS.md:12-15`
+  silently:** Layers 3 and 4 are fully implemented, and `docs/ARCHITECTURE.md:12-15`
   marks all four layers `ACTIVE`. Read this as already activated in practice, but confirm
   with the owner before starting new Layer 3/4 work, and get `.agents/README.md` updated.
 - Any date alignment change must include a no-look-ahead test.
 - Follow `docs/TIMING_PROTOCOL.md` for every time-dependent task.
-- Known deviation: `docs/DEPENDENCY_MAPS.md:27-28` records two temporary Layer 2 → Layer 3/4
+- Known deviation: `docs/ARCHITECTURE.md:27-28` records two temporary Layer 2 → Layer 3/4
   compatibility edges that violate the no-backward-import rule. Don't add more.
 
 ---

@@ -18,36 +18,33 @@ code docstrings cite the methodology by equation number.
 
 ## Results at a glance
 
-- **×4,073** — how much the PD-based conversion layer amplifies parameter uncertainty vs the drift-free RiskScore, measured on ten real companies → [parameter uncertainty](#parameter-uncertainty-the-bootstrap)
-- **τ = 0.956** — median Kendall's τ of the risk ordering across 2,000 bootstrap replicates; the extremes are essentially never misordered → [rank stability](#parameter-uncertainty-the-bootstrap)
-- **7 notches** — how far one company's letter (T) moves on the unargued long-term-debt weight alone → [convention uncertainty](#convention-uncertainty-the-debt-weight-sweep)
-- **7/10 rated, 3/10 scale-resolved** — coverage stated honestly: most letters are pinned by the scale, not resolved by the model → [what the scale could resolve](#what-the-scale-could-resolve)
+- **×4,073** — how much the PD-based conversion layer amplifies parameter uncertainty vs the drift-free RiskScore, measured on ten real companies → [parameter uncertainty](#parameter-uncertainty)
+- **τ = 0.956** — median Kendall's τ of the risk ordering across 2,000 bootstrap replicates; the extremes are essentially never misordered → [rank stability](#parameter-uncertainty)
+- **7 notches** — how far one company's letter (T) moves on the unargued long-term-debt weight alone → [convention uncertainty](#convention-uncertainty)
+- **7/10 rated, 3/10 scale-resolved** — coverage stated honestly: most letters are pinned by the scale, not resolved by the model → [what the scale could resolve](#scale-resolution)
 - **150-name universe, 0 unexplained failures** — every non-rating classified (gates, defective drift, data), two real bugs found and fixed by scale alone → [docs/UNIVERSE.md](docs/UNIVERSE.md)
 - **ρ = 0.79 against actual agency ratings** (0.73 restricted to scale-resolved names) — the ordering validates; the letter runs +5 notches optimistic and DD alone ties RiskScore → [validation study](docs/analysis/VALIDATION.md)
 
 ![Amplification ladder: median relative bootstrap interval width per quantity, log scale](docs/figures/amplification_ladder.svg)
 
-## Pipeline at a glance
+## Architecture
 
-```text
-packages/core/creditrating/
-  data/         providers (Yahoo/FRED), cleaning, alignment, sectors,
-                cache, provenance + manifest, the batch pipeline
-  model/        em.py (E=g(A) inversion), tic.py (Eq. 11-14 measures),
-                conversion.py (PIT->TTC->S&P), drift regime + config
-  tables/       conversion-grid loader + structural validation
-                (the grids themselves are licensed, git-ignored local/)
-  io/           records (one schema), workbook writer, excel, csv export
-  diagnostics/  bootstrap uncertainty, domain-invariant checks
-  cli.py        typer CLI (`mdt` / `creditrating`)
-services/api/   FastAPI service (offline-first; make serve)   apps/terminal/  phase 12 (placeholder)
+```mermaid
+flowchart LR
+    src["Yahoo · FRED"] --> data["creditrating.data\ncache · clean · align · gate"]
+    data --> model["creditrating.model\nEM → TiC measures → conversion"]
+    grids[("local/ grids — licensed,\nnever committed")] -.-> model
+    model --> io["creditrating.io\nworkbook · exports · manifest"]
+    io --> api["services/api\noffline-first FastAPI"]
+    io --> site["apps/terminal\nstatic terminal (Pages)"]
 ```
 
-One package, four responsibilities, pandas frames flowing forward. See
-[`docs/DEPENDENCY_MAPS.md`](docs/DEPENDENCY_MAPS.md) and
-[`docs/GAP_ANALYSIS.md`](docs/GAP_ANALYSIS.md).
+One package owns the computation; the API and the web terminal are thin
+consumers of its outputs. Full picture (package map, runtime data flow, the
+static-site pipeline and the licensed-materials boundary, each with a
+staleness guard in CI): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Method (formula → code → reference)
+## Method
 
 | Step | Where | Reference |
 | --- | --- | --- |
@@ -152,7 +149,7 @@ reference tables, and conversion checks. Grid/lookup tests that need the
 proprietary workbook skip automatically when `local/` is absent, so a fresh
 clone is green. CI runs the same suite with coverage on every push.
 
-## Findings in depth: what survives uncertainty, and what does not
+## Findings
 
 **The drift-free rating and the rank ordering survive uncertainty. The PD-based letter
 does not.** A published letter carries **three distinct sources of uncertainty** —
@@ -161,10 +158,10 @@ does not.** A published letter carries **three distinct sources of uncertainty**
 right at all, exposed by PNC) — and they are of comparable size. Each is presented below;
 the combined conclusion follows them.
 
-### Parameter uncertainty: the bootstrap
+### Parameter uncertainty
 
 A moving-block bootstrap over the EM-recovered asset returns (2,000
-replicates, `signal_construction/bootstrap.py`) separates the drift-free quantities from
+replicates, `creditrating.diagnostics.uncertainty`) separates the drift-free quantities from
 the PD chain cleanly:
 
 | Quantity | Median relative interval width | Amplification |
@@ -196,7 +193,7 @@ misordered — COST ranks 1st in 100% of replicates, ORCL 10th in 99.7%.
    5–9 and swap freely (INTU holds its exact point rank in only 35% of replicates). The
    stability is at the extremes, where the companies are actually far apart.
 
-### Why the framework itself predicts this result
+### Theoretical basis
 
 This is not a defect we discovered; it is the result the framework predicts. Prop. 4.4.2
 establishes that `TiC = σ_A²/ln²(A₀/D)` is invariant under the Girsanov change of measure
@@ -209,7 +206,7 @@ the qualitative version of the same argument.
 Our contribution is the measurement: a ×4,073 amplification between two quantities computed
 from the same two parameters, on ten real companies.
 
-### Convention uncertainty: the debt-weight sweep
+### Convention uncertainty
 
 The bootstrap holds `A₀` and `D` fixed because they are observations. **`D` is not an
 observation.** It is `1.0·ST + 0.5·LT`, and the 0.5 is a convention nobody has justified
@@ -251,7 +248,7 @@ Three further readings:
 The honest total uncertainty on a letter is therefore **wider than the bootstrap interval
 alone**, and the bootstrap is correctly described as a lower bound.
 
-### Specification uncertainty: PNC, where no convention lands on the truth
+### Specification uncertainty
 
 The sweep varies the weight *within* the barrier definition `ST + w·LT`. PNC shows the
 definition itself can be wrong:
@@ -268,7 +265,7 @@ the barrier swings ~10 notches past the truth to BB. This is not an interval to 
 value of `w` is right — which is why the answer is a gate (`MODEL_NOT_APPLICABLE`,
 [ADR 0003](docs/adr/0003-financial-firms.md)), not a better number.
 
-### The combined conclusion
+### Combined conclusion
 
 **The letter is dominated by drift noise AND an arbitrary convention — either alone moves
 it several notches, and they act at once. RiskScore and the rank ordering are robust to
@@ -281,7 +278,7 @@ weight (span 1) — not because they are precisely measured, but because a pinne
 insensitive to its inputs. **A letter that cannot move carries no information**; its
 immunity to an arbitrary convention is the same fact seen from the other side.
 
-### Validated against actual agency ratings
+### Agency validation
 
 The full study — sourced ratings, stratified discrimination with bootstrap CIs,
 calibration, baselines, sector stratification — is in
@@ -295,7 +292,7 @@ advantages are stability properties, not ranking properties.
 
 ![Model letters vs agency letters by broad grade](docs/analysis/letters_model_vs_agency.svg)
 
-### How a rating must be presented
+### Presentation rule
 
 **A letter rating is a derived, wide-interval conversion. It is never the headline.**
 Wherever one appears — this README, the workbook, the API, the UI — it carries its
@@ -308,7 +305,7 @@ counterparty requires one, and never without its interval.
 
 ![Per-company rating intervals: point letter with its 5–95% bootstrap interval bar](docs/figures/rating_intervals.svg)
 
-## What the scale could resolve
+## Scale resolution
 
 Separately from precision, `Rating Determination` records whether the *scale* could tell a
 value from its neighbours. As of the 2026-07-26 run, of ten companies:
@@ -344,7 +341,7 @@ says anything about precision. Full explanation:
 [`docs/RATING_DETERMINATION.md`](docs/RATING_DETERMINATION.md); the uncertainty method and
 its known limits: [`docs/UNCERTAINTY.md`](docs/UNCERTAINTY.md).
 
-## Known limitations
+## Limitations
 
 - **Market-based PIT PD is liquidity-sensitive.** For large, liquid,
   investment-grade names PIT PD is legitimately ~0; compare firms by **DD** and

@@ -1,4 +1,4 @@
-# apps/terminal — the creditrating terminal (phase 12)
+# apps/terminal — the creditrating terminal
 
 Next.js 15 (App Router) + TypeScript strict + Tailwind + shadcn/ui +
 TanStack Query/Table + Zod. A **fixture-backed static site**: every number is
