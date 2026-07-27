@@ -9,7 +9,7 @@ export default function PlanePage() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold text-zinc-50">µ–CCM plane</h1>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-zinc-400">
             iso-rating lines with slope Q = 0.6259 (published Table-8 scale) ·{" "}
             <Link href="/" className="underline underline-offset-2 hover:text-zinc-300">
               ← universe

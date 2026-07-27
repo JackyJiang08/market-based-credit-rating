@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "577ab1a",
-  "generated_utc": "2026-07-27T00:01:28Z",
+  "git_sha": "74a28de",
+  "generated_utc": "2026-07-27T01:09:22Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -12,6 +12,13 @@
  "industry": "Auto Parts",
  "firm_type": "NONFINANCIAL",
  "as_of": "2026-07-24",
+ "inputs": {
+  "st_debt": 336340000.0,
+  "lt_debt": 12294831000.0,
+  "default_point": 6483755500.0,
+  "equity": 48280768512.0,
+  "risk_free": 0.0415
+ },
  "measures": {
   "risk_score": 1.480134297445554,
   "sigma_a": 0.2590058434786268,

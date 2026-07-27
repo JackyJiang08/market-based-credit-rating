@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/cleaning_config.py
+# hypothesis_version: 6.141.1
+
+[0.0, 0.3, 0.5, 1.0, 'Current Debt', 'Current Liabilities', 'Customer Deposits', 'Deposits', 'Long Term Debt', 'Long-term Debt', 'Short Long Term Debt', 'Short Term Debt', 'Total Debt', 'Total Deposits', 'Total Liab', 'Total Liabilities', 'data', 'data_cleaning', 'estimated_lag', 'standard']

@@ -79,7 +79,7 @@ export function UniverseView() {
           <option value="yes">rated only</option>
           <option value="no">no letter only</option>
         </select>
-        <span className="font-mono text-xs text-zinc-500">{rows.length} names</span>
+        <span className="font-mono text-xs text-zinc-400">{rows.length} names</span>
       </div>
 
       <UniverseTable rows={rows} />

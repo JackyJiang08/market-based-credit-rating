@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/io/workbook.py
+# hypothesis_version: 6.141.1
+
+[110, '%Y%m%dT%H%M%SZ', '1F4E78', 'A', 'Asset', 'B', 'B2', 'FFFFFF', 'README', 'Ratings', 'center', 'openpyxl', 'outputs', 'solid', 'top', 'validation']

@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/services/api/creditrating_api/jobs.py
+# hypothesis_version: 6.141.1
+
+['%H:%M:%SZ', 'INTERNAL', 'batch.done', 'code', 'company', 'completed', 'determination', 'done', 'em_converged', 'em_iterations', 'error', 'event', 'letter', 'ok', 'queued', 'risk_score', 'running', 'sigma_a', 'start', 'status', 'ticker', 'total', 'ts']

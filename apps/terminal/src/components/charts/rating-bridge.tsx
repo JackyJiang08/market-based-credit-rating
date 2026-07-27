@@ -40,7 +40,7 @@ export function RatingBridge({ d }: { d: CompanyDetail }) {
   ];
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="group"
       aria-label="rating bridge from PIT PD to TTC PD to the letter">
       <rect width={W} height={H} fill={P.surface} rx={6} />
       {logTicks(DOM).map((v) => (

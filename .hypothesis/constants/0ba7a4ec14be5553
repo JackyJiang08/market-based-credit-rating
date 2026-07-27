@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/model/em.py
+# hypothesis_version: 6.141.1
+
+[0.0, 0.02, 0.3, 0.5, 1.0, 2.0, '  %s', 'AssetValue', 'D', 'E', 'ignore', 'inf', 'r']

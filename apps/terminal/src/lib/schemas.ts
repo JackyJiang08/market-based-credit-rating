@@ -54,6 +54,13 @@ export const CompanyDetail = z.object({
   industry: z.string().nullable(),
   firm_type: z.string().nullable(),
   as_of: z.string().nullable(),
+  inputs: z.object({
+    st_debt: z.number().nullable(),
+    lt_debt: z.number().nullable(),
+    default_point: z.number().nullable(),
+    equity: z.number().nullable(),
+    risk_free: z.number().nullable(),
+  }),
   measures: z.object({
     risk_score: z.number().nullable(),
     sigma_a: z.number().nullable(),

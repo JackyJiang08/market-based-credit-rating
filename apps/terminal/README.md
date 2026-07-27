@@ -16,6 +16,11 @@ fails the build if licensed grid content would enter the bundle.
   and explicit error/empty states; site-wide footer: fixture-backed demo,
   data as-of, not investment advice, methodology attribution.
 
+Deployed to GitHub Pages by the `deploy` CI job (after every other cell is
+green; the bundle-safety gate runs again inside the job) with
+`NEXT_PUBLIC_BASE_PATH=/market-based-credit-rating`. A custom domain is a
+documented option: set it in repo Pages settings and drop the base path.
+
 ```bash
 make build-site-data   # export + bundle-safety check (fails on violation)
 cd apps/terminal

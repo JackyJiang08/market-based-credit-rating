@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/tables/loader.py
+# hypothesis_version: 6.141.1
+
+['PD_threshold', 'PIT', 'SP', 'TTC', 'coerce', 'local', 'sp_thresholds.csv', 'tables', 'ttc.csv']

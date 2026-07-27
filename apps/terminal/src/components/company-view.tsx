@@ -22,7 +22,7 @@ function Prov({ label, children }: { label: string; children: React.ReactNode })
   return (
     <Popover>
       <PopoverTrigger
-        className="inline-flex items-center gap-1 text-zinc-500 hover:text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+        className="inline-flex items-center gap-1 text-zinc-400 hover:text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
         aria-label={`provenance for ${label}`}
       >
         <Info className="h-3 w-3" aria-hidden />
@@ -287,7 +287,7 @@ export function CompanyView({ ticker }: { ticker: string }) {
               </tbody>
             </table>
             <div className="mt-3">
-              <div className="mb-1 text-xs text-zinc-500">
+              <div className="mb-1 text-xs text-zinc-400">
                 EM-implied asset value ({d.em_path.length} pts, downsampled)
               </div>
               <Spark points={d.em_path} />

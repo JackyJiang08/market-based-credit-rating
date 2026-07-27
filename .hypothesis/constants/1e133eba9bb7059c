@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/persistence.py
+# hypothesis_version: 6.141.1
+
+['aligned_panel', 'annual_balance_sheet', 'clean', 'debt_schedule', 'prices', 'raw']

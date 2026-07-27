@@ -46,7 +46,7 @@ export function AmplificationLadder({
         : null;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="group"
       aria-label="relative bootstrap interval width per quantity, log scale">
       <rect width={W} height={H} fill={P.surface} rx={6} />
       {logTicks(DOM).map((v) => (

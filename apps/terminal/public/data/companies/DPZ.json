@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "577ab1a",
-  "generated_utc": "2026-07-27T00:01:28Z",
+  "git_sha": "74a28de",
+  "generated_utc": "2026-07-27T01:09:22Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -12,6 +12,13 @@
  "industry": "Restaurants",
  "firm_type": "NONFINANCIAL",
  "as_of": "2026-07-24",
+ "inputs": {
+  "st_debt": 53387000.0,
+  "lt_debt": 5069466000.0,
+  "default_point": 2588120000.0,
+  "equity": 11015225344.0,
+  "risk_free": 0.0415
+ },
  "measures": {
   "risk_score": 2.140766237118141,
   "sigma_a": 0.24165441274364777,

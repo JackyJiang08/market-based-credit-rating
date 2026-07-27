@@ -35,6 +35,41 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-26 - House style, sensitivity playground, E2E, public deployment
+
+- **House style:** phase wording now lives only in this log (grep-verified);
+  DEPENDENCY_MAPS.md replaced by docs/ARCHITECTURE.md (three current
+  diagrams + a CI staleness guard that fails on drift); README gains a
+  one-diagram Architecture section; headings across README/docs are short
+  noun phrases with the vivid phrasing kept in body text; GAP_ANALYSIS and
+  reconciliation/REPORT open with two-sentence orientation.
+- **Sensitivity playground (/sensitivity):** the published formulas
+  client-side (Eq. 11-14, 22, 26/27 and the published Table-8 seven-grade
+  scale -- the licensed grids that notch it are not involved), anchored in
+  vitest to alpha_FH(1.5)=0.91906 / alpha_FH(5.0)=0.72749 / CCM*=1.35373.
+  Sliders for sigma, the LT-debt weight w, eta, T; every output labels which
+  sliders move it, and the eta slider visibly NOT moving RiskScore -- with a
+  Prop. 4.4.2 callout when touched -- is the lesson. Company presets, URL
+  state, and a live trace on the mu-CCM plane. A is held at the EM point
+  estimate, stated on the page.
+- **E2E (Playwright + axe):** command-bar flow, the interval-attached letter
+  on the company view, all chart panels, URL-state filters, the
+  drift-does-not-move-RiskScore interaction, and axe on four pages with
+  zero serious/critical violations -- which required real fixes: 72
+  text-zinc-500 contrast failures brightened to AA, chart SVGs with
+  focusable points re-roled from img to group, and cmdk (which crashed the
+  page under this React runtime) replaced by a self-contained accessible
+  combobox. 9/9 passing; new e2e CI cell.
+- **Public deployment (GitHub Pages):** deploy job runs only after every
+  other cell is green and re-runs the bundle-safety gate itself; project
+  base path via NEXT_PUBLIC_BASE_PATH; SEO/OG (mu-CCM card, favicon);
+  /about carries the two central findings, attribution and links.
+  Lighthouse gate >= 90 asserted in CI; measured home 92/100/100/100 and
+  about 98/100/100/100 (LCP fixed by preloading universe.json). README:
+  live-demo link + demo GIF above the fold + pages badge.
+- **Validation:** python 370 passed; vitest 18; E2E 9/9; lighthouse as
+  above; CI watched to green including the three new cells and the deploy.
+
 ### 2026-07-26 - Terminal chart layer: the mu-CCM plane and friends
 
 - **Scope:** apps/terminal charts + export additions; two screenshots under

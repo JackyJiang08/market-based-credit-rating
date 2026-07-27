@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/domain.py
+# hypothesis_version: 6.141.1
+
+[-0.05, 0.3, 3.0, 'D = ST + 0.5*LT', 'after']

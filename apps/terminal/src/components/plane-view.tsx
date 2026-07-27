@@ -50,7 +50,7 @@ export function PlaneView() {
             ))}
         </select>
         {focus && detail.data ? (
-          <span className="font-mono text-xs text-zinc-500">
+          <span className="font-mono text-xs text-zinc-400">
             {detail.data.bootstrap_cloud.length} replicate points
           </span>
         ) : null}

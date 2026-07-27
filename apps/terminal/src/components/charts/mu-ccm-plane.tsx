@@ -45,7 +45,7 @@ export function MuCcmPlane({
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full"
-        role="img"
+        role="group"
         aria-label="ln mu versus ln CCM plane with iso-rating lines of slope Q"
       >
         <rect width={W} height={H} fill={P.surface} rx={6} />

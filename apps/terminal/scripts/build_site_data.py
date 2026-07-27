@@ -245,6 +245,13 @@ def main() -> None:
             "industry": c.industry,
             "firm_type": c.firm_type,
             "as_of": rec["last_date"],
+            "inputs": {
+                "st_debt": rec["short_term_debt"],
+                "lt_debt": rec["long_term_debt"],
+                "default_point": rec["default_point_debt"],
+                "equity": rec["equity"],
+                "risk_free": rec["interest_rate"],
+            },
             "measures": {
                 "risk_score": c.risk_score,
                 "sigma_a": c.sigma_A,

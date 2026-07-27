@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/io/export.py
+# hypothesis_version: 6.141.1
+
+['%Y-%m-%d', 'AsOf', 'AssetValue_A', 'CCM', 'Category', 'DD', 'Date', 'DividendRate', 'DividendYield', 'EDF', 'LastClose', 'MACRO', 'MarketCap', 'Metric', 'Outlook', 'PIT_PD', 'Period', 'R', 'ReferenceShares', 'RiskScore', 'TTC_PD', 'TiC', 'Ticker', 'Value', 'aligned_panel', 'asset_value', 'balance_sheet (A)', 'balance_sheet (Q)', 'cash_flow (A)', 'cash_flow (Q)', 'ccm', 'coerce', 'company_info', 'credit_measures', 'dd', 'debt_schedule', 'dividend', 'drift', 'edf', 'eta_A', 'income_statement (A)', 'income_statement (Q)', 'lam', 'lambda', 'mu', 'outlook', 'pit_pd', 'price', 'rate', 'risk_score', 'sigma_A', 'tic', 'ttc_pd']

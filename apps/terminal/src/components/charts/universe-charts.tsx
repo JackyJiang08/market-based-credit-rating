@@ -33,7 +33,7 @@ export function TwoHistogram({ rows }: { rows: UniverseRow[] }) {
   const bw = (W - M.l - M.r) / BANDS.length;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="group"
       aria-label="model letters versus sourced agency letters by broad grade">
       <rect width={W} height={H} fill={P.surface} rx={6} />
       {BANDS.map((b, i) => {
@@ -84,7 +84,7 @@ export function RankScatter({ rows }: { rows: UniverseRow[] }) {
   const t = linScale([0, pts.length + 1], [H - M2, 10]);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="group"
       aria-label="RiskScore rank versus agency rank; scale-resolved names emphasized">
       <rect width={W} height={H} fill={P.surface} rx={6} />
       <line x1={s(0)} y1={t(0)} x2={s(pts.length)} y2={t(pts.length)} stroke={P.grid} />
@@ -134,7 +134,7 @@ export function NotchErrors({ errors }: { errors: number[] }) {
   const x0 = (k: number) => M2.l + (k - keys[0]) * bw;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="group"
       aria-label="notch error distribution, positive means the model is optimistic">
       <rect width={W} height={H} fill={P.surface} rx={6} />
       {keys.map((k) => (

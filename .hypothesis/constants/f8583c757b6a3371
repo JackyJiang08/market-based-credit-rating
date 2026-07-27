@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/sectors.py
+# hypothesis_version: 6.141.1
+
+['AIG', 'ALL', 'AMT', 'APPLICABLE', 'BAC', 'BANK', 'BANK_DEPOSIT_FUNDED', 'BRK-B', 'C', 'CB', 'GS', 'INSURER', 'JPM', 'MA', 'MET', 'MODEL_NOT_APPLICABLE', 'MS', 'NONFINANCIAL', 'O', 'PLD', 'PNC', 'PRU', 'PYPL', 'REIT', 'REIT_ASSET_STRUCTURE', 'SCHW', 'SPG', 'TFC', 'TRV', 'UNKNOWN', 'USB', 'V', 'WFC', 'bank', 'capital markets', 'credit services', 'financial', 'financial services', 'financials', 'insurance', 'insurer', 'real estate', 'reinsurance', 'reit', 'savings', 'thrift']

@@ -26,7 +26,7 @@ export function RatingCell({
 }) {
   if (!letter) {
     return (
-      <span className="text-zinc-500" aria-label="no letter">
+      <span className="text-zinc-400" aria-label="no letter">
         — <span className="text-[11px]">({determination ?? "NOT_RATED"})</span>
       </span>
     );

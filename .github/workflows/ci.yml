@@ -12,6 +12,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -106,3 +109,85 @@ jobs:
         run: python3 scripts/check_bundle_safety.py
       - name: build
         run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/terminal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/terminal/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Playwright E2E + axe
+        run: npx playwright test
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/terminal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/terminal/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Lighthouse >= 90 on perf/a11y/best-practices/SEO
+        run: |
+          npx serve out -l 4180 -n &
+          sleep 2
+          for path in "/" "/about/"; do
+            npx -y lighthouse "http://localhost:4180$path"               --chrome-flags="--headless=new --no-sandbox"               --output=json --output-path=./lh.json --quiet
+            node -e "
+              const c = require('./lh.json').categories;
+              const s = Object.fromEntries(['performance','accessibility','best-practices','seo'].map(k=>[k,Math.round(c[k].score*100)]));
+              console.log('$path', JSON.stringify(s));
+              for (const [k,v] of Object.entries(s)) if (v < 90) { console.error(k, v, '< 90'); process.exit(1); }
+            "
+          done
+
+  deploy:
+    # Public GitHub Pages deploy -- only after EVERY other cell is green,
+    # and the bundle-safety gate runs again in this job.
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [lint, tests, acceptance, frontend, e2e, lighthouse]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: apps/terminal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/terminal/package-lock.json
+      - run: npm ci
+      - name: Bundle safety (deploy gate)
+        run: python3 scripts/check_bundle_safety.py
+      - name: Build with the project-pages base path
+        env:
+          NEXT_PUBLIC_BASE_PATH: /market-based-credit-rating
+        run: npm run build
+      - run: touch out/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/terminal/out
+      - id: deployment
+        uses: actions/deploy-pages@v4

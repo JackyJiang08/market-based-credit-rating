@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/model/config.py
+# hypothesis_version: 6.141.1
+
+[1e-05, 0.05, 0.1, 0.6, 0.95, 1.0, 2.0, 250, 252, 500, 1260, 20260726]

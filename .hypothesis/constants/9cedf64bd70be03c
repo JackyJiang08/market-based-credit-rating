@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/errors.py
+# hypothesis_version: 6.141.1
+
+[404, 429, 'DELISTED', 'NO_DATA', 'OK', 'RATE_LIMITED', 'SOURCE_ERROR', '\\b404\\b', '\\b429\\b', '\\bquota\\b', '\\bthrottl', 'delisted', 'not\\s+found', 'rate\\s*limit', 'response', 'status_code']

@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "577ab1a",
-  "generated_utc": "2026-07-27T00:01:28Z",
+  "git_sha": "74a28de",
+  "generated_utc": "2026-07-27T01:09:22Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -12,6 +12,13 @@
  "industry": "Software - Application",
  "firm_type": "NONFINANCIAL",
  "as_of": "2026-07-24",
+ "inputs": {
+  "st_debt": 31402000.0,
+  "lt_debt": 8225983000.0,
+  "default_point": 4144393500.0,
+  "equity": 33488848896.0,
+  "risk_free": 0.0415
+ },
  "measures": {
   "risk_score": 9.783117447209984,
   "sigma_a": 0.68861988942223,

@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/pipeline.py
+# hypothesis_version: 6.141.1
+
+[100, 365, '  data status: %s', ', ', '=== %s ===', '?', 'Adj Close', 'Close', 'Date', 'DefaultPointDebt_D', 'Div/Split Adj Factor', 'Dividends', 'LongTermDebt', 'MODEL_NOT_APPLICABLE', 'MarketCap_E', 'RiskFree_R', 'ShortTermDebt', "Skipping '%s': %s", 'a_balance', 'a_cashflow', 'a_income', 'creditrating.run', 'currency', 'dividendRate', 'dividendYield', 'financialCurrency', 'industry', 'longName', 'marketCap', 'n/a', 'nan', 'q_balance', 'q_cashflow', 'q_income', 'run.done', 'run.start', 'sector', 'sharesOutstanding', 'shortName', 'sigma_A', 'tz']

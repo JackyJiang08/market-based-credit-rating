@@ -4,6 +4,13 @@
 [![DEVLOG gate](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
+[![pages](https://img.shields.io/github/deployments/JackyJiang08/market-based-credit-rating/github-pages?label=pages)](https://jackyjiang08.github.io/market-based-credit-rating/)
+
+**Live demo: [jackyjiang08.github.io/market-based-credit-rating](https://jackyjiang08.github.io/market-based-credit-rating/)** — the
+150-name universe, the µ–CCM plane, and a sensitivity playground, all computed
+offline from committed data.
+
+![Terminal demo: command bar to company view to the mu-CCM plane](docs/figures/terminal_demo.gif)
 
 A market-based credit-rating pipeline for public companies. It downloads equity
 and rate data, estimates a **KMV/Merton** structural model by **EM** (recovering
@@ -361,8 +368,8 @@ This pipeline is an **independent implementation of the Time-Consistent (TiC)
 credit-rating methodology (Y. Yang)**, combined with standard KMV/Merton
 structural-model machinery. The methodology is not ours: equation and
 proposition numbers are retained in the docstrings of every module that
-implements a TiC formula (`signal_construction/em.py`, `measures.py`,
-`conversion.py`) — that is the attribution mechanism, and it stays. The
+implements a TiC formula (`model/em.py`, `model/tic.py`,
+`model/conversion.py`) — that is the attribution mechanism, and it stays. The
 reference materials and the conversion workbook are licensed third-party
 material and are not part of this repository; the implementation must not be
 represented as original methodology.

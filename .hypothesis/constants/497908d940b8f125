@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/provenance.py
+# hypothesis_version: 6.141.1
+
+['%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%SZ', '--short', '?', 'HEAD', '__version__', '_rates', '_rates/rates.parquet', 'companies_succeeded', 'config', 'generated_utc', 'git', 'git_sha', 'package_version', 'rates.parquet', 'rb', 'rev-parse', 'run_bootstrap', 'run_credit_model', 'run_id', 'tickers', 'unknown', 'utf-8', 'w', 'workers', 'years']

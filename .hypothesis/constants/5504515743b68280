@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/cache.py
+# hypothesis_version: 6.141.1
+
+['%Y-%m-%dT%H:%M:%SZ', '0', '1', 'FRED rates', 'MDT_CACHE_DIR', 'MDT_CACHE_OFF', 'MDT_CACHE_REFRESH', '_rates', 'a_balance', 'a_cashflow', 'a_income', 'as_unit', 'cache', 'data', 'dt', 'fetched_at', 'info.json', 'meta.json', 'ns', 'prices.parquet', 'q_balance', 'q_cashflow', 'q_income', 'rates.parquet', 'source', 'utf-8', 'w', 'yahoo/fred']

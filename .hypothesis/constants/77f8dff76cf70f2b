@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/alignment.py
+# hypothesis_version: 6.141.1
+
+[0.0, 1.0, 100.0, 'Adj Close', 'AdjClose', 'AvailableAt', 'Close', 'Date', 'DefaultPointDebt_D', 'DivAddBackClose', 'Dividends', 'EquityLogReturn', 'Horizon_T', 'LongTermDebt', 'LongTermDebtSource', 'MarketCap_E', 'PeriodEnd', 'RawMarketCap', 'RiskFree_R', 'Shares', 'ShortTermDebt', 'ShortTermDebtSource', 'StatementAvailableAt', 'StatementPeriodEnd', 'backward', 'coerce', 'index']

@@ -1,0 +1,4 @@
+# file: /Users/jackyjiang/market-based-credit-rating/packages/core/creditrating/data/providers.py
+# hypothesis_version: 6.141.1
+
+[365, '%Y-%m-%d', ', ', '.', '.-', 'Date', 'EQUITY', 'FRED %s failed: %s', 'Ticker.history', 'Ticker.info', 'Ticker.statements', 'a_balance', 'a_cashflow', 'a_income', 'coerce', 'date', 'longname', 'observation_date', 'outer', 'q_balance', 'q_cashflow', 'q_income', 'quoteType', 'quotes', 'regularMarketPrice', 'shortName', 'shortname', 'symbol']
