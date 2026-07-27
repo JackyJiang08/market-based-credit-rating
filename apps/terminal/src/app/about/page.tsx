@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "about — creditrating terminal" };
+export const metadata = { title: "About — Credit Rating Terminal" };
 
 const REPO = "https://github.com/JackyJiang08/market-based-credit-rating";
 

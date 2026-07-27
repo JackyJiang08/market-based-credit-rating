@@ -3,6 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Universe } from "@/lib/schemas";
 
+export const metadata = { title: "µ–CCM plane — Credit Rating Terminal" };
+
 export default function PlanePage() {
   const universe = JSON.parse(
     fs.readFileSync(path.join(process.cwd(), "public", "data", "universe.json"), "utf-8"),

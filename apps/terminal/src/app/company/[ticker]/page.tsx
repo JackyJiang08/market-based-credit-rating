@@ -12,6 +12,15 @@ export function generateStaticParams() {
   return universe.rows.map((r: { ticker: string }) => ({ ticker: r.ticker }));
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ ticker: string }>;
+}) {
+  const { ticker } = await params;
+  return { title: `${ticker.toUpperCase()} — Credit Rating Terminal` };
+}
+
 export default async function CompanyPage({
   params,
 }: {

@@ -12,14 +12,14 @@ const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jackyjiang08.github.io"),
-  title: "creditrating terminal",
+  title: "Credit Rating Terminal — market-based ratings with honest uncertainty",
   description:
     "Market-based credit ratings (KMV/Merton + TiC): a 150-name universe, " +
     "uncertainty-honest letters, and an agency validation study — computed " +
     "offline, rendered live.",
   icons: { icon: `${base}/favicon.svg` },
   openGraph: {
-    title: "creditrating terminal",
+    title: "Credit Rating Terminal — market-based ratings with honest uncertainty",
     description:
       "RiskScore first; the letter never without its interval. The µ–CCM " +
       "plane, the ×4,073 amplification, and a sourced agency validation.",

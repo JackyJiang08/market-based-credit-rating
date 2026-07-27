@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Universe } from "@/lib/schemas";
 
-export const metadata = { title: "universe — creditrating terminal" };
+export const metadata = { title: "Universe — Credit Rating Terminal" };
 
 function universeAtBuildTime(): Universe {
   const p = path.join(process.cwd(), "public", "data", "universe.json");

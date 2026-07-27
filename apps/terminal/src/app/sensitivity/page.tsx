@@ -1,6 +1,6 @@
 import { Sensitivity } from "@/components/sensitivity";
 
-export const metadata = { title: "sensitivity — creditrating terminal" };
+export const metadata = { title: "Sensitivity — Credit Rating Terminal" };
 
 export default function SensitivityPage() {
   return (

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-export const metadata = { title: "validation — creditrating terminal" };
+export const metadata = { title: "Validation — Credit Rating Terminal" };
 
 const REPO = "https://github.com/JackyJiang08/market-based-credit-rating";
 
