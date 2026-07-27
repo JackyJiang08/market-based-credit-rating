@@ -1,6 +1,6 @@
 "use client";
 
-/** The x4,077 finding as a picture: relative 5-95 interval width per
+/** The ×4,073 finding as a picture: relative 5-95 interval width per
  *  quantity, log scale — per company (accent) against the universe median
  *  (open markers). Dot ladder, not bars: bar length lies on a log axis. */
 import { P } from "@/lib/palette";

@@ -1,0 +1,21 @@
+{
+ "_comment": "Run-of-record headline numbers. Single source of truth for every user-facing surface (README, docs, site); tests/test_headline_numbers.py recomputes each value from the committed CSVs and greps the display strings, so a stale number anywhere fails CI.",
+ "derived_from": [
+  "docs/figures/data/amplification.csv",
+  "docs/figures/data/rank_stability.csv",
+  "docs/analysis/data/discrimination.csv",
+  "docs/analysis/data/notch_errors.csv"
+ ],
+ "amplification_pit_vs_riskscore": 4073,
+ "amplification_display": "×4,073",
+ "spearman_all_names": 0.79,
+ "spearman_display": "ρ = 0.79",
+ "spearman_scale_resolved": 0.73,
+ "tau_median": 0.956,
+ "tau_display": "τ = 0.956",
+ "median_notch_error": 5,
+ "notch_display": "+5 notches",
+ "superseded_values": [
+  "4,077"
+ ]
+}
