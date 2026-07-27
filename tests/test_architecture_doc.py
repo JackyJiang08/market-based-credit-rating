@@ -39,6 +39,6 @@ def test_package_map_matches_the_tree():
 
 
 def test_dependency_maps_is_gone():
-    assert not os.path.exists(os.path.join(ROOT, "docs", "DEPENDENCY_MAPS.md")), (
-        "DEPENDENCY_MAPS.md was replaced by ARCHITECTURE.md; it must not return"
-    )
+    assert not os.path.exists(
+        os.path.join(ROOT, "docs", "DEPENDENCY_MAPS.md")
+    ), "DEPENDENCY_MAPS.md was replaced by ARCHITECTURE.md; it must not return"

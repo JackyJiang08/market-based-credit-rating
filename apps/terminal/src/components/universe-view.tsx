@@ -2,23 +2,43 @@
 
 /** The universe view: filterable table + the three charts. Filter state
  *  lives in the URL (deep-linkable). */
-import { NotchErrors, RankScatter, TwoHistogram } from "@/components/charts/universe-charts";
+import dynamic from "next/dynamic";
+
+const TwoHistogram = dynamic(
+  () => import("@/components/charts/universe-charts").then((m) => m.TwoHistogram),
+  { ssr: false },
+);
+const RankScatter = dynamic(
+  () => import("@/components/charts/universe-charts").then((m) => m.RankScatter),
+  { ssr: false },
+);
+const NotchErrors = dynamic(
+  () => import("@/components/charts/universe-charts").then((m) => m.NotchErrors),
+  { ssr: false },
+);
 import { UniverseTable } from "@/components/universe-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loadUniverse, loadValidation } from "@/lib/data";
+import type { Universe } from "@/lib/schemas";
 import { useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const DETS = ["SCALE_RESOLVED", "PINNED_AT_FLOOR", "PINNED_AT_SCALE_TOP",
   "MODEL_NOT_APPLICABLE", "NOT_RATED"];
 
-export function UniverseView() {
-  const { data, isLoading, error } = useQuery({ queryKey: ["universe"], queryFn: loadUniverse });
+export function UniverseView({ initial }: { initial?: Universe }) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["universe"],
+    queryFn: loadUniverse,
+    initialData: initial,
+  });
   const val = useQuery({ queryKey: ["validation"], queryFn: loadValidation });
-  const params = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  // window.location instead of useSearchParams: the hook forces the whole
+  // subtree to client-render on static export, which blanked the table until
+  // hydration (CLS 0.87, late LCP). Deep links still work via the effect.
+  const [query, setQuery] = useState("");
+  useEffect(() => setQuery(window.location.search), []);
+  const params = useMemo(() => new URLSearchParams(query), [query]);
 
   const sector = params.get("sector") ?? "";
   const det = params.get("det") ?? "";
@@ -26,12 +46,14 @@ export function UniverseView() {
 
   const setParam = useCallback(
     (k: string, v: string) => {
-      const next = new URLSearchParams(params.toString());
+      const next = new URLSearchParams(window.location.search);
       if (v) next.set(k, v);
       else next.delete(k);
-      router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+      const qs = next.toString();
+      window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+      setQuery(qs ? `?${qs}` : "");
     },
-    [params, pathname, router],
+    [],
   );
 
   const rows = useMemo(() => {
@@ -85,18 +107,18 @@ export function UniverseView() {
       <UniverseTable rows={rows} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section aria-label="model versus agency letters" className="space-y-1">
+        <section aria-label="model versus agency letters" className="min-h-[260px] space-y-1">
           <h2 className="text-sm font-medium text-zinc-300">
             Model letters vs sourced agency letters
           </h2>
           <TwoHistogram rows={rows} />
         </section>
         <div className="grid gap-4 sm:grid-cols-2">
-          <section aria-label="rank scatter" className="space-y-1">
+          <section aria-label="rank scatter" className="min-h-[300px] space-y-1">
             <h2 className="text-sm font-medium text-zinc-300">Rank vs agency rank</h2>
             <RankScatter rows={rows} />
           </section>
-          <section aria-label="notch errors" className="space-y-1">
+          <section aria-label="notch errors" className="min-h-[220px] space-y-1">
             <h2 className="text-sm font-medium text-zinc-300">Letter notch error</h2>
             {val.data?.notch_errors ? (
               <NotchErrors errors={val.data.notch_errors.map((e) => e.notch_error)} />
