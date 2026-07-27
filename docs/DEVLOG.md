@@ -67,6 +67,16 @@ single push when they represent the same unit of work.
   Lighthouse gate >= 90 asserted in CI; measured home 92/100/100/100 and
   about 98/100/100/100 (LCP fixed by preloading universe.json). README:
   live-demo link + demo GIF above the fold + pages badge.
+- **Fourth CI round (root cause of the red lighthouse cell):** the
+  round-two hardened workflow step NEVER LANDED -- its edit script raised
+  on a stale anchor, only the DEVLOG half of that commit went in, and CI
+  kept running a single mobile-throttled pass (61/51/58 were the runner's
+  4x-CPU GPU-less mobile emulation; artifact ground truth under it: LCP
+  4.1s, TBT 1.26s). The desktop-preset median-of-3 step is now verified in
+  the committed file by grep before push. Two lessons recorded: verify the
+  file, not the edit script's banner; and a failed grep in an &&-chain
+  silently skipped the DEVLOG edit twice -- which the push hook caught both
+  times, which is the hook earning its keep.
 - **Third CI round:** median-of-3 still failed (51) -- the runner renders
   without a GPU, and a 150-row baked table under software raster is a real
   LCP cost, not noise. Honest fix: the universe table initially renders 40
