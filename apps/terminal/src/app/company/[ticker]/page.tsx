@@ -1,11 +1,11 @@
-import { CommandBar } from "@/components/command-bar";
 import { CompanyView } from "@/components/company-view";
-import { Suspense } from "react";
 import fs from "node:fs";
 import path from "node:path";
-import Link from "next/link";
+import type { CompanyDetail } from "@/lib/schemas";
 
-/** Static export: one page per universe ticker, params from the exported JSON. */
+/** Static export: one page per universe ticker, params from the exported JSON.
+ *  The detail fixture is baked in at build time so the company view renders
+ *  in the static HTML (no fetch needed for first paint). */
 export function generateStaticParams() {
   const p = path.join(process.cwd(), "public", "data", "universe.json");
   const universe = JSON.parse(fs.readFileSync(p, "utf-8"));
@@ -18,20 +18,11 @@ export default async function CompanyPage({
   params: Promise<{ ticker: string }>;
 }) {
   const { ticker } = await params;
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <Link
-          href="/"
-          className="text-sm text-zinc-400 underline-offset-2 hover:text-zinc-200 hover:underline"
-        >
-          ← universe
-        </Link>
-        <CommandBar />
-      </div>
-      <Suspense>
-        <CompanyView ticker={ticker} />
-      </Suspense>
-    </div>
+  const detailPath = path.join(
+    process.cwd(), "public", "data", "companies", `${ticker.toUpperCase()}.json`,
   );
+  const initial = fs.existsSync(detailPath)
+    ? (JSON.parse(fs.readFileSync(detailPath, "utf-8")) as CompanyDetail)
+    : undefined;
+  return <CompanyView ticker={ticker} initial={initial} />;
 }

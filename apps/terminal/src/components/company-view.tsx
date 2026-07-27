@@ -12,7 +12,8 @@ import { loadCompany, loadUniverse } from "@/lib/data";
 import { big, fmt, pct } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { Info } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { CompanyDetail } from "@/lib/schemas";
+import { useEffect, useState } from "react";
 import { AmplificationLadder } from "@/components/charts/amplification-ladder";
 import { MuCcmPlane } from "@/components/charts/mu-ccm-plane";
 import { RatingBridge } from "@/components/charts/rating-bridge";
@@ -88,19 +89,27 @@ function Spark({ points }: { points: { date: string; asset_value: number }[] }) 
   );
 }
 
-export function CompanyView({ ticker }: { ticker: string }) {
+export function CompanyView({
+  ticker,
+  initial,
+}: {
+  ticker: string;
+  initial?: CompanyDetail;
+}) {
   const detail = useQuery({
     queryKey: ["company", ticker],
     queryFn: () => loadCompany(ticker),
     retry: false,
+    initialData: initial,
   });
   const uni = useQuery({ queryKey: ["universe"], queryFn: loadUniverse });
   const val = useQuery({ queryKey: ["validation"], queryFn: loadValidation });
   const uniRow = uni.data?.rows.find((r) => r.ticker === ticker.toUpperCase());
-  const params = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const panel = params.get("panel") ?? "bridge";
+  const [panel, setPanel] = useState("bridge");
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("panel");
+    if (p) setPanel(p);
+  }, []);
 
   if (detail.isLoading)
     return (
@@ -166,7 +175,7 @@ export function CompanyView({ ticker }: { ticker: string }) {
       {d.flags.length ? (
         <div className="flex flex-wrap gap-1.5" aria-label="flags">
           {d.flags.map((f) => (
-            <FlagChip key={f.code} code={f.code} text={f.text} />
+            <FlagChip key={f.code} code={f.code} extra={f.text} />
           ))}
         </div>
       ) : null}
@@ -309,9 +318,10 @@ export function CompanyView({ ticker }: { ticker: string }) {
                   : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:text-zinc-200"
               }`}
               onClick={() => {
-                const next = new URLSearchParams(params.toString());
+                setPanel(p);
+                const next = new URLSearchParams(window.location.search);
                 next.set("panel", p);
-                router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+                window.history.replaceState(null, "", `${window.location.pathname}?${next.toString()}`);
               }}
             >
               {p === "bridge" ? "rating bridge" : p === "ladder" ? "amplification ladder" : "µ–CCM plane"}

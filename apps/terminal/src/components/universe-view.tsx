@@ -18,6 +18,7 @@ const NotchErrors = dynamic(
 );
 import { UniverseTable } from "@/components/universe-table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { enumLabel } from "@/lib/labels";
 import { loadUniverse, loadValidation } from "@/lib/data";
 import type { Universe } from "@/lib/schemas";
 import { useQuery } from "@tanstack/react-query";
@@ -93,7 +94,7 @@ export function UniverseView({ initial }: { initial?: Universe }) {
         <select aria-label="determination filter" className={sel} value={det}
           onChange={(e) => setParam("det", e.target.value)}>
           <option value="">all determinations</option>
-          {DETS.map((d) => <option key={d} value={d}>{d}</option>)}
+          {DETS.map((d) => <option key={d} value={d}>{enumLabel(d).label}</option>)}
         </select>
         <select aria-label="rated filter" className={sel} value={rated}
           onChange={(e) => setParam("rated", e.target.value)}>

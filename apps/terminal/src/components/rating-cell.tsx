@@ -1,10 +1,11 @@
-/** The letter, never bare: interval attached + derived-conversion badge. */
-import { Badge } from "@/components/ui/badge";
+/** The letter cell: letter + interval ONLY; the basis is a small icon-badge
+ *  with a tooltip — never inline text jammed against the interval. */
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { enumLabel } from "@/lib/labels";
 import { letterWithInterval } from "@/lib/format";
 
 export function RatingCell({
@@ -25,12 +26,14 @@ export function RatingCell({
   bootstrapNote?: string;
 }) {
   if (!letter) {
+    const det = enumLabel(determination);
     return (
       <span className="text-zinc-400" aria-label="no letter">
-        — <span className="text-[11px]">({determination ?? "NOT_RATED"})</span>
+        — <span className="text-[11px]">{det.label}</span>
       </span>
     );
   }
+  const b = enumLabel(basis);
   return (
     <span className="inline-flex items-center gap-1.5">
       <Tooltip>
@@ -38,7 +41,7 @@ export function RatingCell({
           render={
             <span
               tabIndex={0}
-              className="font-mono tabular-nums font-semibold text-zinc-100"
+              className="font-mono font-semibold tabular-nums text-zinc-100"
               data-testid="letter-with-interval"
             />
           }
@@ -47,16 +50,29 @@ export function RatingCell({
         </TooltipTrigger>
         <TooltipContent className="max-w-xs text-xs">
           5–95% bootstrap interval{notches ? ` spanning ${notches} notches` : ""}
-          {bootstrapNote ? ` — ${bootstrapNote}` : ""}. Parameter uncertainty
-          only: a lower bound on total uncertainty.
+          {bootstrapNote ? ` — ${bootstrapNote}` : ""}. Parameter uncertainty only: a
+          lower bound on total uncertainty.
         </TooltipContent>
       </Tooltip>
-      <Badge
-        variant="outline"
-        className="border-zinc-600 bg-zinc-800/80 text-[10px] uppercase tracking-wide text-zinc-400"
-      >
-        derived conversion{basis ? ` · ${basis}` : ""}
-      </Badge>
+      {basis ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span
+                tabIndex={0}
+                aria-label={`derived conversion — basis: ${b.label}`}
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-zinc-600 text-[9px] font-semibold text-zinc-400"
+              />
+            }
+          >
+            ƒ
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs text-xs">
+            Derived conversion — {b.label}. {b.definition}
+            <span className="mt-1 block font-mono text-[10px] text-zinc-400">{b.code}</span>
+          </TooltipContent>
+        </Tooltip>
+      ) : null}
     </span>
   );
 }

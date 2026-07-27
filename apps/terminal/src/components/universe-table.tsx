@@ -1,171 +1,204 @@
 "use client";
 
-/** The 150-name universe: RiskScore and rank first; sortable; row → company. */
-import { FlagChip } from "@/components/flag-chips";
+/** The universe table. Defaults a designer would pick: rated names first by
+ *  rank; names without estimates grouped at the BOTTOM behind a subdued
+ *  divider linking to the failure taxonomy; sticky header; right-aligned
+ *  tabular numerics. Collapses to cards on mobile. */
+import { ChipRow } from "@/components/flag-chips";
 import { RatingCell } from "@/components/rating-cell";
-import { Skeleton } from "@/components/ui/skeleton";
-import { loadUniverse } from "@/lib/data";
+import { enumLabel } from "@/lib/labels";
 import { fmt } from "@/lib/format";
 import type { UniverseRow } from "@/lib/schemas";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  type SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-const col = createColumnHelper<UniverseRow>();
+type SortKey = "risk_rank" | "ticker" | "risk_score" | "sigma_a" | "dd";
 
-const columns = [
-  col.accessor("risk_rank", {
-    header: "Rank",
-    cell: (c) => <span className="text-zinc-400">{fmt(c.getValue(), 0)}</span>,
-  }),
-  col.accessor("ticker", {
-    header: "Ticker",
-    cell: (c) => <span className="font-semibold text-zinc-100">{c.getValue()}</span>,
-  }),
-  col.accessor("name", { header: "Company", cell: (c) => c.getValue() ?? "—" }),
-  col.accessor("risk_score", {
-    header: "RiskScore",
-    cell: (c) => <span className="font-medium text-sky-300">{fmt(c.getValue(), 3)}</span>,
-  }),
-  col.accessor("sigma_a", { header: "σ_A", cell: (c) => fmt(c.getValue(), 3) }),
-  col.accessor("dd", { header: "DD", cell: (c) => fmt(c.getValue(), 2) }),
-  col.accessor("letter", {
-    header: "Letter (interval)",
-    cell: (c) => (
-      <RatingCell
-        letter={c.getValue()}
-        lo={c.row.original.interval_low}
-        hi={c.row.original.interval_high}
-        notches={c.row.original.interval_notches}
-        basis={c.row.original.basis}
-        determination={c.row.original.determination}
-      />
-    ),
-  }),
-  col.accessor("determination", {
-    header: "Determination",
-    cell: (c) => <span className="text-xs text-zinc-400">{c.getValue() ?? "—"}</span>,
-  }),
-  col.display({
-    id: "flags",
-    header: "Flags",
-    cell: (c) => (
-      <span className="flex flex-wrap gap-1">
-        {c.row.original.weakly_identified ? <FlagChip code="WEAKLY_IDENTIFIED" /> : null}
-        {c.row.original.applicability_reason ? (
-          <FlagChip code={c.row.original.applicability_reason} />
-        ) : null}
-      </span>
-    ),
-  }),
-];
+const TAXONOMY_URL =
+  "https://github.com/JackyJiang08/market-based-credit-rating/blob/main/docs/UNIVERSE.md#failure-taxonomy";
 
-const INITIAL_ROWS = 40;
+function flagsFor(r: UniverseRow): string[] {
+  const out: string[] = [];
+  if (r.applicability_reason) out.push(r.applicability_reason);
+  if (r.weakly_identified) out.push("WEAKLY_IDENTIFIED");
+  return out;
+}
 
-export function UniverseTable({ rows }: { rows?: UniverseRow[] }) {
-  const [showAll, setShowAll] = useState(false);
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["universe"],
-    queryFn: loadUniverse,
-    enabled: rows === undefined,
+export function UniverseTable({ rows, initialLimit }: { rows: UniverseRow[]; initialLimit?: number }) {
+  const [showAll, setShowAll] = useState(initialLimit === undefined);
+  const [sort, setSort] = useState<{ key: SortKey; desc: boolean }>({
+    key: "risk_rank",
+    desc: false,
   });
-  const [sorting, setSorting] = useState<SortingState>([{ id: "risk_rank", desc: false }]);
   const router = useRouter();
 
-  const allRows = rows ?? data?.rows ?? [];
-  const table = useReactTable({
-    data: allRows,
-    columns,
-    state: { sorting },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+  const { withEst, withoutEst } = useMemo(() => {
+    const w = rows.filter((r) => r.risk_score !== null);
+    const wo = rows.filter((r) => r.risk_score === null);
+    const dir = sort.desc ? -1 : 1;
+    w.sort((a, b) => {
+      const av = a[sort.key];
+      const bv = b[sort.key];
+      if (av === null || av === undefined) return 1;
+      if (bv === null || bv === undefined) return -1;
+      return av < bv ? -dir : av > bv ? dir : 0;
+    });
+    return { withEst: w, withoutEst: wo };
+  }, [rows, sort]);
 
-  if (rows === undefined && isLoading)
-    return (
-      <div className="space-y-1.5" aria-busy="true" aria-label="loading universe">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <Skeleton key={i} className="h-7 w-full bg-zinc-800" />
-        ))}
-      </div>
-    );
-  if (rows === undefined && error)
-    return (
-      <div role="alert" className="rounded border border-rose-700 bg-rose-950/40 p-4 text-sm">
-        Failed to load or validate universe.json: {String(error)}
-      </div>
-    );
-  if (!(rows ?? data?.rows ?? []).length)
-    return (
-      <div className="p-4 text-sm text-zinc-400">
-        No rows match these filters — clear them to see the full universe.
-      </div>
-    );
+  const visible = showAll ? withEst : withEst.slice(0, initialLimit ?? withEst.length);
+  const go = (t: string) => router.push(`/company/${t}/`);
+
+  const header = (key: SortKey, label: string, numeric = false) => (
+    <th
+      className={`sticky top-[46px] z-10 bg-zinc-950/95 px-2 py-1.5 font-medium text-zinc-400 backdrop-blur ${numeric ? "text-right" : "text-left"}`}
+      aria-sort={sort.key === key ? (sort.desc ? "descending" : "ascending") : "none"}
+    >
+      <button
+        className="hover:text-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+        onClick={() => setSort((s) => ({ key, desc: s.key === key ? !s.desc : false }))}
+      >
+        {label}
+        <span aria-hidden className="ml-0.5 inline-block w-3 text-sky-300">
+          {sort.key === key ? (sort.desc ? "▼" : "▲") : ""}
+        </span>
+      </button>
+    </th>
+  );
 
   return (
-    <table className="w-full border-collapse text-[13px]">
-      <thead>
-        {table.getHeaderGroups().map((hg) => (
-          <tr key={hg.id} className="border-b border-zinc-700 text-left">
-            {hg.headers.map((h) => (
-              <th key={h.id} className="px-2 py-1.5 font-medium text-zinc-400">
-                <button
-                  className="hover:text-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-                  onClick={h.column.getToggleSortingHandler()}
-                >
-                  {flexRender(h.column.columnDef.header, h.getContext())}
-                  {{ asc: " ↑", desc: " ↓" }[h.column.getIsSorted() as string] ?? ""}
-                </button>
-              </th>
-            ))}
+    <div>
+      {/* desktop: the table */}
+      <table className="hidden w-full border-collapse text-[13px] md:table">
+        <thead>
+          <tr className="border-b border-zinc-700">
+            {header("risk_rank", "Rank", true)}
+            {header("ticker", "Ticker")}
+            <th className="sticky top-[46px] z-10 bg-zinc-950/95 px-2 py-1.5 text-left font-medium text-zinc-400 backdrop-blur">
+              Company
+            </th>
+            {header("risk_score", "RiskScore", true)}
+            {header("sigma_a", "σ_A", true)}
+            {header("dd", "DD", true)}
+            <th className="sticky top-[46px] z-10 bg-zinc-950/95 px-2 py-1.5 text-left font-medium text-zinc-400 backdrop-blur">
+              Letter (interval)
+            </th>
+            <th className="sticky top-[46px] z-10 bg-zinc-950/95 px-2 py-1.5 text-left font-medium text-zinc-400 backdrop-blur">
+              Determination
+            </th>
+            <th className="sticky top-[46px] z-10 bg-zinc-950/95 px-2 py-1.5 text-left font-medium text-zinc-400 backdrop-blur">
+              Flags
+            </th>
           </tr>
-        ))}
-      </thead>
-      <tbody>
-        {(showAll
-          ? table.getRowModel().rows
-          : table.getRowModel().rows.slice(0, INITIAL_ROWS)
-        ).map((row) => (
-          <tr
-            key={row.id}
-            tabIndex={0}
-            className="cursor-pointer border-b border-zinc-800/70 hover:bg-zinc-800/50 focus:outline-none focus-visible:bg-zinc-800/70"
-            onClick={() => router.push(`/company/${row.original.ticker}/`)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") router.push(`/company/${row.original.ticker}/`);
-            }}
-          >
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} className="px-2 py-1 font-mono tabular-nums">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </thead>
+        <tbody>
+          {visible.map((r) => (
+            <tr
+              key={r.ticker}
+              tabIndex={0}
+              className="cursor-pointer border-b border-zinc-800/70 hover:bg-zinc-800/50 focus:outline-none focus-visible:bg-zinc-800/70"
+              onClick={() => go(r.ticker)}
+              onKeyDown={(e) => e.key === "Enter" && go(r.ticker)}
+            >
+              <td className="px-2 py-1 text-right font-mono tabular-nums text-zinc-400">
+                {fmt(r.risk_rank, 0)}
               </td>
-            ))}
-          </tr>
+              <td className="px-2 py-1 font-mono font-semibold text-zinc-100">{r.ticker}</td>
+              <td className="px-2 py-1 text-zinc-300">
+                {r.name ?? "—"}
+                {r.delisted ? <span className="ml-1 text-[11px] text-zinc-400">(delisted)</span> : null}
+              </td>
+              <td className="px-2 py-1 text-right font-mono tabular-nums text-sky-300">
+                {fmt(r.risk_score, 3)}
+              </td>
+              <td className="px-2 py-1 text-right font-mono tabular-nums">{fmt(r.sigma_a, 3)}</td>
+              <td className="px-2 py-1 text-right font-mono tabular-nums">{fmt(r.dd, 2)}</td>
+              <td className="px-2 py-1">
+                <RatingCell
+                  letter={r.letter}
+                  lo={r.interval_low}
+                  hi={r.interval_high}
+                  notches={r.interval_notches}
+                  basis={r.basis}
+                  determination={r.determination}
+                />
+              </td>
+              <td className="px-2 py-1 text-xs text-zinc-400">{enumLabel(r.determination).label}</td>
+              <td className="px-2 py-1">
+                <ChipRow codes={flagsFor(r)} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* mobile: cards */}
+      <ul className="space-y-2 md:hidden" aria-label="universe (cards)">
+        {visible.map((r) => (
+          <li key={r.ticker}>
+            <button
+              className="w-full rounded-md border border-zinc-800 bg-zinc-900/60 p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+              onClick={() => go(r.ticker)}
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="font-mono font-semibold text-zinc-100">
+                  {r.ticker}
+                  <span className="ml-2 text-xs font-normal text-zinc-400">
+                    #{fmt(r.risk_rank, 0)}
+                  </span>
+                </span>
+                <span className="font-mono tabular-nums text-sky-300">{fmt(r.risk_score, 3)}</span>
+              </div>
+              <div className="mt-0.5 truncate text-xs text-zinc-400">{r.name}</div>
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                <RatingCell
+                  letter={r.letter}
+                  lo={r.interval_low}
+                  hi={r.interval_high}
+                  determination={r.determination}
+                />
+                <ChipRow codes={flagsFor(r)} max={1} />
+              </div>
+            </button>
+          </li>
         ))}
-      </tbody>
-      {!showAll && table.getRowModel().rows.length > INITIAL_ROWS ? (
-        <tfoot>
-          <tr>
-            <td colSpan={9} className="px-2 py-2">
-              <button
-                className="w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 text-xs text-zinc-300 hover:border-zinc-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-                onClick={() => setShowAll(true)}
-              >
-                show all {table.getRowModel().rows.length} names (first {INITIAL_ROWS} shown)
-              </button>
-            </td>
-          </tr>
-        </tfoot>
+      </ul>
+
+      {!showAll && withEst.length > (initialLimit ?? 0) ? (
+        <button
+          className="mt-2 w-full rounded-md border border-zinc-700 bg-zinc-900 py-1.5 text-xs text-zinc-300 hover:border-zinc-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+          onClick={() => setShowAll(true)}
+        >
+          show all {withEst.length} names with estimates (first {initialLimit} shown)
+        </button>
       ) : null}
-    </table>
+
+      {withoutEst.length ? (
+        <div className="mt-4">
+          <div className="mb-1.5 flex items-center gap-2 text-xs text-zinc-400">
+            <span className="h-px flex-1 bg-zinc-800" aria-hidden />
+            <a
+              className="underline decoration-zinc-600 underline-offset-2 hover:text-zinc-200"
+              href={TAXONOMY_URL}
+            >
+              {withoutEst.length} names without estimates — why?
+            </a>
+            <span className="h-px flex-1 bg-zinc-800" aria-hidden />
+          </div>
+          <ul className="flex flex-wrap gap-1.5 text-xs" aria-label="names without estimates">
+            {withoutEst.map((r) => (
+              <li
+                key={r.ticker}
+                className="rounded border border-zinc-800 bg-zinc-900/50 px-2 py-1 font-mono text-zinc-400"
+                title={r.taxonomy_detail ?? undefined}
+              >
+                {r.ticker}
+                {r.delisted ? " (delisted)" : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }

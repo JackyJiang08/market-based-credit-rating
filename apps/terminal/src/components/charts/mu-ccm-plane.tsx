@@ -10,6 +10,7 @@
  * focus any point for the company card; enter/click navigates.
  */
 import { GRID_DOMAIN, P, Q_SP, SP_SCALE } from "@/lib/palette";
+import { enumLabel } from "@/lib/labels";
 import type { UniverseRow } from "@/lib/schemas";
 import { fmt } from "@/lib/format";
 import { useRouter } from "next/navigation";
@@ -26,10 +27,12 @@ export function MuCcmPlane({
   rows,
   cloud,
   focusTicker,
+  highlight,
 }: {
   rows: (UniverseRow & { mu?: number | null; ccm?: number | null })[];
   cloud?: { mu: number; ccm: number }[];
   focusTicker?: string;
+  highlight?: "pinned" | "grid";
 }) {
   const [hover, setHover] = useState<UniverseRow | null>(null);
   const router = useRouter();
@@ -56,8 +59,9 @@ export function MuCcmPlane({
           width={x(GRID_DOMAIN.mu[1]) - x(GRID_DOMAIN.mu[0])}
           height={y(GRID_DOMAIN.ccm[0]) - y(GRID_DOMAIN.ccm[1])}
           fill={P.accent}
-          fillOpacity={0.05}
-          stroke={P.base}
+          fillOpacity={highlight === "grid" ? 0.12 : 0.05}
+          stroke={highlight === "grid" ? P.accent : P.base}
+          strokeWidth={highlight === "grid" ? 2 : 1}
           strokeDasharray="4 3"
         />
         <text x={x(GRID_DOMAIN.mu[0]) + 6} y={y(GRID_DOMAIN.ccm[1]) + 14} fill={P.muted} fontSize={10}>
@@ -121,7 +125,7 @@ export function MuCcmPlane({
         })}
         {/* scale-top: below the AAA iso line the letter is pinned */}
         <text x={W - M.r - 4} y={H - M.b - 8} fill={P.muted} fontSize={10} textAnchor="end">
-          below AAA iso line → PINNED_AT_SCALE_TOP
+          below the AAA iso line the letter pins at the scale top
         </text>
 
         {/* bootstrap cloud for the focused company */}
@@ -145,6 +149,7 @@ export function MuCcmPlane({
           const resolved = r.determination === "SCALE_RESOLVED";
           const pinned = r.determination?.startsWith("PINNED");
           const isFocus = r.ticker === focusTicker;
+          const dim = highlight === "pinned" && !pinned;
           const common = {
             tabIndex: 0,
             role: "button" as const,
@@ -158,6 +163,7 @@ export function MuCcmPlane({
               if (e.key === "Enter") router.push(`/company/${r.ticker}/`);
             },
             style: { cursor: "pointer", outline: "none" },
+            opacity: dim ? 0.18 : 1,
           };
           if (resolved)
             return (
@@ -179,7 +185,7 @@ export function MuCcmPlane({
         {/* legend: shape + label */}
         <g transform={`translate(${W - M.r + 10}, ${H - 130})`} fontSize={10} fill={P.ink2}>
           <circle cx={6} cy={4} r={5} fill={P.accent} />
-          <text x={16} y={7}>SCALE_RESOLVED</text>
+          <text x={16} y={7}>scale resolved</text>
           <path d="M1,24L7,18L13,24L7,30Z" fill="none" stroke={P.rampLight} strokeWidth={1.6} />
           <text x={16} y={27}>pinned (floor/top)</text>
           <circle cx={6} cy={44} r={4.5} fill="none" stroke={P.muted} strokeWidth={1.5} />
@@ -199,9 +205,9 @@ export function MuCcmPlane({
           <div className="text-zinc-400">
             {hover.letter
               ? `${hover.letter} (${hover.interval_low}..${hover.interval_high})`
-              : hover.determination}
+              : enumLabel(hover.determination).label}
             {" · "}
-            {hover.basis ?? "—"}
+            {hover.basis ? enumLabel(hover.basis).label : "—"}
           </div>
         </div>
       ) : null}

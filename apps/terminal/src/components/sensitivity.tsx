@@ -13,7 +13,7 @@ import { loadCompany, loadUniverse } from "@/lib/data";
 import { fmt, pct } from "@/lib/format";
 import { compute, type Inputs } from "@/lib/model";
 import { useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const DEFAULTS: Inputs = {
@@ -62,11 +62,12 @@ function Out({
 }
 
 export function Sensitivity() {
-  const params = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const uni = useQuery({ queryKey: ["universe"], queryFn: loadUniverse });
-  const preset = params.get("t")?.toUpperCase() ?? "";
+  const [preset, setPreset] = useState("");
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("t");
+    if (t) setPreset(t.toUpperCase());
+  }, []);
   const detail = useQuery({
     queryKey: ["company", preset],
     queryFn: () => loadCompany(preset),
@@ -121,10 +122,16 @@ export function Sensitivity() {
               className="mt-1 w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-300"
               value={preset}
               onChange={(e) => {
-                const next = new URLSearchParams(params.toString());
+                setPreset(e.target.value);
+                const next = new URLSearchParams(window.location.search);
                 if (e.target.value) next.set("t", e.target.value);
                 else next.delete("t");
-                router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+                const q = next.toString();
+                window.history.replaceState(
+                  null,
+                  "",
+                  `${window.location.pathname}${q ? `?${q}` : ""}`,
+                );
               }}
             >
               <option value="">generic firm</option>

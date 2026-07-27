@@ -1,3 +1,4 @@
+import { Nav } from "@/components/nav";
 import { Providers } from "@/components/providers";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <TooltipProvider delay={150}>
             <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4">
+              <Nav />
               <main className="flex-1 py-4">{children}</main>
               <footer className="border-t border-zinc-800 py-3 text-[11px] leading-relaxed text-zinc-400">
                 <span className="font-medium text-zinc-400">Fixture-backed demo</span> — all
