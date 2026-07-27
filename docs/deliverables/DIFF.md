@@ -45,3 +45,31 @@ the **determination class** (whether the scale resolved the value at all), the
 **drift t** (whether the estimate is identified), and the **applicability gates**
 (whether the model should be speaking). The presentation rule follows: RiskScore first,
 letter never bare. See `docs/UNCERTAINTY.md` and the README results section.
+
+
+---
+
+# deliverable-final (2026-07-27) vs deliverable-v1
+
+| File | Role |
+|---|---|
+| `submission_20260727T104102Z.xlsx` | **Deliverable final.** Generated offline from the final pipeline and the committed cache fixtures (run `python -m mdt batch config/companies.yaml`, UTC stamp per §10). The `deliverable-final` tag ships this workbook. |
+
+**9 of 10 companies are identical to v1 across all 35 Asset columns** — the
+pipeline changes since the v1 freeze (the package restructure, which carried an
+output-identity proof; the signed-drift/split-window fix; the bootstrap
+measurement fixes) leave these point estimates unchanged, which is exactly what
+the restructure promised and what the drift/bootstrap fixes (which act on the
+defective-regime handling and the uncertainty study) predict.
+
+**KHC is the one mover, and it is data, not code:** the refreshed cache
+fixture carries a valid 2026-07-24 close (v1's cache had KHC's last valid row
+on 07-23) and a small vendor share-count revision. σ_A 0.1899 → 0.1894,
+RiskScore 2.197 → 2.186, DD 6.459 → 6.492; the rating is unchanged
+(`NOT_RATED`, defective drift regime).
+
+**IP spot-check (this archive):** every numeric cell of the final workbook was
+scanned against the 28,399 numeric values of the licensed conversion workbook.
+The only overlaps are documented coincidences — a market price (437.5), the
+computed `Bootstrap defective %` values (0.2 / 3.4 / 7.4), and sub-1e-9
+rounding collisions of computed EDF/PIT PDs. No licensed content is present.
