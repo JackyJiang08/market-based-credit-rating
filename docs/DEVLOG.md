@@ -79,7 +79,11 @@ single push when they represent the same unit of work.
   height. Final: home desktop 100/100/100/100 with CLS 0, about
   100/100/100/100, home mobile-emulated 96; the CI assertion uses the
   desktop preset, declared in the workflow step, because the runner's
-  throttled mobile emulation measures the runner.
+  throttled mobile emulation measures the runner. Second CI round: the
+  single cold lighthouse run on the shared runner scored 61 while local
+  desktop scored 100 with LCP 0.6s/CLS 0 -- the step now waits for server
+  readiness and takes the median of three runs, printing LCP/CLS/TBT so a
+  future failure is diagnosable from the log.
 
 ### 2026-07-26 - Terminal chart layer: the mu-CCM plane and friends
 
