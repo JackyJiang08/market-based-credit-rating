@@ -17,17 +17,15 @@ letter does not, and every letter ships with the interval that proves it.
 150-name universe, the µ–CCM plane, and a sensitivity playground, all computed
 offline from committed data.
 
-<!-- INLINE-VIDEO PLACEHOLDER — to make the demo autoplay inline on GitHub:
+<!-- INLINE VIDEO — to make the demo autoplay inline on GitHub:
      1. open any issue/PR comment box on github.com and drag in
         docs/figures/terminal_demo.mp4 (H.264, 21 s, 1.4 MB)
      2. copy the generated github.com/user-attachments/assets/… URL
-     3. replace the INLINE_VIDEO_URL line below with that bare URL on its own
-        line (no markdown around it) — GitHub renders an inline player.
+     3. replace the poster block below (image + ▶ line) with that bare URL on
+        its own line, no markdown around it — GitHub renders an inline player.
+     Until then the poster screenshot below is the visible element.
      The video is recorded by a committed script (apps/terminal/scripts/
-     record_demo.mjs) and transcoded with ffmpeg; the poster screenshot below
-     stays as the fallback for renderers without the player. -->
-
-INLINE_VIDEO_URL
+     record_demo.mjs) and transcoded with ffmpeg. INLINE_VIDEO_URL -->
 
 [![Terminal demo — landing stat cards, command bar to the ORCL company view, then the µ–CCM plane with the bootstrap cloud (click for the 21-second video)](docs/figures/terminal_landing.png)](https://raw.githubusercontent.com/JackyJiang08/market-based-credit-rating/main/docs/figures/terminal_demo.mp4)
 
@@ -327,15 +325,15 @@ Each row links the fix and the regression guard that keeps it fixed.
 
 | Was wrong | Fixed by | Guarded by |
 |---|---|---|
-| A deposit-funded bank (PNC) rated `AAA` off 6% of its liabilities | applicability gates for banks/insurers/REITs ([`8623205`](https://github.com/JackyJiang08/market-based-credit-rating/commit/8623205), [ADR 0003](docs/adr/0003-financial-firms.md)) | `tests/test_sectors.py` |
-| The negative-book-equity gate blocked DELL — a book-value test in a market-based model | market-based test `A > ST + 1.0·LT` ([`ad15b95`](https://github.com/JackyJiang08/market-based-credit-rating/commit/ad15b95), [ADR 0003 Rev 1](docs/adr/0003-financial-firms.md)) | `tests/test_sectors.py` |
-| Foreign-currency filers (TM) mixed reporting units into the model | reporting-currency gate ([`1661304`](https://github.com/JackyJiang08/market-based-credit-rating/commit/1661304)) | `tests/test_currency_gate.py` |
-| Payment networks (V, MA) misclassified as deposit-funded banks | industry-level classification ([`7635e18`](https://github.com/JackyJiang08/market-based-credit-rating/commit/7635e18)) | `tests/test_sectors.py::test_payment_networks_are_not_banks` |
-| `abs(drift)` hid the defective-drift regime; σ and η shared one window | signed drift + split estimation windows ([`bf46ff0`](https://github.com/JackyJiang08/market-based-credit-rating/commit/bf46ff0)) | `tests/test_window_invariance.py` |
-| Two bootstrap bugs inflated the amplification episode | decomposition + re-run, recorded in [docs/UNCERTAINTY.md](docs/UNCERTAINTY.md) ([`c3e8a52`](https://github.com/JackyJiang08/market-based-credit-rating/commit/c3e8a52)) | `tests/test_headline_numbers.py` pins ×4,073 to the run-of-record data |
-| pandas 3 `[ns]/[us]` units broke cache merges | canonical `[ns]` at the cache boundary ([`44617f8`](https://github.com/JackyJiang08/market-based-credit-rating/commit/44617f8)) | `tests/test_cache.py::test_round_trip_is_dtype_identical`, CI pandas 2/3 matrix |
-| A missing price row cascaded NaN into KHC's whole chain | drop-missing guards at every last-value read ([`6eb9826`](https://github.com/JackyJiang08/market-based-credit-rating/commit/6eb9826)) | `tests/test_transforms.py` NaN-propagation family |
-| Delisted tickers (PARA, NKLA, FSR) showed as bare symbols on the site | last-known-name map + "(delisted)" label ([`ac75cbc`](https://github.com/JackyJiang08/market-based-credit-rating/commit/ac75cbc)) | exporter map in `apps/terminal/scripts/build_site_data.py` |
+| Deposit-funded bank rated `AAA` | applicability gates ([`8623205`](https://github.com/JackyJiang08/market-based-credit-rating/commit/8623205), [ADR 0003](docs/adr/0003-financial-firms.md)) | `tests/test_sectors.py` |
+| Book-equity gate blocked DELL | market-based test `A > ST + 1.0·LT` ([`ad15b95`](https://github.com/JackyJiang08/market-based-credit-rating/commit/ad15b95), [ADR 0003 Rev 1](docs/adr/0003-financial-firms.md)) | `tests/test_sectors.py` |
+| Mixed reporting currencies (TM) | reporting-currency gate ([`1661304`](https://github.com/JackyJiang08/market-based-credit-rating/commit/1661304)) | `tests/test_currency_gate.py` |
+| Payment networks gated as banks | industry-level classification ([`7635e18`](https://github.com/JackyJiang08/market-based-credit-rating/commit/7635e18)) | `tests/test_sectors.py::test_payment_networks_are_not_banks` |
+| Unsigned drift, shared windows | signed drift + split estimation windows ([`bf46ff0`](https://github.com/JackyJiang08/market-based-credit-rating/commit/bf46ff0)) | `tests/test_window_invariance.py` |
+| Uncertainty measurement had two bugs | the algebra-prediction test (RiskScore width must be exactly 2× σ_A's) surfaced them; fixed and the study re-run ([`c3e8a52`](https://github.com/JackyJiang08/market-based-credit-rating/commit/c3e8a52), [bug postmortem](docs/UNCERTAINTY.md)) | the two bootstrap regression tests in `tests/test_window_invariance.py`; `tests/test_headline_numbers.py` pins the re-run |
+| pandas-3 datetime-unit merge failures | canonical `[ns]` at the cache boundary ([`44617f8`](https://github.com/JackyJiang08/market-based-credit-rating/commit/44617f8)) | `tests/test_cache.py::test_round_trip_is_dtype_identical`, CI pandas 2/3 matrix |
+| NaN cascade from missing prices | drop-missing guards at every last-value read ([`6eb9826`](https://github.com/JackyJiang08/market-based-credit-rating/commit/6eb9826)) | `tests/test_transforms.py` NaN-propagation family |
+| Delisted tickers unnamed on site | last-known-name map + "(delisted)" label ([`ac75cbc`](https://github.com/JackyJiang08/market-based-credit-rating/commit/ac75cbc)) | exporter map in `apps/terminal/scripts/build_site_data.py` |
 
 ### Still open
 
@@ -351,11 +349,11 @@ Each row links the fix and the regression guard that keeps it fixed.
   and flagged in the `validation` sheet.
 - **Yahoo free tier** returns ~5-7 quarters of statements; banks
   omit a clean current/non-current split (handled by a debt fallback).
-- **Alignment keys on statement period-end**, not a true publication-time
-  `available_at`; panels are research prototypes, not backtest-safe datasets
-  ([TIMING_PROTOCOL §9](docs/TIMING_PROTOCOL.md)).
-- The `Asset` sheet `R` column is the realized drift `η_A - σ_A^2/2` (the DD
-  term); pending confirmation of the intended definition.
+- **Statement availability is approximated, not observed.** Statements enter
+  the model at `period_end` plus a statutory filing lag (45 d for a 10-Q,
+  90 d for a 10-K; `availability_method="estimated_lag"`) rather than their
+  true filing timestamps; panels remain research prototypes, not
+  backtest-safe datasets ([TIMING_PROTOCOL §9](docs/TIMING_PROTOCOL.md)).
 
 ## Architecture
 

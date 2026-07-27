@@ -191,8 +191,11 @@ on undocumented assumptions.
 
 The repository does not yet fully satisfy this protocol:
 
-- `data_cleaning/alignment.py` currently aligns statements using their period
-  end rather than their publication-time `available_at`.
+- `creditrating/data/alignment.py` shifts each statement to
+  `available_at = period_end + a statutory filing lag` (45 days quarterly,
+  90 days annual; `availability_method="estimated_lag"` per §3). True
+  filing/publication timestamps are not sourced, so availability is a
+  documented conservative approximation, not an observation.
 - The current reference-share method can apply a latest-date estimate across
   earlier history.
 - Raw and clean point-in-time vintages are not yet persisted as immutable
