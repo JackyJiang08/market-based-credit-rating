@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "74a28de",
-  "generated_utc": "2026-07-27T01:09:22Z",
+  "git_sha": "1932d0a",
+  "generated_utc": "2026-07-27T06:43:25Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -11,6 +11,7 @@
   {
    "ticker": "AAPL",
    "name": "Apple Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 0.2737896443739253,
    "risk_rank": 3.0,
@@ -37,6 +38,7 @@
   {
    "ticker": "MSFT",
    "name": "Microsoft Corporation",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 0.3775903594499029,
    "risk_rank": 8.0,
@@ -63,6 +65,7 @@
   {
    "ticker": "JNJ",
    "name": "Johnson & Johnson",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 0.6066352460946087,
    "risk_rank": 15.0,
@@ -89,6 +92,7 @@
   {
    "ticker": "GOOGL",
    "name": "Alphabet Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 0.4742070722598483,
    "risk_rank": 10.0,
@@ -115,6 +119,7 @@
   {
    "ticker": "AMZN",
    "name": "Amazon.com, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 0.9013259221718856,
    "risk_rank": 26.0,
@@ -141,6 +146,7 @@
   {
    "ticker": "META",
    "name": "Meta Platforms, Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 1.142868244220868,
    "risk_rank": 44.0,
@@ -167,6 +173,7 @@
   {
    "ticker": "NVDA",
    "name": "NVIDIA Corporation",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 0.2891499921393571,
    "risk_rank": 5.0,
@@ -193,6 +200,7 @@
   {
    "ticker": "CRM",
    "name": "Salesforce, Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 3.712836748760569,
    "risk_rank": 97.0,
@@ -219,6 +227,7 @@
   {
    "ticker": "AVGO",
    "name": "Broadcom Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 1.332021940802134,
    "risk_rank": 52.0,
@@ -245,6 +254,7 @@
   {
    "ticker": "AMD",
    "name": "Advanced Micro Devices, Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 1.323239085968506,
    "risk_rank": 51.0,
@@ -271,6 +281,7 @@
   {
    "ticker": "MU",
    "name": "Micron Technology, Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 1.744796041169243,
    "risk_rank": 67.0,
@@ -297,6 +308,7 @@
   {
    "ticker": "INTC",
    "name": "Intel Corporation",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 5.27970495865915,
    "risk_rank": 110.0,
@@ -323,6 +335,7 @@
   {
    "ticker": "IBM",
    "name": "International Business Machines Corporation",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 6.203292367149199,
    "risk_rank": 116.0,
@@ -349,6 +362,7 @@
   {
    "ticker": "ORCL",
    "name": "Oracle Corporation",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 12.43675385806802,
    "risk_rank": 127.0,
@@ -375,6 +389,7 @@
   {
    "ticker": "INTU",
    "name": "Intuit Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 2.222031093925881,
    "risk_rank": 77.0,
@@ -401,6 +416,7 @@
   {
    "ticker": "DELL",
    "name": "Dell Technologies Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 4.441371272976043,
    "risk_rank": 104.0,
@@ -427,6 +443,7 @@
   {
    "ticker": "MCD",
    "name": "McDonald's Corporation",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 0.6093009677331711,
    "risk_rank": 16.0,
@@ -453,6 +470,7 @@
   {
    "ticker": "SBUX",
    "name": "Starbucks Corporation",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 1.216814794105462,
    "risk_rank": 47.0,
@@ -479,6 +497,7 @@
   {
    "ticker": "HD",
    "name": "The Home Depot, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 0.9657586473288762,
    "risk_rank": 35.0,
@@ -505,6 +524,7 @@
   {
    "ticker": "LOW",
    "name": "Lowe's Companies, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 1.609000891768685,
    "risk_rank": 65.0,
@@ -531,6 +551,7 @@
   {
    "ticker": "BA",
    "name": "The Boeing Company",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 1.905873596134515,
    "risk_rank": 70.0,
@@ -557,6 +578,7 @@
   {
    "ticker": "PM",
    "name": "Philip Morris International Inc.",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 1.460478266018756,
    "risk_rank": 60.0,
@@ -583,6 +605,7 @@
   {
    "ticker": "YUM",
    "name": "Yum! Brands, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 1.039773920574007,
    "risk_rank": 38.0,
@@ -609,6 +632,7 @@
   {
    "ticker": "AZO",
    "name": "AutoZone, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 1.480134297445554,
    "risk_rank": 61.0,
@@ -635,6 +659,7 @@
   {
    "ticker": "DPZ",
    "name": "Domino's Pizza, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 2.140766237118141,
    "risk_rank": 75.0,
@@ -661,6 +686,7 @@
   {
    "ticker": "JPM",
    "name": "JPMorgan Chase & Co.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 1.347012359718499,
    "risk_rank": 55.0,
@@ -687,6 +713,7 @@
   {
    "ticker": "BAC",
    "name": "Bank of America Corporation",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 2.000073781045186,
    "risk_rank": 71.0,
@@ -713,6 +740,7 @@
   {
    "ticker": "WFC",
    "name": "Wells Fargo & Company",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 3.995979664793774,
    "risk_rank": 102.0,
@@ -739,6 +767,7 @@
   {
    "ticker": "C",
    "name": "Citigroup Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 5.053601096729669,
    "risk_rank": 107.0,
@@ -765,6 +794,7 @@
   {
    "ticker": "GS",
    "name": "The Goldman Sachs Group, Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 5.149179507990524,
    "risk_rank": 108.0,
@@ -791,6 +821,7 @@
   {
    "ticker": "MS",
    "name": "Morgan Stanley",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 3.167973035024929,
    "risk_rank": 92.0,
@@ -817,6 +848,7 @@
   {
    "ticker": "PNC",
    "name": "The PNC Financial Services Group, Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 1.455779670054851,
    "risk_rank": 59.0,
@@ -843,6 +875,7 @@
   {
    "ticker": "SCHW",
    "name": "The Charles Schwab Corporation",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 1.159494334606206,
    "risk_rank": 45.0,
@@ -869,6 +902,7 @@
   {
    "ticker": "COF",
    "name": "Capital One Financial Corporation",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 2.42317779312794,
    "risk_rank": 81.0,
@@ -895,6 +929,7 @@
   {
    "ticker": "ALLY",
    "name": "Ally Financial Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 5.592571430429524,
    "risk_rank": 113.0,
@@ -921,6 +956,7 @@
   {
    "ticker": "KEY",
    "name": "KeyCorp",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 5.3241225554143,
    "risk_rank": 111.0,
@@ -947,6 +983,7 @@
   {
    "ticker": "AXP",
    "name": "American Express Company",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 1.290047932792724,
    "risk_rank": 49.0,
@@ -973,6 +1010,7 @@
   {
    "ticker": "V",
    "name": "Visa Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 0.2868239607565133,
    "risk_rank": 4.0,
@@ -999,6 +1037,7 @@
   {
    "ticker": "MA",
    "name": "Mastercard Incorporated",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 0.3129759291597545,
    "risk_rank": 6.0,
@@ -1025,6 +1064,7 @@
   {
    "ticker": "PYPL",
    "name": "PayPal Holdings, Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 2.548590176151115,
    "risk_rank": 85.0,
@@ -1051,6 +1091,7 @@
   {
    "ticker": "BLK",
    "name": "BlackRock, Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 0.6409244789132699,
    "risk_rank": 18.0,
@@ -1077,6 +1118,7 @@
   {
    "ticker": "BX",
    "name": "Blackstone Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 1.121852288273725,
    "risk_rank": 43.0,
@@ -1103,6 +1145,7 @@
   {
    "ticker": "SPGI",
    "name": "S&P Global Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 1.099828460615342,
    "risk_rank": 40.0,
@@ -1129,6 +1172,7 @@
   {
    "ticker": "BRK-B",
    "name": "Berkshire Hathaway Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 0.2319800462858863,
    "risk_rank": 2.0,
@@ -1155,6 +1199,7 @@
   {
    "ticker": "AIG",
    "name": "American International Group, Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 0.9084859084622432,
    "risk_rank": 28.0,
@@ -1181,6 +1226,7 @@
   {
    "ticker": "MET",
    "name": "MetLife, Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 1.183838932286518,
    "risk_rank": 46.0,
@@ -1207,6 +1253,7 @@
   {
    "ticker": "ALL",
    "name": "The Allstate Corporation",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 0.6008626422014713,
    "risk_rank": 14.0,
@@ -1233,6 +1280,7 @@
   {
    "ticker": "PGR",
    "name": "The Progressive Corporation",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 0.5401167032245622,
    "risk_rank": 11.0,
@@ -1259,6 +1307,7 @@
   {
    "ticker": "PLD",
    "name": "Prologis, Inc.",
+   "delisted": false,
    "sector": "Real Estate",
    "risk_score": 0.807110206590673,
    "risk_rank": 22.0,
@@ -1285,6 +1334,7 @@
   {
    "ticker": "AMT",
    "name": "American Tower Corporation",
+   "delisted": false,
    "sector": "Real Estate",
    "risk_score": 2.111020035479909,
    "risk_rank": 73.0,
@@ -1311,6 +1361,7 @@
   {
    "ticker": "SPG",
    "name": "Simon Property Group, Inc.",
+   "delisted": false,
    "sector": "Real Estate",
    "risk_score": 0.7397631077018797,
    "risk_rank": 20.0,
@@ -1337,6 +1388,7 @@
   {
    "ticker": "O",
    "name": "Realty Income Corporation",
+   "delisted": false,
    "sector": "Real Estate",
    "risk_score": 0.7111343762332629,
    "risk_rank": 19.0,
@@ -1363,6 +1415,7 @@
   {
    "ticker": "EQIX",
    "name": "Equinix, Inc.",
+   "delisted": false,
    "sector": "Real Estate",
    "risk_score": 0.8355481374772582,
    "risk_rank": 23.0,
@@ -1389,6 +1442,7 @@
   {
    "ticker": "NEE",
    "name": "NextEra Energy, Inc.",
+   "delisted": false,
    "sector": "Utilities",
    "risk_score": 1.373312414582049,
    "risk_rank": 57.0,
@@ -1415,6 +1469,7 @@
   {
    "ticker": "DUK",
    "name": "Duke Energy Corporation",
+   "delisted": false,
    "sector": "Utilities",
    "risk_score": 0.907374889117211,
    "risk_rank": 27.0,
@@ -1441,6 +1496,7 @@
   {
    "ticker": "SO",
    "name": "The Southern Company",
+   "delisted": false,
    "sector": "Utilities",
    "risk_score": 0.9269351035581712,
    "risk_rank": 30.0,
@@ -1467,6 +1523,7 @@
   {
    "ticker": "D",
    "name": "Dominion Energy, Inc.",
+   "delisted": false,
    "sector": "Utilities",
    "risk_score": 1.481957739833098,
    "risk_rank": 62.0,
@@ -1493,6 +1550,7 @@
   {
    "ticker": "XEL",
    "name": "Xcel Energy Inc.",
+   "delisted": false,
    "sector": "Utilities",
    "risk_score": 1.336432015474442,
    "risk_rank": 53.0,
@@ -1519,6 +1577,7 @@
   {
    "ticker": "PCG",
    "name": "PG&E Corporation",
+   "delisted": false,
    "sector": "Utilities",
    "risk_score": 3.025208109768158,
    "risk_rank": 90.0,
@@ -1545,6 +1604,7 @@
   {
    "ticker": "VST",
    "name": "Vistra Corp.",
+   "delisted": false,
    "sector": "Utilities",
    "risk_score": 5.541479497484769,
    "risk_rank": 112.0,
@@ -1571,6 +1631,7 @@
   {
    "ticker": "XOM",
    "name": "ExxonMobil Holdings Corporation",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 0.600744674826745,
    "risk_rank": 13.0,
@@ -1597,6 +1658,7 @@
   {
    "ticker": "CVX",
    "name": "Chevron Corporation",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 0.6003335149740305,
    "risk_rank": 12.0,
@@ -1623,6 +1685,7 @@
   {
    "ticker": "COP",
    "name": "ConocoPhillips",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 1.1089424463398,
    "risk_rank": 41.0,
@@ -1649,6 +1712,7 @@
   {
    "ticker": "OXY",
    "name": "Occidental Petroleum Corporation",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 1.88038291746614,
    "risk_rank": 69.0,
@@ -1675,6 +1739,7 @@
   {
    "ticker": "SLB",
    "name": "SLB N.V.",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 1.546331960156617,
    "risk_rank": 63.0,
@@ -1701,6 +1766,7 @@
   {
    "ticker": "KMI",
    "name": "Kinder Morgan, Inc.",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 0.9405366039969474,
    "risk_rank": 31.0,
@@ -1727,6 +1793,7 @@
   {
    "ticker": "APA",
    "name": "APA Corporation",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 3.981222123635027,
    "risk_rank": 101.0,
@@ -1753,6 +1820,7 @@
   {
    "ticker": "BTU",
    "name": "Peabody Energy Corporation",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 4.370495717728713,
    "risk_rank": 103.0,
@@ -1779,6 +1847,7 @@
   {
    "ticker": "RIG",
    "name": "Transocean Ltd.",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 8.97880491612513,
    "risk_rank": 122.0,
@@ -1805,6 +1874,7 @@
   {
    "ticker": "LLY",
    "name": "Eli Lilly and Company",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 0.9594076971510098,
    "risk_rank": 33.0,
@@ -1831,6 +1901,7 @@
   {
    "ticker": "UNH",
    "name": "UnitedHealth Group Incorporated",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 2.281775796154588,
    "risk_rank": 78.0,
@@ -1857,6 +1928,7 @@
   {
    "ticker": "PFE",
    "name": "Pfizer Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 1.414440409642731,
    "risk_rank": 58.0,
@@ -1883,6 +1955,7 @@
   {
    "ticker": "MRK",
    "name": "Merck & Co., Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 0.9645038025156,
    "risk_rank": 34.0,
@@ -1909,6 +1982,7 @@
   {
    "ticker": "ABBV",
    "name": "AbbVie Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 0.8789471064206825,
    "risk_rank": 25.0,
@@ -1935,6 +2009,7 @@
   {
    "ticker": "AMGN",
    "name": "Amgen Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 1.316926976175284,
    "risk_rank": 50.0,
@@ -1961,6 +2036,7 @@
   {
    "ticker": "CVS",
    "name": "CVS Health Corporation",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 2.312297333961274,
    "risk_rank": 80.0,
@@ -1987,6 +2063,7 @@
   {
    "ticker": "MRNA",
    "name": "Moderna, Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 3.55866797600895,
    "risk_rank": 94.0,
@@ -2013,6 +2090,7 @@
   {
    "ticker": "HCA",
    "name": "HCA Healthcare, Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 2.894247155663934,
    "risk_rank": 88.0,
@@ -2039,6 +2117,7 @@
   {
    "ticker": "THC",
    "name": "Tenet Healthcare Corporation",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 4.726179763382073,
    "risk_rank": 106.0,
@@ -2065,6 +2144,7 @@
   {
    "ticker": "CYH",
    "name": "Community Health Systems, Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 6597.916064862005,
    "risk_rank": 139.0,
@@ -2091,6 +2171,7 @@
   {
    "ticker": "KO",
    "name": "The Coca-Cola Company",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 0.3686492179529905,
    "risk_rank": 7.0,
@@ -2117,6 +2198,7 @@
   {
    "ticker": "WMT",
    "name": "Walmart Inc.",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 0.6139502277521641,
    "risk_rank": 17.0,
@@ -2143,6 +2225,7 @@
   {
    "ticker": "COST",
    "name": "Costco Wholesale Corporation",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 0.1775329551173454,
    "risk_rank": 1.0,
@@ -2169,6 +2252,7 @@
   {
    "ticker": "TGT",
    "name": "Target Corporation",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 1.661017757536034,
    "risk_rank": 66.0,
@@ -2195,6 +2279,7 @@
   {
    "ticker": "NKE",
    "name": "NIKE, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 2.120467941020847,
    "risk_rank": 74.0,
@@ -2221,6 +2306,7 @@
   {
    "ticker": "DIS",
    "name": "The Walt Disney Company",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 1.350408038053938,
    "risk_rank": 56.0,
@@ -2247,6 +2333,7 @@
   {
    "ticker": "DG",
    "name": "Dollar General Corporation",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 3.928480137663006,
    "risk_rank": 98.0,
@@ -2273,6 +2360,7 @@
   {
    "ticker": "DLTR",
    "name": "Dollar Tree, Inc.",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 3.405566825393825,
    "risk_rank": 93.0,
@@ -2299,6 +2387,7 @@
   {
    "ticker": "KHC",
    "name": "The Kraft Heinz Company",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 2.185665158331277,
    "risk_rank": 76.0,
@@ -2325,6 +2414,7 @@
   {
    "ticker": "GIS",
    "name": "General Mills, Inc.",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 2.439509792834068,
    "risk_rank": 83.0,
@@ -2351,6 +2441,7 @@
   {
    "ticker": "KSS",
    "name": "Kohl's Corporation",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 44.0325795842961,
    "risk_rank": 132.0,
@@ -2377,6 +2468,7 @@
   {
    "ticker": "M",
    "name": "Macy's, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 5.859457769590865,
    "risk_rank": 114.0,
@@ -2403,6 +2495,7 @@
   {
    "ticker": "W",
    "name": "Wayfair Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 8.074202173987125,
    "risk_rank": 121.0,
@@ -2429,6 +2522,7 @@
   {
    "ticker": "BYND",
    "name": "Beyond Meat, Inc.",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 893.3353889810156,
    "risk_rank": 138.0,
@@ -2455,6 +2549,7 @@
   {
    "ticker": "T",
    "name": "AT&T Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 3.090238019252541,
    "risk_rank": 91.0,
@@ -2481,6 +2576,7 @@
   {
    "ticker": "VZ",
    "name": "Verizon Communications Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 2.631099726629502,
    "risk_rank": 86.0,
@@ -2507,6 +2603,7 @@
   {
    "ticker": "TMUS",
    "name": "T-Mobile US, Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 2.809182112789508,
    "risk_rank": 87.0,
@@ -2533,6 +2630,7 @@
   {
    "ticker": "CHTR",
    "name": "Charter Communications, Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 65.3116478048319,
    "risk_rank": 135.0,
@@ -2559,6 +2657,7 @@
   {
    "ticker": "WBD",
    "name": "Warner Bros. Discovery, Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 3.980210598804359,
    "risk_rank": 100.0,
@@ -2584,7 +2683,8 @@
   },
   {
    "ticker": "PARA",
-   "name": "PARA",
+   "name": "Paramount Global",
+   "delisted": true,
    "sector": null,
    "risk_score": null,
    "risk_rank": null,
@@ -2611,6 +2711,7 @@
   {
    "ticker": "LUMN",
    "name": "Lumen Technologies, Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 43.48092688259322,
    "risk_rank": 131.0,
@@ -2637,6 +2738,7 @@
   {
    "ticker": "SATS",
    "name": "EchoStar Corporation",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": null,
    "risk_rank": null,
@@ -2663,6 +2765,7 @@
   {
    "ticker": "CAT",
    "name": "Caterpillar Inc.",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 1.596348449744773,
    "risk_rank": 64.0,
@@ -2689,6 +2792,7 @@
   {
    "ticker": "DE",
    "name": "Deere & Company",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 2.295813973957573,
    "risk_rank": 79.0,
@@ -2715,6 +2819,7 @@
   {
    "ticker": "GE",
    "name": "GE Aerospace",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 1.253336061345806,
    "risk_rank": 48.0,
@@ -2741,6 +2846,7 @@
   {
    "ticker": "LMT",
    "name": "Lockheed Martin Corporation",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 0.9843692104650896,
    "risk_rank": 37.0,
@@ -2767,6 +2873,7 @@
   {
    "ticker": "RTX",
    "name": "RTX Corporation",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 1.343635196604954,
    "risk_rank": 54.0,
@@ -2793,6 +2900,7 @@
   {
    "ticker": "FDX",
    "name": "FedEx Corporation",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 2.43445163977895,
    "risk_rank": 82.0,
@@ -2819,6 +2927,7 @@
   {
    "ticker": "MMM",
    "name": "3M Company",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 0.8554104752297969,
    "risk_rank": 24.0,
@@ -2845,6 +2954,7 @@
   {
    "ticker": "XRX",
    "name": "Xerox Holdings Corporation",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 757.5326319880961,
    "risk_rank": 137.0,
@@ -2871,6 +2981,7 @@
   {
    "ticker": "PBI",
    "name": "Pitney Bowes Inc.",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 5.270393775483118,
    "risk_rank": 109.0,
@@ -2897,6 +3008,7 @@
   {
    "ticker": "TSLA",
    "name": "Tesla, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 0.9419090315057967,
    "risk_rank": 32.0,
@@ -2923,6 +3035,7 @@
   {
    "ticker": "F",
    "name": "Ford Motor Company",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 11.46575290039122,
    "risk_rank": 126.0,
@@ -2949,6 +3062,7 @@
   {
    "ticker": "GM",
    "name": "General Motors Company",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 9.236032121541268,
    "risk_rank": 123.0,
@@ -2975,6 +3089,7 @@
   {
    "ticker": "RIVN",
    "name": "Rivian Automotive, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 9.686753350320714,
    "risk_rank": 124.0,
@@ -3001,6 +3116,7 @@
   {
    "ticker": "LCID",
    "name": "Lucid Group, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 48.08169051153252,
    "risk_rank": 133.0,
@@ -3027,6 +3143,7 @@
   {
    "ticker": "DAL",
    "name": "Delta Air Lines, Inc.",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 3.619038257251689,
    "risk_rank": 95.0,
@@ -3053,6 +3170,7 @@
   {
    "ticker": "UAL",
    "name": "United Airlines Holdings, Inc.",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 7.086729985496831,
    "risk_rank": 117.0,
@@ -3079,6 +3197,7 @@
   {
    "ticker": "AAL",
    "name": "American Airlines Group Inc.",
+   "delisted": false,
    "sector": "Industrials",
    "risk_score": 29.47044526023635,
    "risk_rank": 130.0,
@@ -3105,6 +3224,7 @@
   {
    "ticker": "CCL",
    "name": "Carnival Corporation Ltd.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 7.155359522524522,
    "risk_rank": 118.0,
@@ -3131,6 +3251,7 @@
   {
    "ticker": "RCL",
    "name": "Royal Caribbean Cruises Ltd.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 3.932352621684388,
    "risk_rank": 99.0,
@@ -3157,6 +3278,7 @@
   {
    "ticker": "NCLH",
    "name": "Norwegian Cruise Line Holdings Ltd.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 17.6212808869089,
    "risk_rank": 129.0,
@@ -3183,6 +3305,7 @@
   {
    "ticker": "MGM",
    "name": "MGM Resorts International",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 8.008773457586916,
    "risk_rank": 119.0,
@@ -3209,6 +3332,7 @@
   {
    "ticker": "CZR",
    "name": "Caesars Entertainment, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 14.41628143372944,
    "risk_rank": 128.0,
@@ -3235,6 +3359,7 @@
   {
    "ticker": "COIN",
    "name": "Coinbase Global, Inc.",
+   "delisted": false,
    "sector": "Financial Services",
    "risk_score": 8.014937331627909,
    "risk_rank": 120.0,
@@ -3261,6 +3386,7 @@
   {
    "ticker": "MSTR",
    "name": "Strategy Inc",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 9.783117447209984,
    "risk_rank": 125.0,
@@ -3287,6 +3413,7 @@
   {
    "ticker": "GME",
    "name": "GameStop Corp.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 3.703783200826703,
    "risk_rank": 96.0,
@@ -3313,6 +3440,7 @@
   {
    "ticker": "AMC",
    "name": "AMC Entertainment Holdings, Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 64.97770804017881,
    "risk_rank": 134.0,
@@ -3339,6 +3467,7 @@
   {
    "ticker": "PLTR",
    "name": "Palantir Technologies Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 0.4268923396889077,
    "risk_rank": 9.0,
@@ -3365,6 +3494,7 @@
   {
    "ticker": "ARM",
    "name": "Arm Holdings plc",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 1.070680887440173,
    "risk_rank": 39.0,
@@ -3391,6 +3521,7 @@
   {
    "ticker": "CAVA",
    "name": "CAVA Group, Inc.",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": 2.959957582958435,
    "risk_rank": 89.0,
@@ -3417,6 +3548,7 @@
   {
    "ticker": "KVUE",
    "name": "Kenvue Inc.",
+   "delisted": false,
    "sector": "Consumer Defensive",
    "risk_score": 1.866708355049272,
    "risk_rank": 68.0,
@@ -3443,6 +3575,7 @@
   {
    "ticker": "RDDT",
    "name": "Reddit, Inc.",
+   "delisted": false,
    "sector": "Communication Services",
    "risk_score": 0.7736893501181038,
    "risk_rank": 21.0,
@@ -3469,6 +3602,7 @@
   {
    "ticker": "ALAB",
    "name": "Astera Labs, Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 1.109222935364882,
    "risk_rank": 42.0,
@@ -3495,6 +3629,7 @@
   {
    "ticker": "TEM",
    "name": "Tempus AI, Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 6.0846684094601,
    "risk_rank": 115.0,
@@ -3521,6 +3656,7 @@
   {
    "ticker": "BIRK",
    "name": "Birkenstock Holding plc",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": null,
    "risk_rank": null,
@@ -3547,6 +3683,7 @@
   {
    "ticker": "GEHC",
    "name": "GE HealthCare Technologies Inc.",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 2.531986722622402,
    "risk_rank": 84.0,
@@ -3573,6 +3710,7 @@
   {
    "ticker": "SOLV",
    "name": "Solventum Corporation",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 2.035211281526227,
    "risk_rank": 72.0,
@@ -3599,6 +3737,7 @@
   {
    "ticker": "LINE",
    "name": "Lineage, Inc.",
+   "delisted": false,
    "sector": "Real Estate",
    "risk_score": 4.529374074371231,
    "risk_rank": 105.0,
@@ -3625,6 +3764,7 @@
   {
    "ticker": "TSM",
    "name": "Taiwan Semiconductor Manufacturing Company Limited",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": null,
    "risk_rank": null,
@@ -3651,6 +3791,7 @@
   {
    "ticker": "BABA",
    "name": "Alibaba Group Holding Limited",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": null,
    "risk_rank": null,
@@ -3677,6 +3818,7 @@
   {
    "ticker": "NVO",
    "name": "Novo Nordisk A/S",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": null,
    "risk_rank": null,
@@ -3703,6 +3845,7 @@
   {
    "ticker": "SAP",
    "name": "SAP SE",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": null,
    "risk_rank": null,
@@ -3729,6 +3872,7 @@
   {
    "ticker": "TM",
    "name": "Toyota Motor Corporation",
+   "delisted": false,
    "sector": "Consumer Cyclical",
    "risk_score": null,
    "risk_rank": null,
@@ -3755,6 +3899,7 @@
   {
    "ticker": "ASML",
    "name": "ASML Holding N.V.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": null,
    "risk_rank": null,
@@ -3781,6 +3926,7 @@
   {
    "ticker": "AZN",
    "name": "AstraZeneca PLC",
+   "delisted": false,
    "sector": "Healthcare",
    "risk_score": 0.9817126526578868,
    "risk_rank": 36.0,
@@ -3807,6 +3953,7 @@
   {
    "ticker": "SHEL",
    "name": "Shell plc",
+   "delisted": false,
    "sector": "Energy",
    "risk_score": 0.9215903011628326,
    "risk_rank": 29.0,
@@ -3832,7 +3979,8 @@
   },
   {
    "ticker": "NKLA",
-   "name": "NKLA",
+   "name": "Nikola Corporation",
+   "delisted": true,
    "sector": null,
    "risk_score": null,
    "risk_rank": null,
@@ -3859,6 +4007,7 @@
   {
    "ticker": "SPWR",
    "name": "SunPower Inc.",
+   "delisted": false,
    "sector": "Technology",
    "risk_score": 112.0986650082655,
    "risk_rank": 136.0,
@@ -3884,7 +4033,8 @@
   },
   {
    "ticker": "FSR",
-   "name": "FSR",
+   "name": "Fisker Inc.",
+   "delisted": true,
    "sector": null,
    "risk_score": null,
    "risk_rank": null,

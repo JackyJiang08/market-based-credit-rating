@@ -110,14 +110,31 @@ def main() -> None:
         if os.path.exists(os.path.join(cache.cache_dir(), d, "prices.parquet"))
     )
 
+    # Last-known names for delisted tickers (public record; the vendor
+    # returns nothing for them) and vendor-name quirks we flag rather than
+    # silently rewrite.
+    DELISTED_NAMES = {
+        "PARA": "Paramount Global",
+        "NKLA": "Nikola Corporation",
+        "FSR": "Fisker Inc.",
+        "SPWR": "SunPower Corporation",
+    }
+
     # --- universe.json -------------------------------------------------------
     uni_rows = []
     rs_rank = uni["TiC Risk Score"].rank()
     for i, r in uni.iterrows():
+        name = r["Company"]
+        delisted = False
+        if (not isinstance(name, str)) or name == r["Symbol"]:
+            if r["Symbol"] in DELISTED_NAMES:
+                name = DELISTED_NAMES[r["Symbol"]]
+                delisted = True
         uni_rows.append(
             {
                 "ticker": r["Symbol"],
-                "name": r["Company"],
+                "name": name,
+                "delisted": delisted,
                 "sector": r.get("sector"),
                 "risk_score": r["TiC Risk Score"],
                 "risk_rank": rs_rank[i],
@@ -329,6 +346,17 @@ def main() -> None:
     val2.pop("amplification_median_placeholder", None)
     val2["amplification_median"] = med
     json.dump(_clean(val2), open(os.path.join(OUT, "validation.json"), "w"), indent=1)
+
+    # validation figures for the /validation page (committed SVGs, our outputs)
+    import shutil
+
+    fig_out = os.path.join(OUT, "figures")
+    os.makedirs(fig_out, exist_ok=True)
+    for f in ("letters_model_vs_agency.svg", "rank_scatter.svg",
+              "notch_errors.svg", "baseline_comparison.svg"):
+        src = os.path.join(ROOT, "docs", "analysis", f)
+        if os.path.exists(src):
+            shutil.copy(src, os.path.join(fig_out, f))
 
     # --- manifest.json --------------------------------------------------------
     manifest = {

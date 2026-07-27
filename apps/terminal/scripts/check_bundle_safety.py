@@ -78,8 +78,8 @@ def main() -> int:
                 "ttc"
             ):
                 problems.append(f"forbidden filename in bundle: {os.path.join(dirpath, f)}")
-            if not low.endswith(".json"):
-                problems.append(f"non-JSON file in data export: {os.path.join(dirpath, f)}")
+            if not (low.endswith(".json") or low.endswith(".svg")):
+                problems.append(f"non-JSON/SVG file in data export: {os.path.join(dirpath, f)}")
 
     # 2 + 3. VALUE and SHAPE checks
     # The one documented exception: the grid's 2bp TTC floor. It is already

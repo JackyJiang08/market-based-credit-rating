@@ -12,6 +12,7 @@ export const Meta = z.object({
 export const UniverseRow = z.object({
   ticker: z.string(),
   name: z.string().nullable(),
+  delisted: z.boolean().optional(),
   sector: z.string().nullable(),
   risk_score: z.number().nullable(),
   risk_rank: z.number().nullable(),
