@@ -1,10 +1,17 @@
-# Market-Based Credit-Rating Pipeline
+# Credit Rating Terminal — market-based ratings with honest uncertainty
 
 [![tests](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml)
 [![DEVLOG gate](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
+[![coverage gate](https://img.shields.io/badge/coverage-%E2%89%A585%25%20gated%20in%20CI-blue.svg)](.github/workflows/ci.yml)
 [![pages](https://img.shields.io/github/deployments/JackyJiang08/market-based-credit-rating/github-pages?label=pages)](https://jackyjiang08.github.io/market-based-credit-rating/)
+[![Python 3.11 | 3.12](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
+[![pandas 2 | 3](https://img.shields.io/badge/pandas-2%20%7C%203-blue.svg)](.github/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
+
+A KMV/Merton structural model with Time-Consistent (TiC) credit measures that
+rates 150 public companies and **publishes how much of each rating survives its
+own uncertainty** — the drift-free RiskScore and the rank ordering do; the
+letter does not, and every letter ships with the interval that proves it.
 
 **Live demo: [jackyjiang08.github.io/market-based-credit-rating](https://jackyjiang08.github.io/market-based-credit-rating/)** — the
 150-name universe, the µ–CCM plane, and a sensitivity playground, all computed
@@ -26,88 +33,48 @@ INLINE_VIDEO_URL
 
 ▶ [21-second demo video (MP4)](https://raw.githubusercontent.com/JackyJiang08/market-based-credit-rating/main/docs/figures/terminal_demo.mp4) — landing → ⌘K `ORCL` → interval-attached letter → µ–CCM plane.
 
-A market-based credit-rating pipeline for public companies. It downloads equity
-and rate data, estimates a **KMV/Merton** structural model by **EM** (recovering
-asset value, asset volatility, and asset return), and produces **Time-Consistent
-(TiC)** credit measures — RiskScore, Distance-to-Default, a Point-in-Time PD, a
-no-regulatory-arbitrage Through-The-Cycle PD, and an **S&P-equivalent** letter
-rating.
-
-The methodology reference materials and the `TiC_TTC_conversion.xlsx` workbook
-are licensed material, kept out of the repository (a git-ignored `local/` tree);
-code docstrings cite the methodology by equation number.
-
 ## Results at a glance
 
-- **×4,073** — how much the PD-based conversion layer amplifies parameter uncertainty vs the drift-free RiskScore, measured on ten real companies → [parameter uncertainty](#parameter-uncertainty)
-- **τ = 0.956** — median Kendall's τ of the risk ordering across 2,000 bootstrap replicates; the extremes are essentially never misordered → [rank stability](#parameter-uncertainty)
-- **7 notches** — how far one company's letter (T) moves on the unargued long-term-debt weight alone → [convention uncertainty](#convention-uncertainty)
-- **7/10 rated, 3/10 scale-resolved** — coverage stated honestly: most letters are pinned by the scale, not resolved by the model → [what the scale could resolve](#scale-resolution)
-- **150-name universe, 0 unexplained failures** — every non-rating classified (gates, defective drift, data), two real bugs found and fixed by scale alone → [docs/UNIVERSE.md](docs/UNIVERSE.md)
-- **ρ = 0.79 against actual agency ratings** (0.73 restricted to scale-resolved names) — the ordering validates; the letter runs +5 notches optimistic and DD alone ties RiskScore → [validation study](docs/analysis/VALIDATION.md)
+| Number | The finding | Chart | Interactive |
+|---|---|---|---|
+| **×4,073** | how much the PD-based conversion layer amplifies parameter uncertainty vs the drift-free RiskScore → [parameter uncertainty](#parameter-uncertainty) | [amplification ladder](docs/figures/amplification_ladder.svg) | [sensitivity playground](https://jackyjiang08.github.io/market-based-credit-rating/sensitivity/) — drag the drift slider and watch RiskScore not move |
+| **τ = 0.956** | median Kendall's τ of the risk ordering across 2,000 bootstrap replicates; the extremes are essentially never misordered → [parameter uncertainty](#parameter-uncertainty) | [rank-stability heatmap](docs/figures/rank_stability_heatmap.svg) | [µ–CCM plane with the ORCL cloud](https://jackyjiang08.github.io/market-based-credit-rating/plane/?focus=ORCL) |
+| **ρ = 0.79** | RiskScore ordering vs sourced agency ratings (0.73 restricted to scale-resolved names; holds within every sector) → [agency validation](#agency-validation) | [rank scatter](docs/analysis/rank_scatter.svg) | [validation page](https://jackyjiang08.github.io/market-based-credit-rating/validation/) |
+| **+5 notches** | median optimism of the letter conversion vs agency ratings — the conversion, not the ordering, is the weak layer → [agency validation](#agency-validation) | [notch errors](docs/analysis/notch_errors.svg) | [validation page](https://jackyjiang08.github.io/market-based-credit-rating/validation/) |
 
-![Amplification ladder: median relative bootstrap interval width per quantity, log scale](docs/figures/amplification_ladder.svg)
+Secondary numbers, stated honestly: **7/10 rated but only 3/10
+scale-resolved** on the original panel ([scale resolution](#scale-resolution));
+**150-name universe with 0 unexplained failures** — every non-rating classified
+([docs/UNIVERSE.md](docs/UNIVERSE.md)); and **DD alone ties RiskScore on
+discrimination** (0.78 vs 0.79) — the TiC construction's advantages are
+stability properties, not ranking properties
+([validation study](docs/analysis/VALIDATION.md)).
 
-## Architecture
-
-```mermaid
-flowchart LR
-    src["Yahoo · FRED"] --> data["creditrating.data\ncache · clean · align · gate"]
-    data --> model["creditrating.model\nEM → TiC measures → conversion"]
-    grids[("local/ grids — licensed,\nnever committed")] -.-> model
-    model --> io["creditrating.io\nworkbook · exports · manifest"]
-    io --> api["services/api\noffline-first FastAPI"]
-    io --> site["apps/terminal\nstatic terminal (Pages)"]
-```
-
-One package owns the computation; the API and the web terminal are thin
-consumers of its outputs. Full picture (package map, runtime data flow, the
-static-site pipeline and the licensed-materials boundary, each with a
-staleness guard in CI): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-## Method
-
-| Step | Where | Reference |
-| --- | --- | --- |
-| Equity `E = shares x price` (dividends added back) | `creditrating/data/alignment.py` | total-return convention: a dividend is firm value paid out, not destroyed |
-| Default-point debt `D = 100% ST + 50% LT` | `creditrating/data/cleaning.py` | the standard KMV default-point convention |
-| As-of alignment of price / statement / 1Y rate (no look-ahead) | `creditrating/data/alignment.py` | point-in-time discipline ([TIMING_PROTOCOL](docs/TIMING_PROTOCOL.md)) |
-| **EM**: invert `E = g(A)` by bisection; recover `sigma_A`, `A`, `eta_A` | `creditrating/model/em.py` | Eq. (10) |
-| `mu`, `CCM` (first-passage factors) | `creditrating/model/tic.py` | Eq. (11) |
-| `TiC = sigma_A^2/ln^2(A/D)`, `RiskScore = 100*TiC` | `model/tic.py` | Eq. (12), (5) |
-| `DD`, `EDF = Phi(-DD)` | `model/tic.py` | Eq. (14) |
-| `PIT PD` (inverse-Gaussian first-hitting) | `model/tic.py` | Eq. (13) |
-| No-arbitrage `alpha` match, `CCM*`; TTC PD; S&P letter | `creditrating/model/conversion.py` | Prop. 5.2, Sec. 5.3 |
-| `Outlook = PIT PD - TTC PD` | `model/conversion.py` | Prop. 5.3 |
-
-Verified against the methodology's published anchors: PIT PD reproduces
-Tables 13–14; `alpha_FH(1.5)=0.91906`, `CCM*=1.35373`.
-
-## Data sources
-
-| Data | Source |
-| --- | --- |
-| Prices, shares, dividends, balance sheets | Yahoo Finance (`yfinance`) |
-| Risk-free rate: **1-Year Treasury** (`DGS1`) | FRED (Federal Reserve H.15) |
-
-The 1-year tenor matches the 1-year credit horizon used throughout the model.
+These four numbers have one source of truth
+([docs/analysis/data/headline.json](docs/analysis/data/headline.json)), and
+[`tests/test_headline_numbers.py`](tests/test_headline_numbers.py) recomputes
+them from the committed run-of-record data and fails CI if any surface drifts.
 
 ## Quickstart
 
+**Just looking?** The [live site](https://jackyjiang08.github.io/market-based-credit-rating/)
+is the whole result set, computed offline from committed data.
+
+**Running it** (Python 3.11+; committed cache fixtures make the demo work on a
+fresh clone with no network):
+
 ```bash
-pip install -r requirements.txt -r requirements-dev.txt   # Python 3.11+
+pip install -r requirements.txt -r requirements-dev.txt
+python -m mdt rate COST          # offline: one company → rating table + report
+```
 
-# One company (ticker or name) -> prints the rating table + writes a report
-python -m mdt rate AAPL
+More entry points:
 
-# The batch run -> outputs/submission_<timestamp>.xlsx
-python -m mdt batch config/companies.yaml
-
-# The 150-name universe (parallel, resumable via data/cache/) -- docs/UNIVERSE.md
-python -m mdt batch config/universe.yaml --workers 6
-
-# Backward-compatible workflow entry
-python run.py COST KO --years 2
+```bash
+python -m mdt batch config/companies.yaml        # 10-name batch → outputs/submission_<UTC>.xlsx
+python -m mdt batch config/universe.yaml --workers 6   # the 150-name universe
+make serve                        # offline-first FastAPI service on :8000 (make demo for the CLI demo)
+pytest                            # the offline suite — green on a fresh clone, local/ absent
 ```
 
 What `rate` prints (abbreviated — a real run, 2026-07-26):
@@ -116,10 +83,6 @@ What `rate` prints (abbreviated — a real run, 2026-07-26):
 ======================================================
   Costco Wholesale Corporation (COST)
 ======================================================
-  INPUTS
-    Last price               : 935.03
-    Default-point debt D     : 4,068,000,000
-    Risk-free r (DGS1)       : 4.150%
   MODEL (EM)
     Asset value A            : 418,568,631,432
     Asset volatility sigma_A : 19.52%
@@ -128,47 +91,19 @@ What `rate` prints (abbreviated — a real run, 2026-07-26):
     RiskScore (Eq. 5/12)     : 0.18
     Distance to Default      : 24.37
     PIT PD                   : 0.0000%
-    TTC PD                   : 0.0100%
   RATING
     S&P letter (interval)    : AAA (AAA..AAA-)
     Determination            : PINNED_AT_SCALE_TOP
-    Basis                    : ANALYTICAL
   FLAGS
     ! WEAKLY_IDENTIFIED (|t| = 1.37 < 2): read the interval, not the point rating
     ! TTC PD at the grid's 2bp floor -> letter is floor-determined
 ======================================================
 ```
 
-Committed cache fixtures make the demo run **offline**: `python -m mdt rate COST`
-works on a fresh clone with no network (data/cache/, see docs/UNIVERSE.md).
-
-To enable the TTC/S&P conversion, place the
-`TiC_TTC_conversion.xlsx` workbook at `local/TiC_TTC_conversion.xlsx` (git-ignored).
-Without it the pipeline still runs and reports σ_A / DD / PIT PD; the TTC/S&P
-columns are simply skipped.
-
-Outputs (all git-ignored, regenerated by running):
-- `outputs/submission_<timestamp>.xlsx` — the submission `Asset` sheet + a `validation` sheet.
-- `dashboard/output/` — per-company workbooks, master summary, tidy long table.
-- `raw_data_architecture/data/` & `data_cleaning/data/` — per-company raw + cleaned CSV/XLSX.
-
-## Tests
-
-```bash
-pip install -r requirements.txt -r requirements-dev.txt
-pytest
-```
-
-Those two commands are the entire fresh-clone story (a dependency-declaration
-canary test keeps them true; CI installs from the same two files and nothing
-else). `make setup && make demo` wraps them and runs the offline demo.
-
-`make` targets: `setup | test | lint | run | batch | demo` (`lint` runs ruff,
-black and mypy — all clean). The offline suite
-covers the no-look-ahead canary, EM recovery of a known σ_A, measures vs the
-reference tables, and conversion checks. Grid/lookup tests that need the
-proprietary workbook skip automatically when `local/` is absent, so a fresh
-clone is green. CI runs the same suite with coverage on every push.
+To enable the TTC/S&P conversion, place the licensed
+`TiC_TTC_conversion.xlsx` workbook at `local/TiC_TTC_conversion.xlsx`
+(git-ignored). Without it the pipeline still runs and reports σ_A / DD /
+PIT PD, and the grid tests skip.
 
 ## Findings
 
@@ -197,6 +132,9 @@ the PD chain cleanly:
 `RiskScore ∝ σ_A²` gives `d(RS)/RS = 2·dσ/σ`, and the measured ratio is 2.00. RiskScore
 inherits the volatility's uncertainty and **nothing else**; no instability enters before
 the conversion. The amplification is introduced entirely by the PD-based conversion layer.
+The [sensitivity playground](https://jackyjiang08.github.io/market-based-credit-rating/sensitivity/)
+makes this tactile: the drift slider moves µ, CCM and PIT PD, and visibly does not move
+RiskScore.
 
 **Rank ordering is stable.** Kendall's τ between each replicate's ordering of the ten
 companies and the point-estimate ordering: **median 0.956**, 5th percentile 0.867, and
@@ -251,6 +189,8 @@ scale as the bootstrap interval:
 **For ORCL, PNC and T, the convention span equals or exceeds the bootstrap span.** T moves
 seven notches (AAA− to A−) on the debt weight alone. ORCL moves from unrateable to B+. The
 published rating is at least as much a statement about the 0.5 as it is about the company.
+The playground's `w` slider is the
+[interactive version](https://jackyjiang08.github.io/market-based-credit-rating/sensitivity/).
 
 ![Convention sweep: letter vs long-term debt weight per company; T moves seven notches](docs/figures/convention_sweep.svg)
 
@@ -303,13 +243,16 @@ immunity to an arbitrary convention is the same fact seen from the other side.
 
 The full study — sourced ratings, stratified discrimination with bootstrap CIs,
 calibration, baselines, sector stratification — is in
-[docs/analysis/VALIDATION.md](docs/analysis/VALIDATION.md). The two headline facts:
-the RiskScore ordering correlates ρ = 0.79 with the agency ordering (0.73 restricted
-to the 36 scale-resolved names — it is not carried by pinned letters, and it holds
-within every sector), while the letter conversion runs a median **+5 notches
-optimistic** with only 16% of names within two notches. And the honest baseline:
-**DD alone ties RiskScore on discrimination** (0.78 vs 0.79) — the TiC construction's
-advantages are stability properties, not ranking properties.
+[docs/analysis/VALIDATION.md](docs/analysis/VALIDATION.md), with the tables and
+charts also on the
+[validation page](https://jackyjiang08.github.io/market-based-credit-rating/validation/).
+The two headline facts: the RiskScore ordering correlates ρ = 0.79 with the
+agency ordering (0.73 restricted to the 36 scale-resolved names — it is not
+carried by pinned letters, and it holds within every sector), while the letter
+conversion runs a median **+5 notches optimistic** with only 16% of names
+within two notches. And the honest baseline: **DD alone ties RiskScore on
+discrimination** (0.78 vs 0.79) — the TiC construction's advantages are
+stability properties, not ranking properties.
 
 ![Model letters vs agency letters by broad grade](docs/analysis/letters_model_vs_agency.svg)
 
@@ -339,17 +282,9 @@ value from its neighbours. As of the 2026-07-26 run, of ten companies:
 | `MODEL_NOT_APPLICABLE` | **1** | PNC — see [ADR 0003](docs/adr/0003-financial-firms.md) |
 | `NOT_RATED` | **2** | INTU, KHC — defective drift regime (Prop. 4.4.1) |
 
-DELL was briefly gated for negative book equity — a quantity this market-based model never
-uses. That spec was revised the same day: the gate is now the market-based test
-`A > ST + 1.0·LT` (DELL passes with A ≈ $301bn against ≈ $31bn), and the full record —
-original spec, objection, resolution, and why that margin — is in
-[ADR 0003, Revision 1](docs/adr/0003-financial-firms.md).
-
-**PNC is the case that motivated the gate.** Its default point under the shipped rule is
-$33.3bn against **$539.4bn of total liabilities** — the model was looking at 6% of what the
-bank owes and returning `AAA`. Rating it on total liabilities instead gives `BB`. Its actual
-agency rating is **A / A2**, so the convention choice brackets the truth without landing on
-it, and no choice of barrier rescues the model for a deposit-funded firm.
+Across the 150-name universe the same split is 60% pinned at the scale top among rated
+names — which is why the site's landing page answers "why is everything AAA?" before
+showing a table.
 
 `SCALE_RESOLVED` is a statement about the scale, **not** about estimation precision. DELL
 is the case that proves it: strongest drift t-statistic in the universe (2.01) and the
@@ -362,19 +297,117 @@ says anything about precision. Full explanation:
 [`docs/RATING_DETERMINATION.md`](docs/RATING_DETERMINATION.md); the uncertainty method and
 its known limits: [`docs/UNCERTAINTY.md`](docs/UNCERTAINTY.md).
 
+## Method
+
+| Step | Where | Reference |
+| --- | --- | --- |
+| Equity `E = shares x price` (dividends added back) | `creditrating/data/alignment.py` | total-return convention: a dividend is firm value paid out, not destroyed |
+| Default-point debt `D = 100% ST + 50% LT` | `creditrating/data/cleaning.py` | the standard KMV default-point convention |
+| As-of alignment of price / statement / 1Y rate (no look-ahead) | `creditrating/data/alignment.py` | point-in-time discipline ([TIMING_PROTOCOL](docs/TIMING_PROTOCOL.md)) |
+| **EM**: invert `E = g(A)` by bisection; recover `sigma_A`, `A`, `eta_A` | `creditrating/model/em.py` | Eq. (10) |
+| `mu`, `CCM` (first-passage factors) | `creditrating/model/tic.py` | Eq. (11) |
+| `TiC = sigma_A^2/ln^2(A/D)`, `RiskScore = 100*TiC` | `model/tic.py` | Eq. (12), (5) |
+| `DD`, `EDF = Phi(-DD)` | `model/tic.py` | Eq. (14) |
+| `PIT PD` (inverse-Gaussian first-hitting) | `model/tic.py` | Eq. (13) |
+| No-arbitrage `alpha` match, `CCM*`; TTC PD; S&P letter | `creditrating/model/conversion.py` | Prop. 5.2, Sec. 5.3 |
+| `Outlook = PIT PD - TTC PD` | `model/conversion.py` | Prop. 5.3 |
+
+Verified against the methodology's published anchors: PIT PD reproduces
+Tables 13–14; `alpha_FH(1.5)=0.91906`, `CCM*=1.35373`.
+
+Data sources: prices, shares, dividends and balance sheets from Yahoo Finance
+(`yfinance`); the risk-free rate is the **1-Year Treasury** (`DGS1`) from FRED,
+matching the 1-year credit horizon used throughout the model.
+
 ## Limitations
+
+### Resolved along the way
+
+Each row links the fix and the regression guard that keeps it fixed.
+
+| Was wrong | Fixed by | Guarded by |
+|---|---|---|
+| A deposit-funded bank (PNC) rated `AAA` off 6% of its liabilities | applicability gates for banks/insurers/REITs ([`8623205`](https://github.com/JackyJiang08/market-based-credit-rating/commit/8623205), [ADR 0003](docs/adr/0003-financial-firms.md)) | `tests/test_sectors.py` |
+| The negative-book-equity gate blocked DELL — a book-value test in a market-based model | market-based test `A > ST + 1.0·LT` ([`ad15b95`](https://github.com/JackyJiang08/market-based-credit-rating/commit/ad15b95), [ADR 0003 Rev 1](docs/adr/0003-financial-firms.md)) | `tests/test_sectors.py` |
+| Foreign-currency filers (TM) mixed reporting units into the model | reporting-currency gate ([`1661304`](https://github.com/JackyJiang08/market-based-credit-rating/commit/1661304)) | `tests/test_currency_gate.py` |
+| Payment networks (V, MA) misclassified as deposit-funded banks | industry-level classification ([`7635e18`](https://github.com/JackyJiang08/market-based-credit-rating/commit/7635e18)) | `tests/test_sectors.py::test_payment_networks_are_not_banks` |
+| `abs(drift)` hid the defective-drift regime; σ and η shared one window | signed drift + split estimation windows ([`bf46ff0`](https://github.com/JackyJiang08/market-based-credit-rating/commit/bf46ff0)) | `tests/test_window_invariance.py` |
+| Two bootstrap bugs inflated the amplification episode | decomposition + re-run, recorded in [docs/UNCERTAINTY.md](docs/UNCERTAINTY.md) ([`c3e8a52`](https://github.com/JackyJiang08/market-based-credit-rating/commit/c3e8a52)) | `tests/test_headline_numbers.py` pins ×4,073 to the run-of-record data |
+| pandas 3 `[ns]/[us]` units broke cache merges | canonical `[ns]` at the cache boundary ([`44617f8`](https://github.com/JackyJiang08/market-based-credit-rating/commit/44617f8)) | `tests/test_cache.py::test_round_trip_is_dtype_identical`, CI pandas 2/3 matrix |
+| A missing price row cascaded NaN into KHC's whole chain | drop-missing guards at every last-value read ([`6eb9826`](https://github.com/JackyJiang08/market-based-credit-rating/commit/6eb9826)) | `tests/test_transforms.py` NaN-propagation family |
+| Delisted tickers (PARA, NKLA, FSR) showed as bare symbols on the site | last-known-name map + "(delisted)" label ([`ac75cbc`](https://github.com/JackyJiang08/market-based-credit-rating/commit/ac75cbc)) | exporter map in `apps/terminal/scripts/build_site_data.py` |
+
+### Still open
 
 - **Market-based PIT PD is liquidity-sensitive.** For large, liquid,
   investment-grade names PIT PD is legitimately ~0; compare firms by **DD** and
   **RiskScore** rather than PIT PD. Typical asset volatilities land in ~10-60%.
 - **η_A is noisy** over a short estimation window — the classic drift-estimation
   problem; this shows up in µ/CCM/PIT but *not* in the η-independent RiskScore.
+- **The letter conversion runs +5 notches optimistic** against agency ratings —
+  published as a finding, not corrected by refitting
+  ([validation](docs/analysis/VALIDATION.md)).
 - **Off-grid conversions** (CCM or µ outside the lookup grid) are edge-clamped
   and flagged in the `validation` sheet.
-- **Yahoo free tier** returns ~5-7 quarters of statements; banks (e.g. PNC)
+- **Yahoo free tier** returns ~5-7 quarters of statements; banks
   omit a clean current/non-current split (handled by a debt fallback).
+- **Alignment keys on statement period-end**, not a true publication-time
+  `available_at`; panels are research prototypes, not backtest-safe datasets
+  ([TIMING_PROTOCOL §9](docs/TIMING_PROTOCOL.md)).
 - The `Asset` sheet `R` column is the realized drift `η_A - σ_A^2/2` (the DD
   term); pending confirmation of the intended definition.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    src["Yahoo · FRED"] --> data["creditrating.data\ncache · clean · align · gate"]
+    data --> model["creditrating.model\nEM → TiC measures → conversion"]
+    grids[("local/ grids — licensed,\nnever committed")] -.-> model
+    model --> io["creditrating.io\nworkbook · exports · manifest"]
+    io --> api["services/api\noffline-first FastAPI"]
+    io --> site["apps/terminal\nstatic terminal (Pages)"]
+```
+
+One package owns the computation; the API and the web terminal are thin
+consumers of its outputs. Full picture (package map, runtime data flow, the
+static-site pipeline and the licensed-materials boundary, each with a
+staleness guard in CI): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+**Decision records:** [ADR 0001 — drift estimation](docs/adr/0001-drift-estimation.md) ·
+[ADR 0002 — defective-drift intervals](docs/adr/0002-defective-drift-interval-proposal.md) ·
+[ADR 0003 — financial-firm applicability](docs/adr/0003-financial-firms.md).
+
+**Static-site data pipeline:** `apps/terminal/scripts/build_site_data.py`
+exports the run-of-record results to JSON; `check_bundle_safety.py` then
+proves, against the licensed grids themselves (path, value and shape checks
+over 8,993 values), that nothing licensed reaches the public bundle — the
+check runs in the frontend CI cell and again inside the deploy job.
+
+**The licensed-materials boundary:** the TiC reference materials and the
+conversion workbook live in a git-ignored `local/` tree and are never
+committed; `.gitignore` blocks the extensions, an acceptance check audits
+`git ls-files`, and the pipeline degrades gracefully (σ_A / DD / PIT PD
+without the letter) when `local/` is absent.
+
+## Tests
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+pytest
+```
+
+Those two commands are the entire fresh-clone story (a dependency-declaration
+canary test keeps them true; CI installs from the same two files and nothing
+else). `make setup && make demo` wraps them and runs the offline demo.
+
+`make` targets: `setup | test | lint | run | batch | demo | serve` (`lint` runs
+ruff, black and mypy — all clean). The offline suite covers the no-look-ahead
+canary, EM recovery of a known σ_A, measures vs the reference tables, and
+conversion checks. Grid/lookup tests that need the proprietary workbook skip
+automatically when `local/` is absent, so a fresh clone is green. CI runs the
+same suite with a ≥85% coverage gate on `model/`, `tables/` and
+`diagnostics/`, on Python 3.11/3.12 × pandas 2/3.
 
 ## Methodology & acknowledgements
 
