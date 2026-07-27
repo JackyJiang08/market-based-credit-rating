@@ -35,6 +35,38 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-27 - v1.0.0: final acceptance sweep, deliverable-final, release
+
+- **README review fixes:** the inline-video placeholder moved inside the HTML
+  comment (nothing broken renders); the Resolved-limitations table reflowed to
+  short labels (option comparison recorded in the commit body); the alignment
+  bullet and TIMING_PROTOCOL section 9 now state the actual open item
+  (statutory-lag approximation vs true filing timestamps -- statements ARE
+  lagged 45d/90d with availability_method='estimated_lag'); the settled
+  R-column bullet deleted; the bootstrap Resolved row reworded (bugs were in
+  the uncertainty measurement, surfaced by the algebra-prediction test, fixed,
+  study re-run).
+- **Full acceptance sweep, all green:** fresh clone (no local/), two-command
+  story, py3.11/3.12 x pandas 2.3.3/3.0.5 -- 334 passed + 43 skipped in all
+  four cells; make demo offline produced the COST report; main repo 377/377
+  with anchors (Tables 13-14, alpha_FH, CCM*), DEFAULT_YEARS invariance,
+  no-look-ahead canary, headline guard; bundle-safety full mode OK; vitest
+  18/18; Playwright + axe 19/19; CI lighthouse gates 100 x4 on four pages.
+- **deliverable-final:** workbook regenerated offline from the final pipeline
+  (submission_20260727T104102Z.xlsx), archived with a DIFF vs v1 -- 9/10
+  companies identical across all 35 Asset columns; KHC moves on a refreshed
+  cache fixture (2026-07-24 close + vendor share revision), rating unchanged.
+  Cell-level IP scan vs the licensed workbook's 28,399 values: only documented
+  coincidences. Tagged deliverable-final.
+- **Audit closeout:** all 18 audit issues (#3-#20) closed with commit
+  references; the v1.0.0 CHANGELOG section carries the full register
+  (fixed / mitigated-documented / residual-documented per issue).
+- **Release:** CHANGELOG v1.0.0 section; tag v1.0.0.
+- Follow-ups: the owner uploads docs/figures/terminal_demo.mp4 as a GitHub
+  user-attachment and swaps the poster block per the README comment. True
+  filing-timestamp sourcing and immutable point-in-time snapshots remain the
+  documented section-9 roadmap.
+
 ### 2026-07-27 - README for the 90-second reader, headline-number pinning, PROJECT_SUMMARY
 
 - **Inline demo video:** committed docs/figures/terminal_demo.mp4 (H.264,

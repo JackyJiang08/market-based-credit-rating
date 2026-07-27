@@ -2,7 +2,70 @@
 
 Notable changes to the model and the delivered artifacts. Newest first.
 
-## Unreleased
+## v1.0.0 — 2026-07-27
+
+The release: the full pipeline, the 150-name universe, the validation study,
+the public terminal, and the final deliverable (`deliverable-final` tag,
+archived with a DIFF against v1 — 9/10 companies identical; KHC moves on a
+vendor data revision only).
+
+### Added
+
+- **150-name universe** with a complete failure taxonomy — zero unexplained
+  failures; every non-rating is a gate, a defective drift regime, or a
+  classified data failure (`docs/UNIVERSE.md`).
+- **Agency validation study**: sourced ratings, stratified discrimination with
+  bootstrap CIs (ρ = 0.79 all names / 0.73 scale-resolved), calibration,
+  baselines (DD ties RiskScore), sector stratification
+  (`docs/analysis/VALIDATION.md`).
+- **`packages/core/creditrating`**: the pipeline restructured into an
+  importable, typed, pydantic-validated package with an output-identity proof,
+  structlog provenance manifests, and a typer CLI; plus `services/api`
+  (offline-first FastAPI) and `apps/terminal` (the static Next.js terminal,
+  deployed to GitHub Pages with E2E + axe + Lighthouse gates in CI).
+- **Headline-number source of truth** (`docs/analysis/data/headline.json`)
+  with a CI guard that recomputes the four numbers from run-of-record data and
+  greps every user-facing surface (`tests/test_headline_numbers.py`).
+- **`docs/PROJECT_SUMMARY.md`** — the two-page register write-up.
+- **Statutory filing-lag availability**: statements enter at
+  `period_end + 45 d (10-Q) / 90 d (10-K)`,
+  `availability_method="estimated_lag"`; the remaining gap (true filing
+  timestamps) is documented in `TIMING_PROTOCOL` §9.
+
+### Audit closeout
+
+Every issue from the code and data-layer audits is closed. Register (status ·
+issue · resolution):
+
+- **fixed** #3 — signed drift; the defective regime is a determination
+  (`NOT_RATED`), never `abs()`'d away (`bf46ff0`).
+- **fixed** #4, #5 — Eq. (13) and Φ(−DD) computed in log space
+  (`log_ndtr`/`logsumexp`); no silent overflow/underflow (`42008cd`).
+- **fixed** #6 — the analytical no-arbitrage route is reachable in production
+  (`Rating Basis = ANALYTICAL`).
+- **fixed** #7, #8 — one writer, one declared schema constant, one shared
+  field set for credit measures.
+- **fixed** #9, #20 — broad excepts narrowed; best-effort writes removed
+  (`7c59b69`).
+- **fixed** #10 — estimator/resolver constants named, documented, and cited.
+- **fixed** #11, #14 — docs match the implementation (Outlook = PIT − TTC per
+  Eq. (28); unimplemented paper results no longer referenced as if present).
+- **fixed** #13 — proposition-level regression tests (anchors, invariance,
+  properties).
+- **fixed** #15 — dividend add-back is window-invariant
+  (`tests/test_window_invariance.py`).
+- **fixed** #16, #18 — field-selection and unit/shape validation with
+  provenance that reaches the workbook (`7c59b69`).
+- **fixed, residual documented** #19 — statements now align on
+  `available_at` = period end + statutory lag; the estimated-lag
+  approximation (vs true filing timestamps) stays open in
+  `TIMING_PROTOCOL` §9.
+- **mitigated, documented** #12 — off-grid `(CCM, µ)` is still edge-clamped,
+  but always flagged (`OFF_GRID_CLAMPED` → workbook validation sheet, site
+  chips) and the analytical route covers beyond the grid (`6462ad8`).
+- **mitigated, documented** #17 — reference-share provenance is recorded
+  (`7c59b69`); the latest-date share estimate can still reach earlier history,
+  listed in `TIMING_PROTOCOL` §9.
 
 ### Changed
 
