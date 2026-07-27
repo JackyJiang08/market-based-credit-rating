@@ -68,16 +68,17 @@ const columns = [
   }),
 ];
 
-export function UniverseTable() {
+export function UniverseTable({ rows }: { rows?: UniverseRow[] }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["universe"],
     queryFn: loadUniverse,
+    enabled: rows === undefined,
   });
   const [sorting, setSorting] = useState<SortingState>([{ id: "risk_rank", desc: false }]);
   const router = useRouter();
 
   const table = useReactTable({
-    data: data?.rows ?? [],
+    data: rows ?? data?.rows ?? [],
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -85,7 +86,7 @@ export function UniverseTable() {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  if (isLoading)
+  if (rows === undefined && isLoading)
     return (
       <div className="space-y-1.5" aria-busy="true" aria-label="loading universe">
         {Array.from({ length: 12 }).map((_, i) => (
@@ -93,14 +94,18 @@ export function UniverseTable() {
         ))}
       </div>
     );
-  if (error)
+  if (rows === undefined && error)
     return (
       <div role="alert" className="rounded border border-rose-700 bg-rose-950/40 p-4 text-sm">
         Failed to load or validate universe.json: {String(error)}
       </div>
     );
-  if (!data?.rows.length)
-    return <div className="p-4 text-sm text-zinc-400">No universe rows exported.</div>;
+  if (!(rows ?? data?.rows ?? []).length)
+    return (
+      <div className="p-4 text-sm text-zinc-400">
+        No rows match these filters — clear them to see the full universe.
+      </div>
+    );
 
   return (
     <table className="w-full border-collapse text-[13px]">

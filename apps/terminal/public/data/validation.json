@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "55f96f3",
-  "generated_utc": "2026-07-26T21:15:40Z",
+  "git_sha": "577ab1a",
+  "generated_utc": "2026-07-27T00:01:28Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -750,5 +750,12 @@
    "determination": "PINNED_AT_FLOOR",
    "verified": "no"
   }
- ]
+ ],
+ "amplification_median": {
+  "sigma_a": 0.2519838505088717,
+  "risk_score": 0.5069095160769087,
+  "dd": 0.34883122166653924,
+  "ttc_pd": 1.033558131247496,
+  "pit_pd": 894.2000251582792
+ }
 }

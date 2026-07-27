@@ -1,5 +1,6 @@
 import { CommandBar } from "@/components/command-bar";
 import { CompanyView } from "@/components/company-view";
+import { Suspense } from "react";
 import fs from "node:fs";
 import path from "node:path";
 import Link from "next/link";
@@ -28,7 +29,9 @@ export default async function CompanyPage({
         </Link>
         <CommandBar />
       </div>
-      <CompanyView ticker={ticker} />
+      <Suspense>
+        <CompanyView ticker={ticker} />
+      </Suspense>
     </div>
   );
 }

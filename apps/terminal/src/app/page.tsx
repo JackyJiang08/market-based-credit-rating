@@ -1,5 +1,7 @@
 import { CommandBar } from "@/components/command-bar";
-import { UniverseTable } from "@/components/universe-table";
+import { UniverseView } from "@/components/universe-view";
+import Link from "next/link";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -10,13 +12,18 @@ export default function Home() {
             creditrating <span className="text-sky-300">terminal</span>
           </h1>
           <p className="text-xs text-zinc-500">
-            150-name universe · RiskScore first · press <kbd className="font-mono">⌘K</kbd>{" "}
-            or <kbd className="font-mono">/</kbd> to jump to a company
+            150-name universe · RiskScore first · <kbd className="font-mono">⌘K</kbd> or{" "}
+            <kbd className="font-mono">/</kbd> to jump ·{" "}
+            <Link href="/plane/" className="underline underline-offset-2 hover:text-zinc-300">
+              µ–CCM plane
+            </Link>
           </p>
         </div>
         <CommandBar />
       </div>
-      <UniverseTable />
+      <Suspense>
+        <UniverseView />
+      </Suspense>
     </div>
   );
 }

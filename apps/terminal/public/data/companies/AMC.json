@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "55f96f3",
-  "generated_utc": "2026-07-26T21:15:40Z",
+  "git_sha": "577ab1a",
+  "generated_utc": "2026-07-27T00:01:28Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -32,7 +32,9 @@
   "interval_low": "B",
   "interval_high": "CCC-",
   "interval_notches": 5,
-  "outlook": null
+  "outlook": null,
+  "at_floor": false,
+  "at_scale_top": false
  },
  "drift": {
   "regime": "DEFECTIVE",
@@ -1488,5 +1490,42 @@
    "date": "2026-07-24",
    "asset_value": 6057862221.720057
   }
- ]
+ ],
+ "bootstrap_cloud": [
+  {
+   "mu": 2.4336083632497756,
+   "ccm": 2.150791146898564
+  },
+  {
+   "mu": 203.23037374889998,
+   "ccm": 131.23557092001616
+  },
+  {
+   "mu": 18.43662008551124,
+   "ccm": 9.757998537533418
+  },
+  {
+   "mu": 0.6678715208401557,
+   "ccm": 0.3189656396576951
+  },
+  {
+   "mu": 4.007416963929659,
+   "ccm": 2.0076710304794854
+  },
+  {
+   "mu": 46.53012733627183,
+   "ccm": 44.42800994017351
+  },
+  {
+   "mu": 1.7775526070757732,
+   "ccm": 1.020615322833466
+  }
+ ],
+ "amplification": {
+  "sigma_a": 0.41766540685103415,
+  "risk_score": 0.8483953576471088,
+  "dd": 3.8289681620494647,
+  "ttc_pd": 1.3523281545690768,
+  "pit_pd": 1.6787825124154556
+ }
 }

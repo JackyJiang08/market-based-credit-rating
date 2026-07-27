@@ -39,7 +39,9 @@ from creditrating.data import cache  # noqa: E402
 from creditrating.data.pipeline import RunConfig, fetch_company  # noqa: E402
 from creditrating.data.sectors import REASON_TEXT  # noqa: E402
 from creditrating.io import records  # noqa: E402
+from creditrating.diagnostics import uncertainty as bs  # noqa: E402
 from creditrating.model import config as sig_config  # noqa: E402
+from creditrating.model import conversion  # noqa: E402
 from creditrating.model import em  # noqa: E402
 
 OUT = os.path.join(ROOT, "apps", "terminal", "public", "data")
@@ -120,6 +122,8 @@ def main() -> None:
                 "risk_score": r["TiC Risk Score"],
                 "risk_rank": rs_rank[i],
                 "sigma_a": r["sigma"],
+                "mu": r["mu"],
+                "ccm": r["CCM"],
                 "dd": r["DD"],
                 "letter": r["SP Rating"],
                 "interval_low": r["Rating Interval Low"],
@@ -150,17 +154,25 @@ def main() -> None:
         p = os.path.join(ANALYSIS, f"{name}.csv")
         if os.path.exists(p):
             val[name] = json.loads(pd.read_csv(p).to_json(orient="records"))
+    val["amplification_median_placeholder"] = True
     json.dump(_clean(val), open(os.path.join(OUT, "validation.json"), "w"), indent=1)
 
     # --- per-company detail (fixture-cached tickers only) ---------------------
+    try:
+        TABLES = conversion.load_tables()
+    except FileNotFoundError:
+        TABLES = None  # degraded: cloud + sigma/RS/DD/PIT widths still export
     rates = cache.load_rates()
     exported = []
+    ALL_WIDTHS: list[dict] = []
     for t in cached:
         c = fetch_company(t, RunConfig(tickers=[t]), rates)
         if c is None:
             continue
         rec = records.credit_record(c)
         path = []
+        cloud = []
+        widths = None
         if c.sigma_A is not None and c.panel is not None and not c.panel.empty:
             window = c.panel.tail(sig_config.DRIFT_WINDOW_DAYS)
             res = em.estimate(
@@ -172,6 +184,31 @@ def main() -> None:
                 for i, (d, v) in enumerate(res.asset_values.items())
                 if i % step == 0 or i == len(res.asset_values) - 1
             ]
+            # Bootstrap: the (mu, CCM) cloud for the plane chart, and the
+            # relative 5-95 interval widths for the amplification ladder.
+            import numpy as np
+
+            u = np.diff(np.log(res.asset_values.to_numpy()))
+            b = bs.run(
+                t, u, res.asset_last, res.debt_last, TABLES,
+                n_replicates=sig_config.BOOTSTRAP_REPLICATES,
+                seed=sig_config.BOOTSTRAP_SEED,
+            )
+            finite = np.isfinite(b.mu) & np.isfinite(b.ccm)
+            idx = np.flatnonzero(finite)[:250]
+            cloud = [
+                {"mu": float(b.mu[i]), "ccm": float(b.ccm[i])} for i in idx
+            ]
+            def _w(name):
+                v = b.relative_width(name)
+                return None if v != v else float(v)
+            widths = {
+                "sigma_a": _w("sigma_A"),
+                "risk_score": _w("risk_score"),
+                "dd": _w("dd"),
+                "ttc_pd": _w("ttc_pd"),
+                "pit_pd": _w("pit_pd"),
+            }
         flags = []
         if c.weakly_identified:
             flags.append(
@@ -229,6 +266,8 @@ def main() -> None:
                 "interval_high": c.rating_interval_high,
                 "interval_notches": c.rating_interval_notches,
                 "outlook": rec["outlook"],
+                "at_floor": bool(c.ttc_at_floor) if c.ttc_at_floor is not None else None,
+                "at_scale_top": c.rating_determination == "PINNED_AT_SCALE_TOP",
             },
             "drift": {
                 "regime": c.drift_regime,
@@ -259,7 +298,11 @@ def main() -> None:
                 "defective_fraction": c.boot_defective_fraction,
             },
             "em_path": path,
+            "bootstrap_cloud": cloud,
+            "amplification": widths,
         }
+        if widths:
+            ALL_WIDTHS.append(widths)
         mp = os.path.join(cache.cache_dir(), t, "meta.json")
         if os.path.exists(mp):
             detail["provenance"]["cache_fetched_at"] = json.load(open(mp)).get("fetched_at")
@@ -267,6 +310,18 @@ def main() -> None:
             _clean(detail), open(os.path.join(OUT, "companies", f"{t}.json"), "w"), indent=1
         )
         exported.append(t)
+
+    # median relative widths across companies -> validation.json (the ladder)
+    import numpy as np
+
+    med = {}
+    for k in ("sigma_a", "risk_score", "dd", "ttc_pd", "pit_pd"):
+        vals = [w[k] for w in ALL_WIDTHS if w.get(k) is not None]
+        med[k] = float(np.median(vals)) if vals else None
+    val2 = json.load(open(os.path.join(OUT, "validation.json")))
+    val2.pop("amplification_median_placeholder", None)
+    val2["amplification_median"] = med
+    json.dump(_clean(val2), open(os.path.join(OUT, "validation.json"), "w"), indent=1)
 
     # --- manifest.json --------------------------------------------------------
     manifest = {

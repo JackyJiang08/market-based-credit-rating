@@ -12,6 +12,11 @@ import { loadCompany, loadUniverse } from "@/lib/data";
 import { big, fmt, pct } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { Info } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { AmplificationLadder } from "@/components/charts/amplification-ladder";
+import { MuCcmPlane } from "@/components/charts/mu-ccm-plane";
+import { RatingBridge } from "@/components/charts/rating-bridge";
+import { loadValidation } from "@/lib/data";
 
 function Prov({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -90,7 +95,12 @@ export function CompanyView({ ticker }: { ticker: string }) {
     retry: false,
   });
   const uni = useQuery({ queryKey: ["universe"], queryFn: loadUniverse });
+  const val = useQuery({ queryKey: ["validation"], queryFn: loadValidation });
   const uniRow = uni.data?.rows.find((r) => r.ticker === ticker.toUpperCase());
+  const params = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const panel = params.get("panel") ?? "bridge";
 
   if (detail.isLoading)
     return (
@@ -285,6 +295,45 @@ export function CompanyView({ ticker }: { ticker: string }) {
           </CardContent>
         </Card>
       </div>
+
+      <section aria-label="charts" className="space-y-2">
+        <div role="tablist" aria-label="chart panels" className="flex gap-1.5">
+          {(["bridge", "ladder", "plane"] as const).map((p) => (
+            <button
+              key={p}
+              role="tab"
+              aria-selected={panel === p}
+              className={`rounded-md border px-3 py-1 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
+                panel === p
+                  ? "border-sky-500/60 bg-sky-500/10 text-sky-300"
+                  : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:text-zinc-200"
+              }`}
+              onClick={() => {
+                const next = new URLSearchParams(params.toString());
+                next.set("panel", p);
+                router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+              }}
+            >
+              {p === "bridge" ? "rating bridge" : p === "ladder" ? "amplification ladder" : "µ–CCM plane"}
+            </button>
+          ))}
+        </div>
+        {panel === "bridge" ? (
+          <RatingBridge d={d} />
+        ) : panel === "ladder" ? (
+          <AmplificationLadder
+            company={d.amplification}
+            companyTicker={d.ticker}
+            median={val.data?.amplification_median ?? null}
+          />
+        ) : (
+          <MuCcmPlane
+            rows={(uni.data?.rows ?? []).filter((r) => r.ticker === d.ticker)}
+            cloud={d.bootstrap_cloud}
+            focusTicker={d.ticker}
+          />
+        )}
+      </section>
     </div>
   );
 }

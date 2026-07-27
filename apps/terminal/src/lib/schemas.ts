@@ -16,6 +16,8 @@ export const UniverseRow = z.object({
   risk_score: z.number().nullable(),
   risk_rank: z.number().nullable(),
   sigma_a: z.number().nullable(),
+  mu: z.number().nullable(),
+  ccm: z.number().nullable(),
   dd: z.number().nullable(),
   letter: z.string().nullable(),
   interval_low: z.string().nullable(),
@@ -73,6 +75,8 @@ export const CompanyDetail = z.object({
     interval_high: z.string().nullable(),
     interval_notches: z.number().nullable(),
     outlook: z.number().nullable(),
+    at_floor: z.boolean().nullable(),
+    at_scale_top: z.boolean().nullable(),
   }),
   drift: z.object({
     regime: z.string().nullable(),
@@ -103,6 +107,16 @@ export const CompanyDetail = z.object({
     defective_fraction: z.number().nullable(),
   }),
   em_path: z.array(z.object({ date: z.string(), asset_value: z.number() })),
+  bootstrap_cloud: z.array(z.object({ mu: z.number(), ccm: z.number() })),
+  amplification: z
+    .object({
+      sigma_a: z.number().nullable(),
+      risk_score: z.number().nullable(),
+      dd: z.number().nullable(),
+      ttc_pd: z.number().nullable(),
+      pit_pd: z.number().nullable(),
+    })
+    .nullable(),
 });
 export type CompanyDetail = z.infer<typeof CompanyDetail>;
 
@@ -114,3 +128,24 @@ export const Manifest = Meta.extend({
   }),
   licensing_note: z.string(),
 });
+
+export const ValidationData = z.object({
+  meta: Meta,
+  amplification_median: z
+    .object({
+      sigma_a: z.number().nullable(),
+      risk_score: z.number().nullable(),
+      dd: z.number().nullable(),
+      ttc_pd: z.number().nullable(),
+      pit_pd: z.number().nullable(),
+    })
+    .nullable()
+    .optional(),
+  notch_errors: z
+    .array(z.object({ symbol: z.string(), notch_error: z.number() }).loose())
+    .optional(),
+  discrimination: z
+    .array(z.object({ stratum: z.string(), n: z.number(), spearman: z.number() }).loose())
+    .optional(),
+});
+export type ValidationData = z.infer<typeof ValidationData>;

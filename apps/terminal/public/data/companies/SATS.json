@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "55f96f3",
-  "generated_utc": "2026-07-26T21:15:40Z",
+  "git_sha": "577ab1a",
+  "generated_utc": "2026-07-27T00:01:28Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -32,7 +32,9 @@
   "interval_low": null,
   "interval_high": null,
   "interval_notches": null,
-  "outlook": null
+  "outlook": null,
+  "at_floor": null,
+  "at_scale_top": false
  },
  "drift": {
   "regime": null,
@@ -62,5 +64,7 @@
   "sigma_p95": null,
   "defective_fraction": null
  },
- "em_path": []
+ "em_path": [],
+ "bootstrap_cloud": [],
+ "amplification": null
 }

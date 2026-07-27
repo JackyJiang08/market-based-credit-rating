@@ -1,6 +1,6 @@
 {
- "git_sha": "55f96f3",
- "generated_utc": "2026-07-26T21:15:40Z",
+ "git_sha": "577ab1a",
+ "generated_utc": "2026-07-27T00:01:28Z",
  "package_version": "0.4.0",
  "data_vintage": "2026-07-24",
  "source": "committed fixtures and committed run-of-record results",
@@ -10,6 +10,7 @@
   },
   "validation.json": {
    "sections": [
+    "amplification_median_placeholder",
     "baselines",
     "discrimination",
     "notch_errors",
