@@ -7,6 +7,7 @@ import { loadUniverse } from "@/lib/data";
 import { fuzzyScore } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useShortcutHint } from "@/lib/use-shortcut-hint";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export function CommandBar() {
@@ -47,6 +48,7 @@ export function CommandBar() {
       .map((x) => x.r);
   }, [data, q]);
 
+  const hint = useShortcutHint();
   const go = (ticker: string) => {
     setOpen(false);
     router.push(`/company/${ticker}/`);
@@ -57,12 +59,12 @@ export function CommandBar() {
       <button
         onClick={() => setOpen(true)}
         className="flex items-center justify-between gap-2 rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-left text-sm text-zinc-400 hover:border-zinc-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 sm:w-64"
-        aria-label="Search companies (Command+K or /)"
+        aria-label={`Search companies (${hint === "⌘K" ? "Command+K" : "Ctrl+K"} or /)`}
       >
         <span className="hidden sm:inline">Search ticker or company…</span>
         <span className="sm:hidden">Search</span>
         <kbd className="rounded border border-zinc-600 bg-zinc-800 px-1.5 font-mono text-[10px] text-zinc-400">
-          ⌘K
+          {hint}
         </kbd>
       </button>
       {open ? (

@@ -1,3 +1,4 @@
+import { ShortcutHint } from "@/components/shortcut-hint";
 import fs from "node:fs";
 import path from "node:path";
 import Link from "next/link";
@@ -84,7 +85,7 @@ export default function Home() {
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
           KMV/Merton structural model → Time-Consistent measures → a letter that never
-          travels without its interval. Press <kbd className="font-mono">⌘K</kbd> or{" "}
+          travels without its interval. Press <ShortcutHint className="font-mono" /> or{" "}
           <kbd className="font-mono">/</kbd>, or use the search box above.
         </p>
       </section>
