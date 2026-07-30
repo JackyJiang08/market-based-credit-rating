@@ -87,6 +87,10 @@ class CompanyData:
     drift_t_stat: Optional[float] = None  # drift / SE
     # |t| < WEAK_IDENTIFICATION_T: the rating is still published, annotated.
     weakly_identified: Optional[bool] = None
+    # Computation convention for this run ("DOCUMENTED" | "REFERENCE") and the
+    # reference-convention abs-drift provenance flag (never silent).
+    convention: str = "DOCUMENTED"
+    mu_uses_abs_drift: Optional[bool] = None
     # Bootstrap outputs (signal_construction/bootstrap.py).
     boot_sigma_lo: Optional[float] = None
     boot_sigma_hi: Optional[float] = None

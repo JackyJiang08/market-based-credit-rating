@@ -22,6 +22,7 @@ import numpy as np
 from scipy.special import log_ndtr, logsumexp
 
 from . import config
+from . import convention as conventions
 
 
 class DriftRegime(enum.Enum):
@@ -77,6 +78,8 @@ class CreditMeasures:
     edf: float  # Phi(-DD)                        (Eq. 14)
     pit_pd: float  # 1-year PIT PD                  (Eq. 13)
     regime: DriftRegime = DriftRegime.VALID  # Prop. 4.4.1 precondition
+    convention: str = "DOCUMENTED"  # which computation convention produced this
+    mu_uses_abs_drift: bool = False  # REFERENCE only: mu divided by |eta|
 
 
 def pit_pd_first_hitting(mu: float, ccm: float, horizon: float = 1.0) -> float:
@@ -117,11 +120,23 @@ def pit_pd_first_hitting(mu: float, ccm: float, horizon: float = 1.0) -> float:
 
 
 def compute(
-    sigma_A: float, asset: float, debt: float, eta_A: float, horizon: float = 1.0
+    sigma_A: float,
+    asset: float,
+    debt: float,
+    eta_A: float,
+    horizon: float = 1.0,
+    convention: conventions.Convention | str | None = None,
 ) -> CreditMeasures:
-    """Compute all first-passage credit measures for one company."""
+    """Compute all first-passage credit measures for one company.
+
+    ``convention`` selects the computation convention (default DOCUMENTED --
+    the unchanged run-of-record behaviour). The regime and weak-identification
+    diagnostics run under every convention; only DOCUMENTED lets the defective
+    regime suppress mu/CCM, the reference convention annotates instead.
+    """
     if not (asset > debt > 0):
         raise ValueError(f"require A ({asset:.3g}) > D ({debt:.3g}) > 0")
+    conv = conventions.get(convention)
 
     ln_ad = math.log(asset / debt)
     drift = eta_A - 0.5 * sigma_A**2  # signed, exactly as Eq. (11) uses it
@@ -132,13 +147,32 @@ def compute(
     # the regime and return NaN rather than substituting |drift|, which is what
     # this code used to do and which silently reported a finite `mu`/`CCM` that
     # is not the paper's quantity. See docs/adr/0001-drift-estimation.md.
+    # The regime is classified under EVERY convention; only the documented one
+    # lets it suppress the output.
     regime = drift_regime(drift)
-    if regime is DriftRegime.VALID:
-        mu = ln_ad / drift
-        ccm = sigma_A**2 / (ln_ad * drift)
+    mu_uses_abs_drift = False
+    if conv.mu_denominator == "ito_drift" and conv.negative_drift == "not_rated":
+        # DOCUMENTED: unchanged run-of-record behaviour.
+        if regime is DriftRegime.VALID:
+            mu = ln_ad / drift
+            ccm = sigma_A**2 / (ln_ad * drift)
+        else:
+            mu = float("nan")
+            ccm = float("nan")
     else:
-        mu = float("nan")
-        ccm = float("nan")
+        # Reference convention: the denominator is the raw eta (no Ito
+        # adjustment); a negative denominator becomes |denominator| with a
+        # provenance flag -- never silently.
+        denom = drift if conv.mu_denominator == "ito_drift" else eta_A
+        if conv.negative_drift == "abs" and math.isfinite(denom) and denom < 0:
+            denom = abs(denom)
+            mu_uses_abs_drift = True
+        if math.isfinite(denom) and denom > 0:
+            mu = ln_ad / denom
+            ccm = sigma_A**2 / (ln_ad * denom)
+        else:
+            mu = float("nan")
+            ccm = float("nan")
 
     # TiC rating is eta-independent (Q=1): sigma_A^2 / ln^2(A/D) (Eq. 12).
     # This one survives a defective regime: Prop. 4.4.2 makes it a function of
@@ -176,4 +210,6 @@ def compute(
         edf=edf,
         pit_pd=pit,
         regime=regime,
+        convention=conv.name,
+        mu_uses_abs_drift=mu_uses_abs_drift,
     )

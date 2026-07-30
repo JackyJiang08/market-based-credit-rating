@@ -39,6 +39,13 @@ class RunConfig:
     # (with the polite inter-ticker delay); >1 uses a thread pool with
     # per-company isolation, so one failure cannot abort the run.
     workers: int = 1
+    # Computation convention: "DOCUMENTED" (run of record, default) or
+    # "REFERENCE" (creditrating.model.convention). Every output row carries it.
+    convention: str = "DOCUMENTED"
+    # Optional valuation cutoff (ISO date). When set, the aligned panel is
+    # truncated to rows on or before this date so a run can be pinned to a
+    # specific close regardless of how much history the provider returned.
+    as_of: Optional[str] = None
 
     @property
     def cutoff_date(self) -> datetime:
@@ -200,6 +207,13 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
         available_at=available_at,
     )
     data.availability_method = clean_config.AVAILABILITY_METHOD
+    data.convention = cfg.convention
+
+    # Optional valuation cutoff: truncate the aligned panel so the last priced
+    # day is on or before cfg.as_of (never a look-ahead device -- it only
+    # removes newer rows).
+    if cfg.as_of and not data.panel.empty:
+        data.panel = data.panel.loc[: cfg.as_of]
 
     # --- applicability gate (financial firms) ---
     # The first-passage construction assumes the barrier is debt. For a
@@ -264,15 +278,22 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
         # Import the modelling layer only when used, so Layer 1/2 tooling and
         # CLI help do not require SciPy.
         from creditrating.model import config as sig_config
+        from creditrating.model import convention as conventions
         from creditrating.model import em
         from creditrating.model import tic as measures
 
+        conv = conventions.get(cfg.convention)
         # Pass the full drift window; em.estimate takes sigma_A from its
-        # trailing EM_WINDOW_DAYS and the drift from the whole span.
-        window = data.panel.tail(sig_config.DRIFT_WINDOW_DAYS)
+        # trailing vol window and the drift from the whole span. Both windows
+        # come from the convention (DOCUMENTED: ~5y drift / 252d vol --
+        # unchanged; REFERENCE: one shared 250d span).
+        window = data.panel.tail(conv.drift_window_days)
         try:
             res = em.estimate(
-                window["MarketCap_E"], window["DefaultPointDebt_D"], window["RiskFree_R"]
+                window["MarketCap_E"],
+                window["DefaultPointDebt_D"],
+                window["RiskFree_R"],
+                vol_window=conv.vol_window_days,
             )
             _em_asset_path = res.asset_values.to_numpy()
             _em_debt_last = res.debt_last
@@ -288,7 +309,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
                 "  EM: sigma_A=%.1f%% (%dd)  eta_A=%.1f%% (%.1fy, SE=%.1f%%)  "
                 "A=%.4g  iters=%d",
                 res.sigma_A * 100,
-                sig_config.EM_WINDOW_DAYS,
+                conv.vol_window_days,
                 res.eta_A * 100,
                 res.drift_span_years,
                 res.drift_se * 100,
@@ -297,7 +318,16 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             )
 
             # Derived first-passage credit measures (Eq. 11-14).
-            m = measures.compute(res.sigma_A, res.asset_last, res.debt_last, res.eta_A)
+            m = measures.compute(
+                res.sigma_A, res.asset_last, res.debt_last, res.eta_A, convention=conv
+            )
+            data.mu_uses_abs_drift = m.mu_uses_abs_drift
+            if m.mu_uses_abs_drift:
+                LOG.warning(
+                    "  MU_USES_ABS_DRIFT: eta = %+.4f < 0; the reference "
+                    "convention divides mu/CCM by |eta| -- flagged, never silent",
+                    res.eta_A,
+                )
             data.mu, data.ccm, data.tic, data.risk_score = m.mu, m.ccm, m.tic, m.risk_score
             data.lam, data.dd, data.edf, data.pit_pd = m.lam, m.dd, m.edf, m.pit_pd
             data.drift_regime = m.regime.value

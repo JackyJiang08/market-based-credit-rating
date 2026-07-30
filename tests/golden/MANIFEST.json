@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-07-26T20:22:20Z",
-  "git_sha": "9f2ad99",
+  "generated_utc": "2026-07-29T00:00:00Z",
+  "git_sha": "469c5a0+convention",
   "package_version": "0.4.0",
   "conversion_workbook_present": true,
-  "note": "grid-dependent columns (TTC PD, letter, basis, determination, intervals) are populated because local/ was present in the generating environment; environments without it assert NaN for those columns instead (see tests/test_golden_workbook.py)"
+  "note": "grid-dependent columns (TTC PD, letter, basis, determination, intervals) are populated because local/ was present in the generating environment; environments without it assert NaN for those columns instead (see tests/test_golden_workbook.py) Regenerated 2026-07-29 for the deliberate Convention-column addition: pre-existing values verified bit-identical against the pre-change code in the same interpreter (py3.11.13/scipy1.17.1/pandas3.0.5/numpy2.4.6); the two sub-1e-117 EDF/PIT ulp shifts vs the 2026-07-26 file are environment drift from its generating interpreter, not a model change."
 }

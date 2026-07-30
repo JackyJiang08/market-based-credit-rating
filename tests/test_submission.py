@@ -55,6 +55,7 @@ GOLDEN_ASSET_SCHEMA = (
     "Rating Interval Low",
     "Rating Interval High",
     "Rating Interval Notches",
+    "Convention",
 )
 
 GOLDEN_VALIDATION_SCHEMA = (
@@ -81,6 +82,8 @@ GOLDEN_VALIDATION_SCHEMA = (
     "Debt field provenance",
     "Statement available at",
     "Availability method",
+    "Convention",
+    "Mu uses abs drift",
     "Warnings",
 )
 

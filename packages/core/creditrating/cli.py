@@ -128,12 +128,16 @@ def _last(c: CompanyData, col: str):
     return None if s.empty else float(s.iloc[-1])
 
 
-def _rate_impl(company: str, years: int) -> None:
+def _rate_impl(
+    company: str, years: int, convention: str = "DOCUMENTED", as_of: str = None
+) -> None:
     from datetime import datetime, timezone
 
     from creditrating.io import workbook as submission
 
-    companies = run(RunConfig(tickers=[company], years=years))
+    companies = run(
+        RunConfig(tickers=[company], years=years, convention=convention, as_of=as_of)
+    )
     if not companies:
         raise SystemExit(f"Could not process '{company}'.")
     c = companies[0]
@@ -145,7 +149,9 @@ def _rate_impl(company: str, years: int) -> None:
     print(f"Report written: {path}")
 
 
-def _batch_impl(config: str, years: int, workers: int) -> None:
+def _batch_impl(
+    config: str, years: int, workers: int, convention: str = "DOCUMENTED", as_of: str = None
+) -> None:
     import yaml
 
     with open(config) as fh:
@@ -156,7 +162,15 @@ def _batch_impl(config: str, years: int, workers: int) -> None:
     tickers = [str(x.get("ticker") if isinstance(x, dict) else x).strip() for x in entries]
     if not tickers:
         raise SystemExit(f"No 'companies:' list found in {config}")
-    run(RunConfig(tickers=tickers, years=years, workers=workers))
+    run(
+        RunConfig(
+            tickers=tickers,
+            years=years,
+            workers=workers,
+            convention=convention,
+            as_of=as_of,
+        )
+    )
 
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, help=__doc__)
@@ -189,10 +203,18 @@ def rate(
     years: int = typer.Option(
         raw_config.DEFAULT_YEARS, "--years", help="history window in years"
     ),
+    convention: str = typer.Option(
+        "DOCUMENTED",
+        "--convention",
+        help="computation convention: DOCUMENTED (run of record) or REFERENCE",
+    ),
+    as_of: str = typer.Option(
+        None, "--as-of", help="pin the valuation to this close (YYYY-MM-DD)"
+    ),
 ) -> None:
     """Rate one company: full table to stdout + a per-ticker report."""
     _setup_logging()
-    _rate_impl(company, years)
+    _rate_impl(company, years, convention, as_of)
 
 
 @app.command()
@@ -202,10 +224,18 @@ def batch(
     workers: int = typer.Option(
         1, "--workers", help="concurrent company fetches " "(cached reruns tolerate more)"
     ),
+    convention: str = typer.Option(
+        "DOCUMENTED",
+        "--convention",
+        help="computation convention: DOCUMENTED (run of record) or REFERENCE",
+    ),
+    as_of: str = typer.Option(
+        None, "--as-of", help="pin the valuation to this close (YYYY-MM-DD)"
+    ),
 ) -> None:
     """Run the batch from a YAML universe file."""
     _setup_logging()
-    _batch_impl(config, years, workers)
+    _batch_impl(config, years, workers, convention, as_of)
 
 
 def main() -> None:

@@ -84,6 +84,7 @@ EXTENDED_ASSET_COLUMNS: tuple[str, ...] = (
     "Rating Interval Low",
     "Rating Interval High",
     "Rating Interval Notches",
+    "Convention",
 )
 
 ASSET_SCHEMA: tuple[str, ...] = CANONICAL_ASSET_COLUMNS + EXTENDED_ASSET_COLUMNS
@@ -113,6 +114,8 @@ VALIDATION_SCHEMA: tuple[str, ...] = (
     "Debt field provenance",
     "Statement available at",
     "Availability method",
+    "Convention",
+    "Mu uses abs drift",
     "Warnings",
 )
 
@@ -240,6 +243,8 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
         "applicability_reason": c.applicability_reason,
         "drift_t_stat": c.drift_t_stat,
         "weakly_identified": c.weakly_identified,
+        "convention": c.convention,
+        "mu_uses_abs_drift": c.mu_uses_abs_drift,
         "boot_sigma_lo": c.boot_sigma_lo,
         "boot_sigma_hi": c.boot_sigma_hi,
         "boot_defective_fraction": c.boot_defective_fraction,
@@ -300,6 +305,7 @@ def asset_row(c: CompanyData) -> dict[str, Any]:
         "Rating Interval Low": r["rating_interval_low"],
         "Rating Interval High": r["rating_interval_high"],
         "Rating Interval Notches": r["rating_interval_notches"],
+        "Convention": r["convention"],
     }
     assert tuple(row) == ASSET_SCHEMA, "asset_row drifted from ASSET_SCHEMA"
     return row
@@ -342,6 +348,10 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
         flags.append(
             f"MODEL_NOT_APPLICABLE ({code}): "
             f"{_sectors.REASON_TEXT.get(code, 'see docs/adr/0003')}"
+        )
+    if r["mu_uses_abs_drift"]:
+        flags.append(
+            "MU_USES_ABS_DRIFT: eta < 0; the reference convention divides " "mu/CCM by |eta|"
         )
     if r["weakly_identified"] and r["drift_regime"] == "VALID":
         t = r["drift_t_stat"]
@@ -399,6 +409,8 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
         "Debt field provenance": "; ".join(prov_bits) if prov_bits else None,
         "Statement available at": r["statement_available_at"],
         "Availability method": r["availability_method"],
+        "Convention": r["convention"],
+        "Mu uses abs drift": r["mu_uses_abs_drift"],
         "Warnings": "; ".join(flags) if flags else "OK",
     }
     assert tuple(row) == VALIDATION_SCHEMA, "validation_row drifted from VALIDATION_SCHEMA"
@@ -429,6 +441,7 @@ RATINGS_SCHEMA: tuple[str, ...] = (
     "Drift t",
     "Weakly Identified",
     "Convention span (notches)",
+    "Convention",
 )
 
 
@@ -475,6 +488,7 @@ def ratings_frame(companies: list[CompanyData]) -> pd.DataFrame:
                 "Drift t": r["drift_t_stat"],
                 "Weakly Identified": r["weakly_identified"],
                 "Convention span (notches)": CONVENTION_SPANS.get(r["symbol"]),
+                "Convention": r["convention"],
             }
         )
         assert tuple(rows[-1]) == RATINGS_SCHEMA, "ratings row drifted from RATINGS_SCHEMA"
@@ -485,6 +499,44 @@ def ratings_frame(companies: list[CompanyData]) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 # Workbook README sheet
 # --------------------------------------------------------------------------- #
+def _run_convention(companies: list[CompanyData]):
+    """The (single) convention this run was produced under."""
+    from creditrating.model import convention as conventions
+
+    names = {c.convention for c in companies if c.convention}
+    name = names.pop() if len(names) == 1 else "DOCUMENTED"
+    return conventions.get(name)
+
+
+def _convention_line(companies: list[CompanyData]) -> str:
+    conv = _run_convention(companies)
+    if conv.name == "DOCUMENTED":
+        return (
+            "DOCUMENTED (run of record): mu denominator = eta - sigma^2/2; "
+            "negative drift -> NOT_RATED (defective regime); drift window "
+            f"{conv.drift_window_days} trading days."
+        )
+    return (
+        f"{conv.name}: mu denominator = raw eta (no Ito adjustment); "
+        "negative drift -> |eta| with the MU_USES_ABS_DRIFT flag (never "
+        f"silent); drift window = volatility window = {conv.drift_window_days} "
+        "trading days. Matches the team's reference implementation; the "
+        "documented convention remains the run of record."
+    )
+
+
+def _window_line(companies: list[CompanyData], which: str) -> str:
+    conv = _run_convention(companies)
+    if which == "vol":
+        return f"{conv.vol_window_days} trading days"
+    if conv.name == "DOCUMENTED":
+        return (
+            f"{conv.drift_window_days} trading days (~5y); the drift's "
+            f"standard error falls with calendar span, volatility's does not"
+        )
+    return f"{conv.drift_window_days} trading days (same span as the volatility window)"
+
+
 def _git_sha() -> str:
     """Short SHA of the commit this run was produced from, or 'unknown'."""
     from creditrating._paths import REPO_ROOT as root
@@ -554,6 +606,10 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
         ("", ""),
         ("— CONVENTIONS IN FORCE —", ""),
         (
+            "Computation convention",
+            _convention_line(companies),
+        ),
+        (
             "Equity series",
             "Reinvested total-return index anchored at the valuation date: "
             "r_t = (Close_t + Div_t)/Close_{t-1} - 1, normalised so the last value "
@@ -589,11 +645,10 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
             "market cap / price on the valuation date, held constant across "
             "history (a modelling assumption; see docs)",
         ),
-        ("Volatility window", f"{sig_config.EM_WINDOW_DAYS} trading days"),
+        ("Volatility window", _window_line(companies, "vol")),
         (
             "Drift window",
-            f"{sig_config.DRIFT_WINDOW_DAYS} trading days (~5y); the drift's "
-            f"standard error falls with calendar span, volatility's does not",
+            _window_line(companies, "drift"),
         ),
         ("Trading days per year", str(sig_config.TRADING_DAYS_PER_YEAR)),
         ("Risk-free rate", "FRED DGS1 (1-year), horizon T = 1 year"),
