@@ -35,6 +35,24 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-29 - Badge investigation: pinned to main; no trigger change needed
+
+- Reported: the CI badge showed failing while main's latest run was green,
+  hypothesized cause a missing branch filter letting gh-pages deploy pushes
+  trigger doomed runs. Verified instead: ci.yml has had branches: [main]
+  on push since it was created; no gh-pages branch exists (deploy is the
+  artifact-based Pages API, which pushes no branch); every ci.yml run in
+  history is a main push. The failing badge was the REAL red run on
+  de4ace7 (the PNC no-workbook test, fixed in 41a2c2d eight minutes
+  later), served stale by GitHub's Camo image cache; both badge source
+  URLs render passing.
+- Change applied: ?branch=main appended to the ci and DEVLOG-gate badge
+  URLs in the README -- hardening so the badges can never reflect a
+  non-main run, the one part of the request that survives verification.
+- Validation: both badge URLs curl as "passing"; headline-number guard
+  green (README edit); full suite green before push.
+- Follow-ups: None.
+
 ### 2026-07-29 - Fix: PNC gate test respects the no-workbook contract
 
 - The barrier push went red on CI: test_gated_bank_is_annotated_not_

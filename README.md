@@ -1,7 +1,7 @@
 # Market-based Credit Ratings
 
-[![tests](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml)
-[![DEVLOG gate](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml/badge.svg)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml)
+[![tests](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/ci.yml)
+[![DEVLOG gate](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml/badge.svg?branch=main)](https://github.com/JackyJiang08/market-based-credit-rating/actions/workflows/devlog.yml)
 [![coverage gate](https://img.shields.io/badge/coverage-%E2%89%A585%25%20gated%20in%20CI-blue.svg)](.github/workflows/ci.yml)
 [![pages](https://img.shields.io/github/deployments/JackyJiang08/market-based-credit-rating/github-pages?label=pages)](https://jackyjiang08.github.io/market-based-credit-rating/)
 [![Python 3.11 | 3.12](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
