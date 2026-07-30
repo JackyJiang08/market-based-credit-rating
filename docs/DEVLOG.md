@@ -1,6 +1,6 @@
 # Development Log
 
-Last updated: 2026-07-27
+Last updated: 2026-07-29
 
 This file under `docs/` is the shared, human-readable status record for the repository. It
 must be updated as part of every push so contributors can understand what
@@ -34,6 +34,57 @@ single push when they represent the same unit of work.
   true publication-time `available_at` field (documented limitation).
 
 ## Recent changes
+
+### 2026-07-29 - Switchable REFERENCE convention, reconciliation, ablation
+
+- **Convention switch (surgical):** creditrating.model.convention with two
+  presets. DOCUMENTED (default, run of record) is unchanged -- proven two
+  ways: golden COST row regenerated from pre- and post-change code in the
+  same interpreter is byte-identical, and the regenerated 10-name DOCUMENTED
+  workbook matches the archived deliverable-final on every pre-existing
+  value. REFERENCE = raw-eta mu denominator, |eta| on negative drift with a
+  MU_USES_ABS_DRIFT flag (never silent), 250-day shared drift/vol window.
+  Threaded pipeline -> CLI (--convention/--as-of) -> workbook; every output
+  row carries a Convention column; regime/weak-ID diagnostics run under both
+  modes (REFERENCE annotates instead of suppressing).
+- **Formula lock:** tests/test_reference_convention.py pins REFERENCE
+  mu/CCM/RiskScore for ORCL, INTU, COST, AMZN against inlined constants
+  (team reference implementation, 2026-07-27 vintage; sourced by
+  description; no external file committed). Recorded: exact 4-dp equality
+  on all quantities at once is arithmetically impossible from the 4-dp
+  displays (ORCL's implied ln(A/D) intervals are disjoint); mu locks to 4
+  dp, CCM/RS to 2e-3 relative, wrong formulas miss by >20%. DELL/KHC/KO/PNC
+  reference inputs were NOT provided -- recorded as missing, not guessed.
+- **Live-path bug found and fixed:** the Part-3 refresh aborted all eight
+  names (pandas 3: [s]-unit fresh prices vs [us] statement keys in the
+  as-of join). Live acquisition now routes through the cache's canonical
+  [ns] chokepoint; tests/test_live_normalization.py (7 tests) pins it.
+- **Reconciliation + ablation** (docs/analysis/reference_reconciliation.md,
+  regenerable by the committed script; live refresh pinned to the
+  2026-07-27 close in a separate cache so committed fixtures are
+  untouched): with the formula layer locked, the entire end-to-end
+  residual is one named input -- the reference implementation's default
+  point is TOTAL LIABILITIES (implied barrier = our Total Liabilities Net
+  Minority Interest at 0.98-1.01x on all four reference-valued names);
+  sigma/eta gaps are downstream of that field via the EM inversion. The
+  ablation answers the window question: 250d alone flips drift signs on
+  ORCL (and with abs revives INTU/ORCL), WORSENS the positive-drift names
+  (AMZN mu 12.5 -> 201 vs reference 17), the Ito drop closes about half
+  their log-gap, and the barrier dominates everywhere.
+- **Deliverable-reference:** 10-name workbook under REFERENCE at the
+  2026-07-27 close archived (submission_20260730T020414Z.xlsx), convention
+  on its README sheet and every row, IP scan clean (2bp-floor exception +
+  computed-value coincidences only); tagged deliverable-reference. The
+  documented deliverables are untouched.
+- **Site (option A):** run of record stays DOCUMENTED with explicit labels
+  on the landing numbers and universe page; the eight names carry a
+  REFERENCE block (same committed vintage) behind a company-view toggle,
+  values labeled, abs-drift as a chip; E2E covers the toggle.
+- **Validation run:** pytest 398/398 (21 new); pinned ruff/black/mypy
+  clean; bundle-safety full OK; tsc/lint/build; vitest 18/18; Playwright
+  20/20; local Lighthouse 99-100 on / and /company/ORCL/.
+- Follow-ups: complete the formula lock and reconciliation for DELL, KHC,
+  KO, PNC when their reference inputs are provided.
 
 ### 2026-07-27 - README title (owner edit + pluralization)
 

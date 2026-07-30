@@ -317,6 +317,38 @@ Data sources: prices, shares, dividends and balance sheets from Yahoo Finance
 (`yfinance`); the risk-free rate is the **1-Year Treasury** (`DGS1`) from FRED,
 matching the 1-year credit horizon used throughout the model.
 
+## Conventions
+
+The documented convention follows the framework's first-passage definitions;
+the reference convention matches the team's reference implementation. Both
+ship in `creditrating.model.convention`; the documented convention is the
+default and the run of record everywhere (site, headline numbers, archived
+deliverables), and every output row carries a `Convention` field.
+
+| Switch | DOCUMENTED (run of record) | REFERENCE |
+|---|---|---|
+| µ denominator | η − σ²/2 (Ito drift) | raw η (no Ito adjustment) |
+| negative drift | `NOT_RATED` (defective regime) | abs(η), flagged `MU_USES_ABS_DRIFT` |
+| drift window | ~5y (volatility 252d separate) | 250 trading days, one shared span |
+
+Equivalence on the deliverable names, given the reference implementation's
+own inputs (formula lock: `tests/test_reference_convention.py`; "n.p." =
+reference inputs not provided, recorded rather than guessed):
+
+| Name | µ ours/ref | RiskScore ours/ref | abs-drift |
+|---|---|---|---|
+| AMZN | 16.9632 / 16.9632 | 2.1049 / 2.1038 | — |
+| COST | 13.4993 / 13.4993 | 0.7379 / 0.7372 | — |
+| INTU | 1.5477 / 1.5477 | 8.6867 / 8.6867 | flagged |
+| ORCL | 2.7583 / 2.7583 | 21.3328 / 21.3296 | flagged |
+| DELL, KHC, KO, PNC | n.p. | n.p. | — |
+
+End-to-end on our own data, the residual against the reference is one named
+input: the reference's default point is total liabilities where ours is
+`ST + 0.5·LT`, and an ablation shows the 250-day window alone explains only
+the sign flips on the negative-drift names while worsening the rest. The full
+per-switch table: [reference reconciliation](docs/analysis/reference_reconciliation.md).
+
 ## Limitations
 
 ### Resolved along the way
