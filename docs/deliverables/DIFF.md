@@ -73,3 +73,26 @@ scanned against the 28,399 numeric values of the licensed conversion workbook.
 The only overlaps are documented coincidences — a market price (437.5), the
 computed `Bootstrap defective %` values (0.2 / 3.4 / 7.4), and sub-1e-9
 rounding collisions of computed EDF/PIT PDs. No licensed content is present.
+
+
+---
+
+# deliverable-reference (2026-07-29)
+
+| File | Role |
+|---|---|
+| `submission_20260730T020414Z.xlsx` | **Reference-convention deliverable.** The 10-name batch under the `REFERENCE` computation convention (mu denominator = raw eta; negative drift -> |eta| with the MU_USES_ABS_DRIFT flag; drift window = vol window = 250 trading days), pinned to the **2026-07-27 close** from a live refresh. The convention and its three switches are stated on the workbook's own README sheet, and every Asset/validation/Ratings row carries a `Convention` column. The `deliverable-reference` tag ships this workbook. |
+
+The documented-convention deliverables above stay archived untouched; the
+DOCUMENTED convention remains the run of record everywhere (site, README
+headline numbers). ORCL, INTU and T carry `MU_USES_ABS_DRIFT` (negative
+250-day eta -- annotated, never silent). Why the two conventions differ per
+company, with the residuals against the team reference implementation
+attributed to a named input, is in
+[`docs/analysis/reference_reconciliation.md`](../analysis/reference_reconciliation.md).
+
+**IP spot-check (this archive):** every numeric cell scanned against the
+licensed workbook's values; overlaps are the publicly stated 2bp TTC floor
+(0.0002, the single documented exception), computed `Bootstrap defective %`
+values, and sub-1e-9 rounding collisions of computed EDF/PIT PDs. No licensed
+content.
