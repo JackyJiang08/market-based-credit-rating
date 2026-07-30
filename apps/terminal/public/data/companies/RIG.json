@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "RIG",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Transocean Ltd.",
  "sector": "Energy",
  "industry": "Oil & Gas Drilling",
@@ -2236,7 +2238,7 @@
   "sigma_a": 0.2757057647612126,
   "risk_score": 0.5556489905618924,
   "dd": 0.6304322504686226,
-  "ttc_pd": 1.4092908240529864,
-  "pit_pd": 6.669122986999602
+  "ttc_pd": 1.4092908240529862,
+  "pit_pd": 6.669122986999604
  }
 }

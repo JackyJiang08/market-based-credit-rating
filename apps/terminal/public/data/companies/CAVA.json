@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "CAVA",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "CAVA Group, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Restaurants",
@@ -2521,6 +2523,6 @@
   "risk_score": 0.6532032520348386,
   "dd": 0.4532476133799857,
   "ttc_pd": 1.7230448492262915,
-  "pit_pd": 128.86274004329613
+  "pit_pd": 128.86274004329601
  }
 }

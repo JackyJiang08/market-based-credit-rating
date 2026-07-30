@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "BA",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "The Boeing Company",
  "sector": "Industrials",
  "industry": "Aerospace & Defense",
@@ -1677,7 +1679,7 @@
   },
   {
    "mu": 9.529186550809381,
-   "ccm": 0.17829782834431368
+   "ccm": 0.17829782834431374
   },
   {
    "mu": 953.3319757993017,

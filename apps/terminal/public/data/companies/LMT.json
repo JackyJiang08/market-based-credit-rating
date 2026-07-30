@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "LMT",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Lockheed Martin Corporation",
  "sector": "Industrials",
  "industry": "Aerospace & Defense",
@@ -25,8 +27,8 @@
   "asset_value": 144467099428.9499,
   "eta_a": 0.13033050318702835,
   "dd": 10.44853536549103,
-  "edf": 7.440272066471364e-26,
-  "pit_pd": 2.6480927566403144e-22,
+  "edf": 7.440272066471311e-26,
+  "pit_pd": 2.6480927566402956e-22,
   "ttc_pd": 0.00020000000000000004,
   "ccm": 0.2685466142712424,
   "mu": 27.281086346083587,
@@ -2629,6 +2631,6 @@
   "risk_score": 0.589696084059986,
   "dd": 0.3338038109612839,
   "ttc_pd": 0.5104286032884725,
-  "pit_pd": 1443006.9081018947
+  "pit_pd": 1443006.908101906
  }
 }

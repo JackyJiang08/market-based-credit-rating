@@ -98,6 +98,11 @@ export default function Home() {
         <StatCard value="+5 notches" label="how optimistic the letter runs against agency ratings — the conversion, not the ordering, is the weak layer" href="/validation/" />
       </section>
 
+      <p className="-mt-1 text-center text-[11px] text-zinc-400">
+        All numbers on this site are computed under the documented convention (the run of
+        record); eight names also carry reference-convention values on their company pages.
+      </p>
+
       {/* the AAA question, answered before it is asked */}
       <section
         aria-label="why is everything AAA"

@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "RTX",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "RTX Corporation",
  "sector": "Industrials",
  "industry": "Aerospace & Defense",
@@ -1893,7 +1895,7 @@
   },
   {
    "mu": 16.193205340370355,
-   "ccm": 0.11726965044037643
+   "ccm": 0.11726965044037642
   },
   {
    "mu": 11.162756370926994,
@@ -2293,7 +2295,7 @@
   },
   {
    "mu": 12.63947559932519,
-   "ccm": 0.0999207180131926
+   "ccm": 0.09992071801319259
   },
   {
    "mu": 30.692429561972894,
@@ -2501,6 +2503,6 @@
   "risk_score": 1.326313174379007,
   "dd": 0.6613669001456882,
   "ttc_pd": 1.5722429737552857,
-  "pit_pd": 9250088.808555787
+  "pit_pd": 9250088.808555817
  }
 }

@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "AIG",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "American International Group, Inc.",
  "sector": "Financial Services",
  "industry": "Insurance - Diversified",
@@ -1693,7 +1695,7 @@
   },
   {
    "mu": 12.062115837050113,
-   "ccm": 0.12054209184900969
+   "ccm": 0.1205420918490097
   },
   {
    "mu": 41.9434943900708,
@@ -1941,7 +1943,7 @@
   },
   {
    "mu": 33.60333945221738,
-   "ccm": 0.3226403550758299
+   "ccm": 0.32264035507582983
   },
   {
    "mu": 17.35967374806118,
@@ -2633,6 +2635,6 @@
   "risk_score": 0.5069095160769087,
   "dd": 0.2995284276448924,
   "ttc_pd": 0.5092613645537764,
-  "pit_pd": 37817.66983842628
+  "pit_pd": 37817.669838426176
  }
 }

@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "AZO",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "AutoZone, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Auto Parts",
@@ -1785,7 +1787,7 @@
   },
   {
    "mu": 16.785080254454055,
-   "ccm": 0.2577596505696806
+   "ccm": 0.25775965056968053
   },
   {
    "mu": 102.26461307694565,

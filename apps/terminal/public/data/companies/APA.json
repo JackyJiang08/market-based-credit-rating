@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "APA",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "APA Corporation",
  "sector": "Energy",
  "industry": "Oil & Gas E&P",
@@ -25,7 +27,7 @@
   "asset_value": 15076551157.69431,
   "eta_a": 0.09155332314235534,
   "dd": 5.077737620242305,
-  "edf": 1.909778309439233e-07,
+  "edf": 1.9097783094392364e-07,
   "pit_pd": 7.490533421050139e-07,
   "ttc_pd": 0.0006877904148821144,
   "ccm": 3.0250168304133447,

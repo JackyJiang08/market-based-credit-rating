@@ -157,6 +157,7 @@ def main() -> None:
                 "agency_sp": r.get("sp"),
                 "agency_verified": r.get("verified"),
                 "detail_available": r["Symbol"] in cached,
+                "convention": "DOCUMENTED",
             }
         )
     json.dump(
@@ -180,6 +181,7 @@ def main() -> None:
     except FileNotFoundError:
         TABLES = None  # degraded: cloud + sigma/RS/DD/PIT widths still export
     rates = cache.load_rates()
+    REFERENCE_NAMES = {"AMZN", "COST", "DELL", "INTU", "KHC", "KO", "ORCL", "PNC"}
     exported = []
     ALL_WIDTHS: list[dict] = []
     for t in cached:
@@ -254,9 +256,30 @@ def main() -> None:
                     "text": REASON_TEXT.get(c.applicability_reason or "", "gated"),
                 }
             )
+        reference_block = None
+        if t in REFERENCE_NAMES:
+            cref = fetch_company(t, RunConfig(tickers=[t], convention="REFERENCE"), rates)
+            if cref is not None and cref.sigma_A is not None:
+                reference_block = {
+                    "convention": "REFERENCE",
+                    "risk_score": cref.risk_score,
+                    "sigma_a": cref.sigma_A,
+                    "eta_a": cref.eta_A,
+                    "mu": cref.mu,
+                    "ccm": cref.ccm,
+                    "mu_uses_abs_drift": bool(cref.mu_uses_abs_drift),
+                    "note": (
+                        "reference convention: raw-eta denominator, |eta| on "
+                        "negative drift (flagged), 250-day shared window; same "
+                        "committed data vintage as the documented values"
+                    ),
+                }
+
         detail = {
             "meta": meta(),
             "ticker": c.ticker,
+            "convention": "DOCUMENTED",
+            "reference": reference_block,
             "name": c.name,
             "sector": c.sector,
             "industry": c.industry,

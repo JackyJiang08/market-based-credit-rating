@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "HCA",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "HCA Healthcare, Inc.",
  "sector": "Healthcare",
  "industry": "Medical Care Facilities",
@@ -25,8 +27,8 @@
   "asset_value": 112786923465.22864,
   "eta_a": 0.15249495929659546,
   "dd": 6.426184969524434,
-  "edf": 6.542308722442117e-11,
-  "pit_pd": 9.028655190450637e-08,
+  "edf": 6.542308722442093e-11,
+  "pit_pd": 9.028655190450606e-08,
   "ttc_pd": 0.0005708870250809121,
   "ccm": 0.31036209761385586,
   "mu": 10.723413755680427,
@@ -2624,7 +2626,7 @@
   "sigma_a": 0.23919137777711144,
   "risk_score": 0.4877104492459994,
   "dd": 0.3828239080157277,
-  "ttc_pd": 1.43115246533517,
-  "pit_pd": 90.7501019826849
+  "ttc_pd": 1.4311524653351702,
+  "pit_pd": 90.75010198268481
  }
 }

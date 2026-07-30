@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "RDDT",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Reddit, Inc.",
  "sector": "Communication Services",
  "industry": "Internet Content & Information",
@@ -2141,6 +2143,6 @@
   "risk_score": 0.3299444944660361,
   "dd": 0.31069872339428106,
   "ttc_pd": 1.00214484541165,
-  "pit_pd": 1372703.2638235711
+  "pit_pd": 1372703.2638235614
  }
 }

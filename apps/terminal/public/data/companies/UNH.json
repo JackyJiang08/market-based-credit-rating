@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "UNH",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "UnitedHealth Group Incorporated",
  "sector": "Healthcare",
  "industry": "Healthcare Plans",
@@ -25,7 +27,7 @@
   "asset_value": 422574336927.35315,
   "eta_a": 0.05398130321940273,
   "dd": 6.601170503551657,
-  "edf": 2.0396203087642065e-11,
+  "edf": 2.039620308764199e-11,
   "pit_pd": null,
   "ttc_pd": null,
   "ccm": null,

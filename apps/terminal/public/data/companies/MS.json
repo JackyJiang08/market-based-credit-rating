@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "MS",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Morgan Stanley",
  "sector": "Financial Services",
  "industry": "Capital Markets",
@@ -25,7 +27,7 @@
   "asset_value": 537635399892.9851,
   "eta_a": 0.27080315511524405,
   "dd": 7.144273001306024,
-  "edf": 4.523671648322771e-13,
+  "edf": 4.5236716483227547e-13,
   "pit_pd": 3.399119131106263e-05,
   "ttc_pd": 0.0011114080980508638,
   "ccm": 0.11664331512245583,
@@ -2625,6 +2627,6 @@
   "risk_score": 0.401736920440352,
   "dd": 0.30028338791137704,
   "ttc_pd": 1.7617893619677085,
-  "pit_pd": 27.803486399704582
+  "pit_pd": 27.803486399704557
  }
 }

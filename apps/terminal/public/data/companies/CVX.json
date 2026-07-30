@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "CVX",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Chevron Corporation",
  "sector": "Energy",
  "industry": "Oil & Gas Integrated",
@@ -2629,6 +2631,6 @@
   "risk_score": 0.45170355495865105,
   "dd": 0.2439045052075137,
   "ttc_pd": 0.4999999999999998,
-  "pit_pd": 8562095.253636409
+  "pit_pd": 8562095.25363656
  }
 }

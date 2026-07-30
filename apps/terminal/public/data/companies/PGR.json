@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "PGR",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "The Progressive Corporation",
  "sector": "Financial Services",
  "industry": "Insurance - Property & Casualty",
@@ -25,7 +27,7 @@
   "asset_value": 128343311571.08679,
   "eta_a": 0.1899428324844272,
   "dd": 14.236506978841494,
-  "edf": 2.718896724976563e-46,
+  "edf": 2.7188967249765245e-46,
   "pit_pd": 1.5777507009583613e-38,
   "ttc_pd": 0.0002,
   "ccm": 0.1167103851636706,
@@ -2633,6 +2635,6 @@
   "risk_score": 0.6255043939915395,
   "dd": 0.3269435097513978,
   "ttc_pd": 0.9999999999999987,
-  "pit_pd": 226007899341.881
+  "pit_pd": 226007899341.88177
  }
 }

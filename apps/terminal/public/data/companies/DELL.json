@@ -1,12 +1,23 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "DELL",
+ "convention": "DOCUMENTED",
+ "reference": {
+  "convention": "REFERENCE",
+  "risk_score": 4.472568809414872,
+  "sigma_a": 0.5805214777742622,
+  "eta_a": 1.2604570682338854,
+  "mu": 2.1777685351394074,
+  "ccm": 0.09740219624389629,
+  "mu_uses_abs_drift": false,
+  "note": "reference convention: raw-eta denominator, |eta| on negative drift (flagged), 250-day shared window; same committed data vintage as the documented values"
+ },
  "name": "Dell Technologies Inc.",
  "sector": "Technology",
  "industry": "Computer Hardware",
@@ -86,7 +97,7 @@
   },
   {
    "date": "2023-05-09",
-   "asset_value": 45032847561.65492
+   "asset_value": 45032847561.65491
   },
   {
    "date": "2023-05-11",
@@ -230,7 +241,7 @@
   },
   {
    "date": "2023-08-22",
-   "asset_value": 51301603571.65053
+   "asset_value": 51301603571.65054
   },
   {
    "date": "2023-08-24",
@@ -2460,6 +2471,6 @@
   "risk_score": 0.8947183317168803,
   "dd": 0.517161949230332,
   "ttc_pd": 2.19033345494132,
-  "pit_pd": 19.30432000762059
+  "pit_pd": 19.30432000762057
  }
 }

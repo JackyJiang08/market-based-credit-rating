@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "CAT",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Caterpillar Inc.",
  "sector": "Industrials",
  "industry": "Farm & Heavy Construction Machinery",
@@ -1948,7 +1950,7 @@
   },
   {
    "mu": 8.426269775330777,
-   "ccm": 0.14085773605019558
+   "ccm": 0.14085773605019564
   },
   {
    "mu": 6.365743934537708,
@@ -2620,6 +2622,6 @@
   "risk_score": 0.4559201459916554,
   "dd": 0.2747198024950651,
   "ttc_pd": 1.141879066463194,
-  "pit_pd": 529.9489737452897
+  "pit_pd": 529.9489737452881
  }
 }

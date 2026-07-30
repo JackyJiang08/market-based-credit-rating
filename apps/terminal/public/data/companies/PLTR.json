@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "PLTR",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Palantir Technologies Inc.",
  "sector": "Technology",
  "industry": "Software - Infrastructure",
@@ -26,7 +28,7 @@
   "eta_a": 0.9387043276107288,
   "dd": 16.857774892297115,
   "edf": 4.599372503447004e-64,
-  "pit_pd": 4.454742087111632e-43,
+  "pit_pd": 4.454742087111569e-43,
   "ttc_pd": 0.00010000000000000009,
   "ccm": 0.04208472231156865,
   "mu": 9.858392479527122,
@@ -2201,6 +2203,6 @@
   "risk_score": 0.42645047699844774,
   "dd": 0.2401962167497165,
   "ttc_pd": 0.9999999999999983,
-  "pit_pd": 21594283046.436577
+  "pit_pd": 21594283046.43656
  }
 }

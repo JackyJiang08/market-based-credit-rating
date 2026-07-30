@@ -96,6 +96,14 @@ export const ENUM_LABELS: Record<string, EnumLabel> = {
       "|drift t| < 2 — µ and CCM divide by a drift statistically " +
       "indistinguishable from zero. Read the interval, not the point letter.",
   },
+  MU_USES_ABS_DRIFT: {
+    label: "Abs drift in µ",
+    tone: "amber",
+    definition:
+      "Reference convention only: η < 0, and µ/CCM divide by |η|. The " +
+      "documented convention reports NOT_RATED here instead. Flagged, " +
+      "never silent.",
+  },
   DEFECTIVE_DRIFT: {
     label: "Defective drift",
     tone: "amber",

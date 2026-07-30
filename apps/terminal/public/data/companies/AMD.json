@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "AMD",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Advanced Micro Devices, Inc.",
  "sector": "Technology",
  "industry": "Semiconductors",
@@ -26,7 +28,7 @@
   "eta_a": 0.6128836537317749,
   "dd": 9.26003067642152,
   "edf": 1.0218674309181942e-20,
-  "pit_pd": 4.1573919172805703e-16,
+  "pit_pd": 4.1573919172805407e-16,
   "ttc_pd": 0.00020272482525305452,
   "ccm": 0.20294751281979578,
   "mu": 15.337176400835702,
@@ -2453,6 +2455,6 @@
   "risk_score": 0.5440911080234709,
   "dd": 0.3120319204463829,
   "ttc_pd": 0.7764120279004716,
-  "pit_pd": 4646.139334240337
+  "pit_pd": 4646.139334240321
  }
 }

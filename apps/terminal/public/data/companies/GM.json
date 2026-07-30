@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "GM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "General Motors Company",
  "sector": "Consumer Cyclical",
  "industry": "Auto Manufacturers",
@@ -143,7 +145,7 @@
   },
   {
    "date": "2023-05-17",
-   "asset_value": 101591712174.61496
+   "asset_value": 101591712174.61499
   },
   {
    "date": "2023-05-19",
@@ -307,7 +309,7 @@
   },
   {
    "date": "2023-09-14",
-   "asset_value": 102500804422.88046
+   "asset_value": 102500804422.8805
   },
   {
    "date": "2023-09-18",
@@ -359,11 +361,11 @@
   },
   {
    "date": "2023-10-20",
-   "asset_value": 98849714146.36377
+   "asset_value": 98849714146.3638
   },
   {
    "date": "2023-10-24",
-   "asset_value": 97831854119.34268
+   "asset_value": 97831854119.34265
   },
   {
    "date": "2023-10-26",
@@ -735,7 +737,7 @@
   },
   {
    "date": "2024-07-23",
-   "asset_value": 118039596725.3186
+   "asset_value": 118039596725.31857
   },
   {
    "date": "2024-07-25",
@@ -2501,6 +2503,6 @@
   "risk_score": 1.1344692293010434,
   "dd": 0.687227168449802,
   "ttc_pd": 2.257957355641188,
-  "pit_pd": 9.995538158752778
+  "pit_pd": 9.995538158752773
  }
 }

@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "DUK",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Duke Energy Corporation",
  "sector": "Utilities",
  "industry": "Utilities - Regulated Electric",
@@ -26,7 +28,7 @@
   "eta_a": 0.11970488787371565,
   "dd": 11.598822940528933,
   "edf": 2.0889240042775966e-31,
-  "pit_pd": 5.0810672648536805e-21,
+  "pit_pd": 5.081067264853644e-21,
   "ttc_pd": 0.00010000000000000009,
   "ccm": 0.086531935115908,
   "mu": 9.536514196474547,

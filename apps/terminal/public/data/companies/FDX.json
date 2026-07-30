@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "FDX",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "FedEx Corporation",
  "sector": "Industrials",
  "industry": "Integrated Freight & Logistics",
@@ -25,7 +27,7 @@
   "asset_value": 97559094341.54184,
   "eta_a": 0.17029068466232222,
   "dd": 7.078554893890014,
-  "edf": 7.28327122998146e-13,
+  "edf": 7.283271229981485e-13,
   "pit_pd": 8.622603927498546e-09,
   "ttc_pd": 0.0004432283563479319,
   "ccm": 0.23307838777665443,
@@ -2421,6 +2423,6 @@
   "risk_score": 0.5348485252285733,
   "dd": 0.3601886840495762,
   "ttc_pd": 1.6696476411510868,
-  "pit_pd": 414.41900048164933
+  "pit_pd": 414.4190004816498
  }
 }

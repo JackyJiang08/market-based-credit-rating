@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "M",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Macy's, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Department Stores",
@@ -26,7 +28,7 @@
   "eta_a": 0.13107917232129343,
   "dd": 4.43029221295983,
   "edf": 4.705274193038773e-06,
-  "pit_pd": 0.00011926505253676672,
+  "pit_pd": 0.00011926505253676693,
   "ttc_pd": 0.002658482800768496,
   "ccm": 0.8091992123366789,
   "mu": 13.810138141727425,
@@ -39,7 +41,7 @@
   "interval_low": "A",
   "interval_high": "BBB-",
   "interval_notches": 5,
-  "outlook": -0.0025392177482317295,
+  "outlook": -0.002539217748231729,
   "at_floor": false,
   "at_scale_top": false
  },
@@ -2149,6 +2151,6 @@
   "risk_score": 0.5541429710853868,
   "dd": 0.7408158644447892,
   "ttc_pd": 1.3994060326958733,
-  "pit_pd": 37.71637115420842
+  "pit_pd": 37.7163711542084
  }
 }

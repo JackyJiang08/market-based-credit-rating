@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "MU",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Micron Technology, Inc.",
  "sector": "Technology",
  "industry": "Semiconductors",
@@ -114,7 +116,7 @@
   },
   {
    "date": "2023-01-12",
-   "asset_value": 67349091785.43652
+   "asset_value": 67349091785.43654
   },
   {
    "date": "2023-01-18",
@@ -2140,6 +2142,6 @@
   "risk_score": 0.4282430995166047,
   "dd": 0.25749423691189666,
   "ttc_pd": 1.1911643640421763,
-  "pit_pd": 295.9036800179162
+  "pit_pd": 295.9036800179161
  }
 }

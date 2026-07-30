@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "ARM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Arm Holdings plc",
  "sector": "Technology",
  "industry": "Semiconductors",
@@ -25,8 +27,8 @@
   "asset_value": 277961069797.85645,
   "eta_a": 0.7516903505260819,
   "dd": 10.345414937858184,
-  "edf": 2.195051868735178e-25,
-  "pit_pd": 2.4609522889364403e-19,
+  "edf": 2.1950518687351623e-25,
+  "pit_pd": 2.4609522889364225e-19,
   "ttc_pd": 0.00020045430031029633,
   "ccm": 0.15191601063312746,
   "mu": 14.188729098950697,
@@ -1768,8 +1770,8 @@
    "ccm": 1.9239858189243766
   },
   {
-   "mu": 12.43315952630086,
-   "ccm": 0.14016359234485568
+   "mu": 12.433159526300862,
+   "ccm": 0.14016359234485573
   },
   {
    "mu": 10.317147308246831,
@@ -2525,6 +2527,6 @@
   "risk_score": 0.5126803986250981,
   "dd": 0.3162020205112911,
   "ttc_pd": 0.5871168594130056,
-  "pit_pd": 42425.97097140039
+  "pit_pd": 42425.97097140054
  }
 }

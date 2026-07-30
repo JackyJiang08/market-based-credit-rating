@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "AVGO",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Broadcom Inc.",
  "sector": "Technology",
  "industry": "Semiconductors",
@@ -2593,6 +2595,6 @@
   "risk_score": 0.5563053431744032,
   "dd": 0.3275624008788922,
   "ttc_pd": 1.5992271014903043,
-  "pit_pd": 3600.8329662265583
+  "pit_pd": 3600.83296622657
  }
 }

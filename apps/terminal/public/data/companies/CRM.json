@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "CRM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Salesforce, Inc.",
  "sector": "Technology",
  "industry": "Software - Application",
@@ -25,7 +27,7 @@
   "asset_value": 154395417312.34973,
   "eta_a": 0.04511438053341063,
   "dd": 5.116536717710749,
-  "edf": 1.5559836374363212e-07,
+  "edf": 1.5559836374363241e-07,
   "pit_pd": null,
   "ttc_pd": null,
   "ccm": null,
@@ -2385,6 +2387,6 @@
   "risk_score": 0.40086025429412164,
   "dd": 0.430253021208999,
   "ttc_pd": 1.1171203643839647,
-  "pit_pd": 22.45731330749548
+  "pit_pd": 22.457313307495465
  }
 }

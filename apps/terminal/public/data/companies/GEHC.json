@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "GEHC",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "GE HealthCare Technologies Inc.",
  "sector": "Healthcare",
  "industry": "Medical Devices",
@@ -2293,6 +2295,6 @@
   "risk_score": 0.646682955698258,
   "dd": 0.4201643607252038,
   "ttc_pd": 1.7495548787828128,
-  "pit_pd": 179.90452541146556
+  "pit_pd": 179.90452541146578
  }
 }

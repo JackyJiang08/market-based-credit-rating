@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "PYPL",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "PayPal Holdings, Inc.",
  "sector": "Financial Services",
  "industry": "Credit Services",
@@ -25,7 +27,7 @@
   "asset_value": 54043483588.029434,
   "eta_a": -0.0801930326656745,
   "dd": 5.863344172217284,
-  "edf": 2.2681828407701235e-09,
+  "edf": 2.2681828407701156e-09,
   "pit_pd": null,
   "ttc_pd": null,
   "ccm": null,
@@ -1841,6 +1843,6 @@
   "risk_score": 0.9525751524709882,
   "dd": 0.5630984283503029,
   "ttc_pd": 3.2089478689319,
-  "pit_pd": 10009.226763120618
+  "pit_pd": 10009.226763120641
  }
 }

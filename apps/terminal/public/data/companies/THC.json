@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "THC",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Tenet Healthcare Corporation",
  "sector": "Healthcare",
  "industry": "Medical Care Facilities",
@@ -323,7 +325,7 @@
   },
   {
    "date": "2023-09-26",
-   "asset_value": 12898057349.642895
+   "asset_value": 12898057349.642899
   },
   {
    "date": "2023-09-28",
@@ -355,7 +357,7 @@
   },
   {
    "date": "2023-10-18",
-   "asset_value": 11954741181.222965
+   "asset_value": 11954741181.22297
   },
   {
    "date": "2023-10-20",
@@ -391,7 +393,7 @@
   },
   {
    "date": "2023-11-13",
-   "asset_value": 11885035144.828712
+   "asset_value": 11885035144.828716
   },
   {
    "date": "2023-11-15",
@@ -2624,7 +2626,7 @@
   "sigma_a": 0.34949922194252225,
   "risk_score": 0.7066524686312061,
   "dd": 0.45948830838505983,
-  "ttc_pd": 1.7139379405481596,
-  "pit_pd": 34.98155987647716
+  "ttc_pd": 1.71393794054816,
+  "pit_pd": 34.981559876477185
  }
 }

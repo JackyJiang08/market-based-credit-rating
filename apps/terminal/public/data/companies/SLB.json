@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "SLB",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "SLB N.V.",
  "sector": "Energy",
  "industry": "Oil & Gas Equipment & Services",
@@ -2629,6 +2631,6 @@
   "risk_score": 0.42044823113293456,
   "dd": 0.3025081886877314,
   "ttc_pd": 0.7316787753940348,
-  "pit_pd": 1073.9251159373805
+  "pit_pd": 1073.925115937382
  }
 }

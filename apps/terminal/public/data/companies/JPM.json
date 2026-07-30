@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "JPM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "JPMorgan Chase & Co.",
  "sector": "Financial Services",
  "industry": "Banks - Diversified",
@@ -1857,7 +1859,7 @@
   },
   {
    "mu": 3.550564418694586,
-   "ccm": 0.04759411495000179
+   "ccm": 0.047594114950001785
   },
   {
    "mu": 3.4783673891303986,
@@ -2629,6 +2631,6 @@
   "risk_score": 0.34306107502137306,
   "dd": 0.22010174313614303,
   "ttc_pd": 1.452307004087191,
-  "pit_pd": 418.95868709098784
+  "pit_pd": 418.95868709098556
  }
 }

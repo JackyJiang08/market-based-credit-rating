@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "AXP",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "American Express Company",
  "sector": "Financial Services",
  "industry": "Credit Services",
@@ -99,7 +101,7 @@
   },
   {
    "date": "2023-04-13",
-   "asset_value": 128173000579.2839
+   "asset_value": 128173000579.28394
   },
   {
    "date": "2023-04-17",
@@ -2629,6 +2631,6 @@
   "risk_score": 0.5285991329366658,
   "dd": 0.3193422335536806,
   "ttc_pd": 0.7533025444959256,
-  "pit_pd": 15504.204940489699
+  "pit_pd": 15504.20494048968
  }
 }

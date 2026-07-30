@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "COF",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Capital One Financial Corporation",
  "sector": "Financial Services",
  "industry": "Credit Services",
@@ -2629,6 +2631,6 @@
   "risk_score": 0.48661407792534106,
   "dd": 0.31321861414407415,
   "ttc_pd": 1.5411631233935814,
-  "pit_pd": 141.98972980997974
+  "pit_pd": 141.98972980997945
  }
 }

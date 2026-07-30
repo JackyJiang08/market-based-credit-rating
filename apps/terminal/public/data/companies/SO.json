@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "SO",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "The Southern Company",
  "sector": "Utilities",
  "industry": "Utilities - Regulated Electric",
@@ -25,8 +27,8 @@
   "asset_value": 149722197897.25543,
   "eta_a": 0.12441911934573935,
   "dd": 11.33790867792014,
-  "edf": 4.257756596346729e-30,
-  "pit_pd": 3.574170678987302e-21,
+  "edf": 4.25775659634679e-30,
+  "pit_pd": 3.574170678987327e-21,
   "ttc_pd": 0.00020062666567837004,
   "ccm": 0.10121019528220682,
   "mu": 10.918800560438072,
@@ -2201,6 +2203,6 @@
   "risk_score": 0.3935998835679554,
   "dd": 0.25184273467801854,
   "ttc_pd": 0.5187561223755821,
-  "pit_pd": 24619.928492488078
+  "pit_pd": 24619.928492488165
  }
 }

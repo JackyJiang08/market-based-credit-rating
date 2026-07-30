@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "ALL",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "The Allstate Corporation",
  "sector": "Financial Services",
  "industry": "Insurance - Property & Casualty",
@@ -2205,6 +2207,6 @@
   "risk_score": 0.3919441722442742,
   "dd": 0.225939830655346,
   "ttc_pd": 0.9999999999999987,
-  "pit_pd": 2917779.4292041278
+  "pit_pd": 2917779.429204135
  }
 }

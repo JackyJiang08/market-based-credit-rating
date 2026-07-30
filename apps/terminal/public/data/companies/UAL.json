@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "UAL",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "United Airlines Holdings, Inc.",
  "sector": "Industrials",
  "industry": "Airlines",
@@ -26,7 +28,7 @@
   "eta_a": 0.2235765453559686,
   "dd": 4.3191710596846775,
   "edf": 7.830817766587175e-06,
-  "pit_pd": 0.0012391376645095673,
+  "pit_pd": 0.0012391376645095663,
   "ttc_pd": 0.0034054246302986854,
   "ccm": 0.4730707168565691,
   "mu": 6.675444356208294,
@@ -39,7 +41,7 @@
   "interval_low": "BBB",
   "interval_high": "BBB-",
   "interval_notches": 2,
-  "outlook": -0.002166286965789118,
+  "outlook": -0.002166286965789119,
   "at_floor": false,
   "at_scale_top": false
  },
@@ -387,7 +389,7 @@
   },
   {
    "date": "2023-11-09",
-   "asset_value": 30880836626.554077
+   "asset_value": 30880836626.55407
   },
   {
    "date": "2023-11-13",
@@ -471,7 +473,7 @@
   },
   {
    "date": "2024-01-11",
-   "asset_value": 33412167521.40599
+   "asset_value": 33412167521.406
   },
   {
    "date": "2024-01-16",
@@ -483,7 +485,7 @@
   },
   {
    "date": "2024-01-22",
-   "asset_value": 31365751009.031715
+   "asset_value": 31365751009.031723
   },
   {
    "date": "2024-01-24",
@@ -2005,7 +2007,7 @@
   },
   {
    "mu": 3.5803728052972517,
-   "ccm": 0.24555872381795055
+   "ccm": 0.24555872381795057
   },
   {
    "mu": 8.943125868605408,
@@ -2501,6 +2503,6 @@
   "risk_score": 0.36778551607416415,
   "dd": 0.35514030416052134,
   "ttc_pd": 0.8168690199068834,
-  "pit_pd": 7.756837933951415
+  "pit_pd": 7.756837933951404
  }
 }

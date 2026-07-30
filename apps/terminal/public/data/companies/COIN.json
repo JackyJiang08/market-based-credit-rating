@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "COIN",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Coinbase Global, Inc.",
  "sector": "Financial Services",
  "industry": "Financial Data & Stock Exchanges",
@@ -26,7 +28,7 @@
   "eta_a": 0.46377396939267224,
   "dd": 3.9426819235199737,
   "edf": 4.028774374597074e-05,
-  "pit_pd": 0.0016306466288076825,
+  "pit_pd": 0.001630646628807681,
   "ttc_pd": 0.005181904357911431,
   "ccm": 0.6897568617657018,
   "mu": 8.605892138967054,
@@ -39,7 +41,7 @@
   "interval_low": "BBB",
   "interval_high": "BB+",
   "interval_notches": 3,
-  "outlook": -0.0035512577291037482,
+  "outlook": -0.00355125772910375,
   "at_floor": false,
   "at_scale_top": false
  },

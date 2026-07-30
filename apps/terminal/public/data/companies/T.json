@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "T",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "AT&T Inc.",
  "sector": "Communication Services",
  "industry": "Telecom Services",
@@ -95,7 +97,7 @@
   },
   {
    "date": "2023-04-13",
-   "asset_value": 192131136793.72858
+   "asset_value": 192131136793.72864
   },
   {
    "date": "2023-04-17",
@@ -2345,7 +2347,7 @@
   },
   {
    "mu": 23.06825354115166,
-   "ccm": 0.46461204716286675
+   "ccm": 0.4646120471628668
   },
   {
    "mu": 4.952005155721827,
@@ -2501,6 +2503,6 @@
   "risk_score": 0.7308910350920077,
   "dd": 0.42741765076699534,
   "ttc_pd": 1.8127787686444585,
-  "pit_pd": 240.1353619510433
+  "pit_pd": 240.13536195104317
  }
 }

@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "KMI",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Kinder Morgan, Inc.",
  "sector": "Energy",
  "industry": "Oil & Gas Midstream",
@@ -2629,6 +2631,6 @@
   "risk_score": 0.338011606365472,
   "dd": 0.2160851747090284,
   "ttc_pd": 1.037842709766017,
-  "pit_pd": 6085.675362572672
+  "pit_pd": 6085.675362572694
  }
 }

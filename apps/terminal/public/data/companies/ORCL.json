@@ -1,12 +1,23 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "ORCL",
+ "convention": "DOCUMENTED",
+ "reference": {
+  "convention": "REFERENCE",
+  "risk_score": 12.52657720896957,
+  "sigma_a": 0.5705567605887203,
+  "eta_a": -0.45655054347922364,
+  "mu": 3.5309680011109785,
+  "ccm": 0.4423094328831762,
+  "mu_uses_abs_drift": true,
+  "note": "reference convention: raw-eta denominator, |eta| on negative drift (flagged), 250-day shared window; same committed data vintage as the documented values"
+ },
  "name": "Oracle Corporation",
  "sector": "Technology",
  "industry": "Software - Infrastructure",
@@ -26,7 +37,7 @@
   "eta_a": 0.19246532979008155,
   "dd": 2.889899140921656,
   "edf": 0.0019268272238503398,
-  "pit_pd": 0.005328449804653005,
+  "pit_pd": 0.005328449804653009,
   "ttc_pd": 0.015458673552203598,
   "ccm": 6.495903558045225,
   "mu": 52.23150375233306,
@@ -39,7 +50,7 @@
   "interval_low": "BBB-",
   "interval_high": "BB-",
   "interval_notches": 4,
-  "outlook": -0.010130223747550593,
+  "outlook": -0.010130223747550588,
   "at_floor": false,
   "at_scale_top": false
  },
@@ -1724,8 +1735,8 @@
    "ccm": 3.1588021937869235
   },
   {
-   "mu": 3.964678804179993,
-   "ccm": 0.36279097071875355
+   "mu": 3.964678804179994,
+   "ccm": 0.36279097071875366
   },
   {
    "mu": 5.382438319676622,
@@ -2297,6 +2308,6 @@
   "risk_score": 0.9215331123152051,
   "dd": 0.7614505653199538,
   "ttc_pd": 1.835798066823533,
-  "pit_pd": 6.545065330328609
+  "pit_pd": 6.545065330328607
  }
 }

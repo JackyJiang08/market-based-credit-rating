@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "C",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Citigroup Inc.",
  "sector": "Financial Services",
  "industry": "Banks - Diversified",
@@ -95,7 +97,7 @@
   },
   {
    "date": "2023-04-13",
-   "asset_value": 245606550018.31226
+   "asset_value": 245606550018.31232
   },
   {
    "date": "2023-04-17",
@@ -171,7 +173,7 @@
   },
   {
    "date": "2023-06-07",
-   "asset_value": 246605488263.55615
+   "asset_value": 246605488263.5561
   },
   {
    "date": "2023-06-09",
@@ -2041,7 +2043,7 @@
   },
   {
    "mu": 11.058562109083208,
-   "ccm": 0.618916452575756
+   "ccm": 0.6189164525757561
   },
   {
    "mu": 2.5048948401447197,
@@ -2625,6 +2627,6 @@
   "risk_score": 0.49195310812840687,
   "dd": 0.3160237841080543,
   "ttc_pd": 1.0713369481995574,
-  "pit_pd": 10.622352783310017
+  "pit_pd": 10.622352783310022
  }
 }

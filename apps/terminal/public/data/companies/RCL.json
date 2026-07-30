@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "RCL",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Royal Caribbean Cruises Ltd.",
  "sector": "Consumer Cyclical",
  "industry": "Travel Services",
@@ -26,7 +28,7 @@
   "eta_a": 0.445165610778936,
   "dd": 5.939267922098828,
   "edf": 1.431488251934912e-09,
-  "pit_pd": 2.8976323529891325e-05,
+  "pit_pd": 2.8976323529891274e-05,
   "ttc_pd": 0.001260738379640315,
   "ccm": 0.22120904640819433,
   "mu": 5.625361397865724,
@@ -2625,6 +2627,6 @@
   "risk_score": 0.5425701452062159,
   "dd": 0.351699126032281,
   "ttc_pd": 1.331795395626835,
-  "pit_pd": 29.796193356411454
+  "pit_pd": 29.796193356411422
  }
 }

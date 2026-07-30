@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "MSTR",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Strategy Inc",
  "sector": "Technology",
  "industry": "Software - Application",
@@ -25,7 +27,7 @@
   "asset_value": 37463577402.2704,
   "eta_a": 0.6118767678341105,
   "dd": 3.7413831143404255,
-  "edf": 9.150514479879635e-05,
+  "edf": 9.150514479879619e-05,
   "pit_pd": 0.006960654638300148,
   "ttc_pd": 0.006802604283837907,
   "ccm": 0.57470370945556,
@@ -2625,6 +2627,6 @@
   "risk_score": 0.5677648323601755,
   "dd": 0.602390887299261,
   "ttc_pd": 1.1568281466331665,
-  "pit_pd": 7.8218930696451965
+  "pit_pd": 7.821893069645194
  }
 }

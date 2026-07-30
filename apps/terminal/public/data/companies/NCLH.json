@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "NCLH",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Norwegian Cruise Line Holdings Ltd.",
  "sector": "Consumer Cyclical",
  "industry": "Travel Services",
@@ -25,7 +27,7 @@
   "asset_value": 16719798740.543457,
   "eta_a": 0.12389075371442304,
   "dd": 2.6435741239739903,
-  "edf": 0.004101790064640146,
+  "edf": 0.004101790064640142,
   "pit_pd": 0.031215209093872362,
   "ttc_pd": 0.0243413133196646,
   "ccm": 1.6061417796396635,
@@ -2625,6 +2627,6 @@
   "risk_score": 0.4430948968493481,
   "dd": 0.8271495730039922,
   "ttc_pd": 1.0511232166800804,
-  "pit_pd": 3.11020843651649
+  "pit_pd": 3.1102084365164897
  }
 }

@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "ABBV",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "AbbVie Inc.",
  "sector": "Healthcare",
  "industry": "Drug Manufacturers - General",
@@ -2629,6 +2631,6 @@
   "risk_score": 0.4704277158492647,
   "dd": 0.2629446539220985,
   "ttc_pd": 0.5137960869957136,
-  "pit_pd": 177737.4177414672
+  "pit_pd": 177737.41774146596
  }
 }

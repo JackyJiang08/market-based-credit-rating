@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "CCL",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Carnival Corporation Ltd.",
  "sector": "Consumer Cyclical",
  "industry": "Travel Services",
@@ -26,7 +28,7 @@
   "eta_a": 0.20002932854048716,
   "dd": 4.15866513200924,
   "edf": 1.6005638847095416e-05,
-  "pit_pd": 0.0008237979335933271,
+  "pit_pd": 0.0008237979335933264,
   "ttc_pd": 0.004031277317850062,
   "ccm": 0.6364716236101993,
   "mu": 8.895033458579343,
@@ -39,7 +41,7 @@
   "interval_low": "BBB",
   "interval_high": "BBB-",
   "interval_notches": 2,
-  "outlook": -0.003207479384256735,
+  "outlook": -0.003207479384256736,
   "at_floor": false,
   "at_scale_top": false
  },
@@ -463,7 +465,7 @@
   },
   {
    "date": "2023-12-01",
-   "asset_value": 39678815148.80916
+   "asset_value": 39678815148.80914
   },
   {
    "date": "2023-12-05",
@@ -1700,8 +1702,8 @@
    "ccm": 0.565210590327081
   },
   {
-   "mu": 11.324507361256012,
-   "ccm": 0.9095739372808843
+   "mu": 11.32450736125601,
+   "ccm": 0.9095739372808844
   },
   {
    "mu": 3.8900022836055994,
@@ -2549,6 +2551,6 @@
   "risk_score": 0.3824954925834657,
   "dd": 0.43866644000577043,
   "ttc_pd": 0.8981940080054921,
-  "pit_pd": 12.87409322074843
+  "pit_pd": 12.87409322074841
  }
 }

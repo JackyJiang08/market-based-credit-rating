@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "BAC",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Bank of America Corporation",
  "sector": "Financial Services",
  "industry": "Banks - Diversified",
@@ -2557,7 +2559,7 @@
   },
   {
    "mu": 6.251525436681415,
-   "ccm": 0.14329779303347537
+   "ccm": 0.1432977930334754
   },
   {
    "mu": 4.880820679803614,
@@ -2629,6 +2631,6 @@
   "risk_score": 0.43289557561103703,
   "dd": 0.2886394431522483,
   "ttc_pd": 4.295116179270158,
-  "pit_pd": 280.80360775718555
+  "pit_pd": 280.8036077571851
  }
 }

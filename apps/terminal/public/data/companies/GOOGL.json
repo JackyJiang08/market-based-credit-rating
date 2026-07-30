@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "GOOGL",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Alphabet Inc.",
  "sector": "Communication Services",
  "industry": "Internet Content & Information",
@@ -26,7 +28,7 @@
   "eta_a": 0.244236414840848,
   "dd": 15.161105060966399,
   "edf": 3.199183233133973e-52,
-  "pit_pd": 7.782154263158528e-44,
+  "pit_pd": 7.782154263158529e-44,
   "ttc_pd": 0.0002,
   "ccm": 0.10768977545254975,
   "mu": 22.709441033713574,
@@ -2129,7 +2131,7 @@
   },
   {
    "mu": 15.59287217591425,
-   "ccm": 0.07583227338657733
+   "ccm": 0.07583227338657732
   },
   {
    "mu": 21.28124552749258,

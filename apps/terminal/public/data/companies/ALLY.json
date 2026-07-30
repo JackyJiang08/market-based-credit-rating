@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "ALLY",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Ally Financial Inc.",
  "sector": "Financial Services",
  "industry": "Credit Services",
@@ -25,8 +27,8 @@
   "asset_value": 24889821718.002403,
   "eta_a": 0.1427545133652834,
   "dd": 5.005443825755227,
-  "edf": 2.786673246658393e-07,
-  "pit_pd": 0.000477332547058409,
+  "edf": 2.7866732466583876e-07,
+  "pit_pd": 0.00047733254705840857,
   "ttc_pd": 0.002703487388786348,
   "ccm": 0.30441014502945607,
   "mu": 5.443115905022541,
@@ -1860,8 +1862,8 @@
    "ccm": 1.0914568150987036
   },
   {
-   "mu": 5.9392392637426905,
-   "ccm": 0.31571641579054854
+   "mu": 5.939239263742692,
+   "ccm": 0.3157164157905486
   },
   {
    "mu": 3.7350332921333025,
@@ -2505,6 +2507,6 @@
   "risk_score": 0.4335071884152033,
   "dd": 0.4343491968744522,
   "ttc_pd": 1.0100007096206363,
-  "pit_pd": 19.414942786166538
+  "pit_pd": 19.41494278616653
  }
 }

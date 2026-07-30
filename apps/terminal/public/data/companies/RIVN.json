@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "RIVN",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Rivian Automotive, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Auto Manufacturers",
@@ -26,7 +28,7 @@
   "eta_a": 0.21360824788606314,
   "dd": 3.2830858350670686,
   "edf": 0.0005133869843506859,
-  "pit_pd": 0.0016418124636590336,
+  "pit_pd": 0.001641812463659032,
   "ttc_pd": 0.00896165051150527,
   "ccm": 4.440848034498576,
   "mu": 45.84454536928564,
@@ -39,7 +41,7 @@
   "interval_low": "BBB",
   "interval_high": "BB",
   "interval_notches": 4,
-  "outlook": -0.007319838047846237,
+  "outlook": -0.007319838047846238,
   "at_floor": false,
   "at_scale_top": false
  },
@@ -1665,7 +1667,7 @@
   },
   {
    "mu": 3.093172455400045,
-   "ccm": 0.22628663313738417
+   "ccm": 0.22628663313738415
   },
   {
    "mu": 23.665663587382895,

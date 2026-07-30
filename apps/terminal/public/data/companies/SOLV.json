@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "SOLV",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Solventum Corporation",
  "sector": "Healthcare",
  "industry": "Medical Instruments & Supplies",
@@ -1548,8 +1550,8 @@
    "ccm": 3.599068334334888
   },
   {
-   "mu": 41.29787819812134,
-   "ccm": 0.7429866134913988
+   "mu": 41.297878198121325,
+   "ccm": 0.7429866134913986
   },
   {
    "mu": 5.215342946488683,
@@ -2257,6 +2259,6 @@
   "risk_score": 0.5004223185570599,
   "dd": 0.5222018547193595,
   "ttc_pd": 1.5280388453526592,
-  "pit_pd": 1450.7567880111706
+  "pit_pd": 1450.7567880111746
  }
 }

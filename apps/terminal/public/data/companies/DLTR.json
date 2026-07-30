@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "DLTR",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Dollar Tree, Inc.",
  "sector": "Consumer Defensive",
  "industry": "Discount Stores",
@@ -1693,7 +1695,7 @@
   },
   {
    "mu": 6.732424344790876,
-   "ccm": 0.2961326381391844
+   "ccm": 0.29613263813918433
   },
   {
    "mu": 11.648055653592525,
@@ -2205,6 +2207,6 @@
   "risk_score": 0.6176752704358527,
   "dd": 0.5523322386484176,
   "ttc_pd": 1.748103770309337,
-  "pit_pd": 101.89356585431015
+  "pit_pd": 101.89356585431024
  }
 }

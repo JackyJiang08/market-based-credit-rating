@@ -2,6 +2,7 @@
 
 /** Company view: header, RiskScore-first result table, interval-attached
  *  letter, provenance popovers, first-class flag chips, EM path sparkline. */
+import { ConventionToggle } from "@/components/convention-toggle";
 import { FlagChip } from "@/components/flag-chips";
 import { RatingCell } from "@/components/rating-cell";
 import { Badge } from "@/components/ui/badge";
@@ -179,6 +180,8 @@ export function CompanyView({
           ))}
         </div>
       ) : null}
+
+      {d.reference ? <ConventionToggle documented={m} reference={d.reference} /> : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="border-zinc-800 bg-zinc-900/60">

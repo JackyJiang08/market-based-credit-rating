@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "MGM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "MGM Resorts International",
  "sector": "Consumer Cyclical",
  "industry": "Resorts & Casinos",
@@ -1709,7 +1711,7 @@
   },
   {
    "mu": 0.6046133679002345,
-   "ccm": 0.049877508275647305
+   "ccm": 0.0498775082756473
   },
   {
    "mu": 5.0388539598381,

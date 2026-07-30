@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "PCG",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "PG&E Corporation",
  "sector": "Utilities",
  "industry": "Utilities - Regulated Electric",
@@ -25,7 +27,7 @@
   "asset_value": 79175680389.86465,
   "eta_a": 0.05383849120379412,
   "dd": 6.021996812977672,
-  "edf": 8.613914415033536e-10,
+  "edf": 8.613914415033566e-10,
   "pit_pd": 4.1447887084502384e-08,
   "ttc_pd": 0.0005033129291614174,
   "ccm": 0.6380484163605848,
@@ -2501,6 +2503,6 @@
   "risk_score": 0.3341769108544722,
   "dd": 0.33123638790404436,
   "ttc_pd": 1.142203227034742,
-  "pit_pd": 41.12609330719851
+  "pit_pd": 41.12609330719847
  }
 }

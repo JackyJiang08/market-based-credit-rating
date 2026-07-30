@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "COP",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "ConocoPhillips",
  "sector": "Energy",
  "industry": "Oil & Gas E&P",
@@ -2565,7 +2567,7 @@
   },
   {
    "mu": 18.823538939872773,
-   "ccm": 0.22793579726821103
+   "ccm": 0.22793579726821106
   },
   {
    "mu": 21.559569081386996,

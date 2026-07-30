@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "BLK",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "BlackRock, Inc.",
  "sector": "Financial Services",
  "industry": "Asset Management",
@@ -2629,6 +2631,6 @@
   "risk_score": 0.3890595717907744,
   "dd": 0.22954485494197546,
   "ttc_pd": 0.4999999999999998,
-  "pit_pd": 5320509.681824532
+  "pit_pd": 5320509.681824516
  }
 }

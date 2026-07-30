@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "MSFT",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Microsoft Corporation",
  "sector": "Technology",
  "industry": "Software - Infrastructure",
@@ -25,8 +27,8 @@
   "asset_value": 2866998164055.4053,
   "eta_a": 0.1728502705052752,
   "dd": 16.766207439958055,
-  "edf": 2.1558275894103e-63,
-  "pit_pd": 4.0540496034812327e-56,
+  "edf": 2.1558275894103613e-63,
+  "pit_pd": 4.05404960348129e-56,
   "ttc_pd": 0.00019999999999999998,
   "ccm": 0.12479721967882103,
   "mu": 33.05095497158173,
@@ -2257,7 +2259,7 @@
   },
   {
    "mu": 58.16222943777045,
-   "ccm": 0.32060382509506835
+   "ccm": 0.3206038250950683
   },
   {
    "mu": 96.69600101121871,

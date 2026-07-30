@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "SCHW",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "The Charles Schwab Corporation",
  "sector": "Financial Services",
  "industry": "Capital Markets",
@@ -25,7 +27,7 @@
   "asset_value": 199191225437.74036,
   "eta_a": 0.2115531144771729,
   "dd": 10.07603790997177,
-  "edf": 3.525617049771078e-24,
+  "edf": 3.525617049771052e-24,
   "pit_pd": 1.787845002626198e-17,
   "ttc_pd": 0.00021033866727470212,
   "ccm": 0.1364336740624031,

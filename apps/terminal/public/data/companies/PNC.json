@@ -1,12 +1,23 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "PNC",
+ "convention": "DOCUMENTED",
+ "reference": {
+  "convention": "REFERENCE",
+  "risk_score": 1.4634752713860284,
+  "sigma_a": 0.1666038821928312,
+  "eta_a": 0.25335590331136293,
+  "mu": 5.435774035225453,
+  "ccm": 0.07955120881394698,
+  "mu_uses_abs_drift": false,
+  "note": "reference convention: raw-eta denominator, |eta| on negative drift (flagged), 250-day shared window; same committed data vintage as the documented values"
+ },
  "name": "The PNC Financial Services Group, Inc.",
  "sector": "Financial Services",
  "industry": "Banks - Regional",
@@ -26,7 +37,7 @@
   "eta_a": 0.20992561499997137,
   "dd": 9.468318156614018,
   "edf": 1.4219275007877084e-21,
-  "pit_pd": 1.0358574476225197e-12,
+  "pit_pd": 1.0358574476225233e-12,
   "ttc_pd": 0.00022544761842876708,
   "ccm": 0.10222704763240817,
   "mu": 7.022151066895752,

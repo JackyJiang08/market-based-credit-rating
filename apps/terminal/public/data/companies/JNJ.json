@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "JNJ",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Johnson & Johnson",
  "sector": "Healthcare",
  "industry": "Drug Manufacturers - General",
@@ -2060,8 +2062,8 @@
    "ccm": 0.4900355483649105
   },
   {
-   "mu": 106.68873165576869,
-   "ccm": 0.6064274350588426
+   "mu": 106.6887316557687,
+   "ccm": 0.6064274350588428
   },
   {
    "mu": 15.61494356522773,
@@ -2509,6 +2511,6 @@
   "risk_score": 1.3797530641867775,
   "dd": 0.6921336659035597,
   "ttc_pd": 1.0051454061264984,
-  "pit_pd": 1.5627024780043026e+16
+  "pit_pd": 1.5627024780042908e+16
  }
 }

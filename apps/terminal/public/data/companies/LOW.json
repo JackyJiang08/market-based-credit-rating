@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "LOW",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Lowe's Companies, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Home Improvement Retail",
@@ -2589,6 +2591,6 @@
   "risk_score": 0.3440368987959679,
   "dd": 0.3045837175682906,
   "ttc_pd": 0.883330706551349,
-  "pit_pd": 850.3267859499016
+  "pit_pd": 850.3267859498986
  }
 }

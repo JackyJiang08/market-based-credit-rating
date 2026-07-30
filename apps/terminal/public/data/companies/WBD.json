@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "WBD",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Warner Bros. Discovery, Inc.",
  "sector": "Communication Services",
  "industry": "Entertainment",
@@ -25,8 +27,8 @@
   "asset_value": 80898187224.46591,
   "eta_a": 0.13818591358798227,
   "dd": 5.300348981227918,
-  "edf": 5.7790768555902016e-08,
-  "pit_pd": 2.1897331591878644e-06,
+  "edf": 5.779076855590222e-08,
+  "pit_pd": 2.1897331591878686e-06,
   "ttc_pd": 0.0010082782084346548,
   "ccm": 0.6928820130970431,
   "mu": 17.40817466556122,
@@ -1661,7 +1663,7 @@
   },
   {
    "mu": 13.558717979253764,
-   "ccm": 0.318250563712236
+   "ccm": 0.31825056371223603
   },
   {
    "mu": 20.998359356999234,
@@ -2625,6 +2627,6 @@
   "risk_score": 1.4821794649438684,
   "dd": 0.8472439248159565,
   "ttc_pd": 4.665808319806055,
-  "pit_pd": 576.0408790080268
+  "pit_pd": 576.0408790080277
  }
 }

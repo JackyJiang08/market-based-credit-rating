@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "GME",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "GameStop Corp.",
  "sector": "Consumer Cyclical",
  "industry": "Specialty Retail",
@@ -2465,6 +2467,6 @@
   "risk_score": 0.6194892279111258,
   "dd": 0.8533590337843182,
   "ttc_pd": 2.489042414050394,
-  "pit_pd": 1293.6562506059422
+  "pit_pd": 1293.6562506059433
  }
 }

@@ -17,7 +17,7 @@ export default function UniversePage() {
         <h1 className="text-lg font-semibold text-zinc-50">The 150-name universe</h1>
         <p className="text-xs text-zinc-400">
           rated names first · names without estimates grouped at the bottom · every
-          letter with its interval
+          letter with its interval · documented convention (run of record)
         </p>
       </div>
       <UniverseView initial={universeAtBuildTime()} />

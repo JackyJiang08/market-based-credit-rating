@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "YUM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Yum! Brands, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Restaurants",
@@ -2421,7 +2423,7 @@
   },
   {
    "mu": 7.804367222262746,
-   "ccm": 0.09188305737619762
+   "ccm": 0.0918830573761976
   },
   {
    "mu": 45.65774447146647,
@@ -2629,6 +2631,6 @@
   "risk_score": 0.38508330061712553,
   "dd": 0.24891721403037062,
   "ttc_pd": 0.5504803893413651,
-  "pit_pd": 7508.894238675574
+  "pit_pd": 7508.894238675515
  }
 }

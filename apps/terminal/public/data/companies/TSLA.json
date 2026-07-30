@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "TSLA",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Tesla, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Auto Manufacturers",
@@ -25,7 +27,7 @@
   "asset_value": 1245116847885.066,
   "eta_a": 0.2602070417183096,
   "dd": 10.611245150160958,
-  "edf": 1.3210220364169397e-26,
+  "edf": 1.3210220364169492e-26,
   "pit_pd": 1.5374859940738651e-23,
   "ttc_pd": 0.0002,
   "ccm": 0.31562626211255745,
@@ -2505,6 +2507,6 @@
   "risk_score": 0.38160529354035766,
   "dd": 0.271758217664101,
   "ttc_pd": 0.5046013939030232,
-  "pit_pd": 242321.85417717163
+  "pit_pd": 242321.85417717078
  }
 }

@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "SPGI",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "S&P Global Inc.",
  "sector": "Financial Services",
  "industry": "Financial Data & Stock Exchanges",
@@ -1953,7 +1955,7 @@
   },
   {
    "mu": 137.80190730212033,
-   "ccm": 2.6153162549363143
+   "ccm": 2.615316254936314
   },
   {
    "mu": 9.46437402372752,
@@ -2629,6 +2631,6 @@
   "risk_score": 0.8031520079544618,
   "dd": 0.4331700212222455,
   "ttc_pd": 0.6280788544509867,
-  "pit_pd": 1656828.5852273665
+  "pit_pd": 1656828.5852273635
  }
 }

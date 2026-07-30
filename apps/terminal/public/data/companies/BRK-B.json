@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "BRK-B",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Berkshire Hathaway Inc.",
  "sector": "Financial Services",
  "industry": "Insurance - Diversified",
@@ -25,8 +27,8 @@
   "asset_value": 1130390849640.996,
   "eta_a": 0.1428833881487519,
   "dd": 21.735593009314307,
-  "edf": 4.727694897847612e-105,
-  "pit_pd": 3.542792184962152e-87,
+  "edf": 4.727694897847477e-105,
+  "pit_pd": 3.5427921849620516e-87,
   "ttc_pd": 0.00010000000000000009,
   "ccm": 0.04948403767848982,
   "mu": 21.331161223024743,
@@ -2205,6 +2207,6 @@
   "risk_score": 0.481650491437877,
   "dd": 0.23772902176257754,
   "ttc_pd": 0.9999999999999983,
-  "pit_pd": 1.7800368486872724e+20
+  "pit_pd": 1.7800368486873232e+20
  }
 }

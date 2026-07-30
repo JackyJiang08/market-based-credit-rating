@@ -35,6 +35,7 @@ export const UniverseRow = z.object({
   agency_sp: z.string().nullable(),
   agency_verified: z.string().nullable(),
   detail_available: z.boolean(),
+  convention: z.string().optional(),
 });
 export type UniverseRow = z.infer<typeof UniverseRow>;
 
@@ -47,7 +48,21 @@ export type Universe = z.infer<typeof Universe>;
 
 export const Flag = z.object({ code: z.string(), text: z.string() });
 
+export const ReferenceBlock = z.object({
+  convention: z.literal("REFERENCE"),
+  risk_score: z.number().nullable(),
+  sigma_a: z.number().nullable(),
+  eta_a: z.number().nullable(),
+  mu: z.number().nullable(),
+  ccm: z.number().nullable(),
+  mu_uses_abs_drift: z.boolean(),
+  note: z.string(),
+});
+export type ReferenceBlock = z.infer<typeof ReferenceBlock>;
+
 export const CompanyDetail = z.object({
+  convention: z.string().optional(),
+  reference: ReferenceBlock.nullable().optional(),
   meta: Meta,
   ticker: z.string(),
   name: z.string().nullable(),

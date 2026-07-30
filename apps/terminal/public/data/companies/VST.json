@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "VST",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Vistra Corp.",
  "sector": "Utilities",
  "industry": "Utilities - Independent Power Producers",
@@ -90,7 +92,7 @@
   },
   {
    "date": "2023-04-13",
-   "asset_value": 14909674171.130295
+   "asset_value": 14909674171.130291
   },
   {
    "date": "2023-04-17",
@@ -286,7 +288,7 @@
   },
   {
    "date": "2023-09-01",
-   "asset_value": 17236721841.37661
+   "asset_value": 17236721841.376602
   },
   {
    "date": "2023-09-06",
@@ -2620,6 +2622,6 @@
   "risk_score": 0.3937193376038844,
   "dd": 0.3419138081071035,
   "ttc_pd": 0.9726697715373788,
-  "pit_pd": 11.9342766977358
+  "pit_pd": 11.934276697735823
  }
 }

@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "SPG",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Simon Property Group, Inc.",
  "sector": "Real Estate",
  "industry": "REIT - Retail",
@@ -25,8 +27,8 @@
   "asset_value": 101213762913.4255,
   "eta_a": 0.24097951440438586,
   "dd": 12.984504465579633,
-  "edf": 7.49022990824719e-39,
-  "pit_pd": 8.740339196385201e-25,
+  "edf": 7.490229908247295e-39,
+  "pit_pd": 8.740339196385262e-25,
   "ttc_pd": 0.00010000000000000009,
   "ccm": 0.06334102930107728,
   "mu": 8.562339570818846,

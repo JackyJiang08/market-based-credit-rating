@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "WFC",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Wells Fargo & Company",
  "sector": "Financial Services",
  "industry": "Banks - Diversified",
@@ -1888,8 +1890,8 @@
    "ccm": 0.11401275813824946
   },
   {
-   "mu": 5.40692896255145,
-   "ccm": 0.2388714357371114
+   "mu": 5.406928962551451,
+   "ccm": 0.23887143573711145
   },
   {
    "mu": 2.9469673173667705,
@@ -2549,7 +2551,7 @@
   },
   {
    "mu": 6.885534639042716,
-   "ccm": 0.21380149047973893
+   "ccm": 0.21380149047973898
   },
   {
    "mu": 4.216412694875327,
@@ -2629,6 +2631,6 @@
   "risk_score": 0.6000921751907138,
   "dd": 0.3896662578691628,
   "ttc_pd": 1.4683999986306524,
-  "pit_pd": 22.902532020205562
+  "pit_pd": 22.90253202020558
  }
 }

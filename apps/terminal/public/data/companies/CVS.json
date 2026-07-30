@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "CVS",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "CVS Health Corporation",
  "sector": "Healthcare",
  "industry": "Healthcare Plans",
@@ -2257,7 +2259,7 @@
   },
   {
    "mu": 15.404149364177377,
-   "ccm": 0.27648560552710644
+   "ccm": 0.2764856055271064
   },
   {
    "mu": 6.197180858824313,
@@ -2625,6 +2627,6 @@
   "risk_score": 0.741822830131217,
   "dd": 0.46432380788797023,
   "ttc_pd": 2.0503848788253274,
-  "pit_pd": 1075.6203423022775
+  "pit_pd": 1075.620342302276
  }
 }

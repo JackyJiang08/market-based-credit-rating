@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "KEY",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "KeyCorp",
  "sector": "Financial Services",
  "industry": "Banks - Regional",
@@ -507,7 +509,7 @@
   },
   {
    "date": "2024-02-05",
-   "asset_value": 27851166345.443962
+   "asset_value": 27851166345.44397
   },
   {
    "date": "2024-02-07",
@@ -2629,6 +2631,6 @@
   "risk_score": 1.409242727288758,
   "dd": 0.8548715734680314,
   "ttc_pd": 3.4120993355499767,
-  "pit_pd": 45.050801292483136
+  "pit_pd": 45.05080129248313
  }
 }

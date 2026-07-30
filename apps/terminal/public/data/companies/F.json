@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "F",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Ford Motor Company",
  "sector": "Consumer Cyclical",
  "industry": "Auto Manufacturers",
@@ -26,7 +28,7 @@
   "eta_a": 0.06809845078845025,
   "dd": 3.3783646372527425,
   "edf": 0.00036459160798748885,
-  "pit_pd": 0.010224563507079277,
+  "pit_pd": 0.010224563507079266,
   "ttc_pd": 0.01028640544812068,
   "ccm": 0.7964982001497465,
   "mu": 6.946758813567049,
@@ -887,7 +889,7 @@
   },
   {
    "date": "2024-11-05",
-   "asset_value": 134325818788.9794
+   "asset_value": 134325818788.97937
   },
   {
    "date": "2024-11-07",
@@ -2629,6 +2631,6 @@
   "risk_score": 1.0643828317357702,
   "dd": 0.7510940032669124,
   "ttc_pd": 2.1747908624014665,
-  "pit_pd": 7.035360275095827
+  "pit_pd": 7.0353602750958295
  }
 }

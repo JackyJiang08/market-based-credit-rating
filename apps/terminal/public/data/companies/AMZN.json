@@ -1,12 +1,23 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "AMZN",
+ "convention": "DOCUMENTED",
+ "reference": {
+  "convention": "REFERENCE",
+  "risk_score": 0.9081742155092781,
+  "sigma_a": 0.30580059489028966,
+  "eta_a": 0.058189928168271066,
+  "mu": 55.144972074295254,
+  "ccm": 0.5008124175285413,
+  "mu_uses_abs_drift": false,
+  "note": "reference convention: raw-eta denominator, |eta| on negative drift (flagged), 250-day shared window; same committed data vintage as the documented values"
+ },
  "name": "Amazon.com, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Internet Retail",
@@ -25,8 +36,8 @@
   "asset_value": 2597510689832.075,
   "eta_a": 0.3038096029745925,
   "dd": 11.378103074964502,
-  "edf": 2.687813911368943e-30,
-  "pit_pd": 3.1360285213269636e-22,
+  "edf": 2.6878139113689046e-30,
+  "pit_pd": 3.136028521326941e-22,
   "ttc_pd": 0.000201869681725753,
   "ccm": 0.11236170396934049,
   "mu": 12.46626788438387,
@@ -1709,7 +1720,7 @@
   },
   {
    "mu": 12.661437969300211,
-   "ccm": 0.11913472735764404
+   "ccm": 0.11913472735764405
   },
   {
    "mu": 26.004662989445723,

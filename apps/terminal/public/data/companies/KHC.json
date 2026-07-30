@@ -1,12 +1,23 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "KHC",
+ "convention": "DOCUMENTED",
+ "reference": {
+  "convention": "REFERENCE",
+  "risk_score": 2.195200321916759,
+  "sigma_a": 0.18983816979768045,
+  "eta_a": 0.0026597626382553943,
+  "mu": 481.7298725909984,
+  "ccm": 10.57493571388679,
+  "mu_uses_abs_drift": false,
+  "note": "reference convention: raw-eta denominator, |eta| on negative drift (flagged), 250-day shared window; same committed data vintage as the documented values"
+ },
  "name": "The Kraft Heinz Company",
  "sector": "Consumer Defensive",
  "industry": "Packaged Foods",
@@ -2101,6 +2112,6 @@
   "risk_score": 0.4351210486754814,
   "dd": 0.31349418275669144,
   "ttc_pd": 1.3055320521141858,
-  "pit_pd": 103.41717714625123
+  "pit_pd": 103.41717714625128
  }
 }

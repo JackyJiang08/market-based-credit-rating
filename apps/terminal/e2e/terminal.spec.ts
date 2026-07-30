@@ -98,6 +98,22 @@ test("sensitivity: drift slider does NOT move RiskScore; w does", async ({ page 
   await expect(rs).not.toHaveText(before!);
 });
 
+test("convention toggle: visible only where both conventions exist", async ({ page }) => {
+  await page.goto("/company/ORCL/");
+  const panel = page.getByTestId("convention-panel");
+  await expect(panel).toBeVisible();
+  // documented is the default and says so
+  await expect(panel.getByText(/run of record/i).first()).toBeVisible();
+  // flip to the reference convention: labeled values + the abs-drift chip
+  await panel.getByTestId("convention-reference").click();
+  await expect(panel.getByText(/reference convention/i).first()).toBeVisible();
+  await expect(page.getByTestId("abs-drift-chip")).toBeVisible();
+  await expect(panel.getByText("Abs drift in µ")).toBeVisible();
+  // a name outside the eight-name reference set has no toggle
+  await page.goto("/company/AAPL/");
+  await expect(page.getByTestId("convention-panel")).toHaveCount(0);
+});
+
 for (const path of [
   "/",
   "/universe/",

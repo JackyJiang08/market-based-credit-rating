@@ -1,12 +1,23 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "COST",
+ "convention": "DOCUMENTED",
+ "reference": {
+  "convention": "REFERENCE",
+  "risk_score": 0.1789381203551749,
+  "sigma_a": 0.19601005660222015,
+  "eta_a": 0.027415098534512947,
+  "mu": 169.0196147326821,
+  "ccm": 0.30244052163421964,
+  "mu_uses_abs_drift": false,
+  "note": "reference convention: raw-eta denominator, |eta| on negative drift (flagged), 250-day shared window; same committed data vintage as the documented values"
+ },
  "name": "Costco Wholesale Corporation",
  "sector": "Consumer Defensive",
  "industry": "Discount Stores",
@@ -25,8 +36,8 @@
   "asset_value": 418568631432.16907,
   "eta_a": 0.1433226182456841,
   "dd": 24.369898933813122,
-  "edf": 1.783711183416839e-131,
-  "pit_pd": 4.838005624288437e-118,
+  "edf": 1.783711183416636e-131,
+  "pit_pd": 4.8380056242881624e-118,
   "ttc_pd": 0.00010000000000000009,
   "ccm": 0.06620066040750061,
   "mu": 37.28922349303734,
@@ -2265,6 +2276,6 @@
   "risk_score": 0.31149641250637117,
   "dd": 0.17577432349742422,
   "ttc_pd": 0.9999999999999983,
-  "pit_pd": 3.2653929474811096e+16
+  "pit_pd": 3.2653929474814628e+16
  }
 }

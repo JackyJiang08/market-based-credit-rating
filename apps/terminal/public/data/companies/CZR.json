@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "CZR",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Caesars Entertainment, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Resorts & Casinos",
@@ -1391,7 +1393,7 @@
   },
   {
    "date": "2026-02-05",
-   "asset_value": 16189076444.10387
+   "asset_value": 16189076444.103867
   },
   {
    "date": "2026-02-09",
@@ -1459,7 +1461,7 @@
   },
   {
    "date": "2026-03-26",
-   "asset_value": 17521637848.708054
+   "asset_value": 17521637848.708046
   },
   {
    "date": "2026-03-30",
@@ -1949,7 +1951,7 @@
   },
   {
    "mu": 11.615237514827822,
-   "ccm": 1.595361138362373
+   "ccm": 1.5953611383623734
   },
   {
    "mu": 4.784097838503728,
@@ -1969,7 +1971,7 @@
   },
   {
    "mu": 5.605577577772868,
-   "ccm": 0.9758042645410226
+   "ccm": 0.9758042645410225
   },
   {
    "mu": 10.823049410693306,
@@ -2153,6 +2155,6 @@
   "risk_score": 0.5799856825757163,
   "dd": 0.9820693093276202,
   "ttc_pd": 1.1226786712059444,
-  "pit_pd": 3.4460260103030778
+  "pit_pd": 3.4460260103030773
  }
 }

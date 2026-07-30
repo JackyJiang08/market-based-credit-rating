@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "EQIX",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Equinix, Inc.",
  "sector": "Real Estate",
  "industry": "REIT - Specialty",
@@ -25,8 +27,8 @@
   "asset_value": 119193798926.99936,
   "eta_a": 0.17401745101675753,
   "dd": 11.690501894358743,
-  "edf": 7.127087780041969e-32,
-  "pit_pd": 2.0726142560448576e-24,
+  "edf": 7.127087780041868e-32,
+  "pit_pd": 2.0726142560448425e-24,
   "ttc_pd": 0.0002003327575856506,
   "ccm": 0.12178375088613133,
   "mu": 14.575312351701102,

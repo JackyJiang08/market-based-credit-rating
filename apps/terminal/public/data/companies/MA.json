@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "MA",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Mastercard Incorporated",
  "sector": "Financial Services",
  "industry": "Credit Services",
@@ -26,7 +28,7 @@
   "eta_a": 0.1482984641053902,
   "dd": 18.455685222420737,
   "edf": 2.3468708986885938e-76,
-  "pit_pd": 5.040198796939255e-67,
+  "pit_pd": 5.040198796939398e-67,
   "ttc_pd": 0.00010000000000000009,
   "ccm": 0.09633141345608638,
   "mu": 30.779176441685802,
@@ -2205,6 +2207,6 @@
   "risk_score": 0.38837625215210425,
   "dd": 0.2105607858325492,
   "ttc_pd": 0.9999999999999987,
-  "pit_pd": 4326884053688.867
+  "pit_pd": 4326884053688.8364
  }
 }

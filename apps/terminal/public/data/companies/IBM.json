@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "IBM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "International Business Machines Corporation",
  "sector": "Technology",
  "industry": "Information Technology Services",
@@ -25,8 +27,8 @@
   "asset_value": 239812195410.63654,
   "eta_a": 0.29359447347557666,
   "dd": 4.445594362287116,
-  "edf": 4.382459839162231e-06,
-  "pit_pd": 0.00030796539296764854,
+  "edf": 4.382459839162239e-06,
+  "pit_pd": 0.0003079653929676491,
   "ttc_pd": 0.002903202507719489,
   "ccm": 0.5784606114399219,
   "mu": 9.32505800473436,
@@ -39,7 +41,7 @@
   "interval_low": "A",
   "interval_high": "BB+",
   "interval_notches": 6,
-  "outlook": -0.00259523711475184,
+  "outlook": -0.0025952371147518398,
   "at_floor": false,
   "at_scale_top": false
  },
@@ -95,7 +97,7 @@
   },
   {
    "date": "2023-04-13",
-   "asset_value": 136327366406.66718
+   "asset_value": 136327366406.6672
   },
   {
    "date": "2023-04-17",

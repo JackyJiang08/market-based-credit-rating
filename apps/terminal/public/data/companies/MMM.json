@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "MMM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "3M Company",
  "sector": "Industrials",
  "industry": "Conglomerates",
@@ -2509,6 +2511,6 @@
   "risk_score": 0.5089982209256473,
   "dd": 0.30224102177606826,
   "ttc_pd": 1.016259388320723,
-  "pit_pd": 870702.0206288703
+  "pit_pd": 870702.0206288722
  }
 }

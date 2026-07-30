@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "W",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Wayfair Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Internet Retail",
@@ -675,7 +677,7 @@
   },
   {
    "date": "2025-01-13",
-   "asset_value": 7897201834.0901985
+   "asset_value": 7897201834.090197
   },
   {
    "date": "2025-01-16",

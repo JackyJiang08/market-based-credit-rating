@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "HD",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "The Home Depot, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Home Improvement Retail",
@@ -1673,7 +1675,7 @@
   },
   {
    "mu": 14.947779385414782,
-   "ccm": 0.1268111589781155
+   "ccm": 0.12681115897811548
   },
   {
    "mu": 14.240642050780561,
@@ -1893,7 +1895,7 @@
   },
   {
    "mu": 32.538387322382,
-   "ccm": 0.29824312633241395
+   "ccm": 0.2982431263324139
   },
   {
    "mu": 8.150908147884207,
@@ -2589,6 +2591,6 @@
   "risk_score": 0.3840723456320292,
   "dd": 0.25201968591426743,
   "ttc_pd": 0.5163835069996721,
-  "pit_pd": 25297.941690489588
+  "pit_pd": 25297.941690489668
  }
 }

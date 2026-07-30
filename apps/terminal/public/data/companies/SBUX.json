@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "SBUX",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Starbucks Corporation",
  "sector": "Consumer Cyclical",
  "industry": "Restaurants",
@@ -25,8 +27,8 @@
   "asset_value": 130956360410.20297,
   "eta_a": 0.061584634517314385,
   "dd": 9.18995598447819,
-  "edf": 1.9650106958449402e-20,
-  "pit_pd": 3.809806683568573e-19,
+  "edf": 1.965010695844954e-20,
+  "pit_pd": 3.8098066835686e-19,
   "ttc_pd": 0.0002,
   "ccm": 0.8857373989759794,
   "mu": 72.79147190408108,

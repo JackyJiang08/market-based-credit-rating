@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "PM",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Philip Morris International Inc.",
  "sector": "Consumer Defensive",
  "industry": "Tobacco",
@@ -26,7 +28,7 @@
   "eta_a": 0.30682287093803523,
   "dd": 9.189909288227803,
   "edf": 1.9658638977964636e-20,
-  "pit_pd": 1.666762672017256e-13,
+  "pit_pd": 1.66676267201725e-13,
   "ttc_pd": 0.0002475390074068246,
   "ccm": 0.13204710345234594,
   "mu": 9.041360390271645,
@@ -2501,6 +2503,6 @@
   "risk_score": 0.6003896042431265,
   "dd": 0.3547178319751869,
   "ttc_pd": 1.0578387989787785,
-  "pit_pd": 5344.260053948707
+  "pit_pd": 5344.260053948726
  }
 }

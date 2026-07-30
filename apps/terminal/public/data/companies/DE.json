@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "DE",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "Deere & Company",
  "sector": "Industrials",
  "industry": "Farm & Heavy Construction Machinery",
@@ -1953,7 +1955,7 @@
   },
   {
    "mu": 12.771176847850382,
-   "ccm": 0.2836987317175564
+   "ccm": 0.28369873171755644
   },
   {
    "mu": 9.06978147892865,
@@ -1961,7 +1963,7 @@
   },
   {
    "mu": 14.632689858142403,
-   "ccm": 0.30841058846500374
+   "ccm": 0.3084105884650038
   },
   {
    "mu": 6.095608886222796,
@@ -2589,6 +2591,6 @@
   "risk_score": 0.5155111766116071,
   "dd": 0.3327352592948642,
   "ttc_pd": 1.62126556479753,
-  "pit_pd": 455.7507038570427
+  "pit_pd": 455.7507038570433
  }
 }

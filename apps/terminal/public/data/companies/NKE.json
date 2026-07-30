@@ -1,12 +1,14 @@
 {
  "meta": {
-  "git_sha": "1932d0a",
-  "generated_utc": "2026-07-27T06:43:25Z",
+  "git_sha": "9360b37",
+  "generated_utc": "2026-07-30T02:06:30Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
  },
  "ticker": "NKE",
+ "convention": "DOCUMENTED",
+ "reference": null,
  "name": "NIKE, Inc.",
  "sector": "Consumer Cyclical",
  "industry": "Footwear & Accessories",
@@ -1429,6 +1431,6 @@
   "risk_score": 0.7184321774203573,
   "dd": 0.500860121420337,
   "ttc_pd": 1.5063875924419292,
-  "pit_pd": 263.9158326930833
+  "pit_pd": 263.91583269308285
  }
 }
