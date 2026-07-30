@@ -91,6 +91,9 @@ class CompanyData:
     # reference-convention abs-drift provenance flag (never silent).
     convention: str = "DOCUMENTED"
     mu_uses_abs_drift: Optional[bool] = None
+    # Barrier provenance: which field supplied D ("ST_PLUS_HALF_LT" or the
+    # matched total-liabilities row name under the reference convention).
+    barrier_source: Optional[str] = None
     # Bootstrap outputs (signal_construction/bootstrap.py).
     boot_sigma_lo: Optional[float] = None
     boot_sigma_hi: Optional[float] = None

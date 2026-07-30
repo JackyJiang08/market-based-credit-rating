@@ -13,7 +13,18 @@ negative drift   NOT_RATED (defective regime    abs(eta), flagged
                  suppresses mu/CCM)             MU_USES_ABS_DRIFT
 drift window     DRIFT_WINDOW_DAYS (~5y)        250 trading days, same span
                                                 as the volatility window
+barrier field    D = 1.0*ST + 0.5*LT            Total Liabilities Net
+                                                Minority Interest (field
+                                                fallback + provenance)
 ===============  =============================  ============================
+
+Consistent with the mode's philosophy, the applicability gates (financial
+firms, market barrier) CLASSIFY under both conventions but suppress the
+letter only under DOCUMENTED; REFERENCE annotates. The reporting-currency
+gate suppresses under both -- mixed units are data corruption, not a
+convention. Note the interaction: the financial-firm gate exists precisely
+because ST+0.5*LT ignores deposits; under a total-liabilities barrier that
+rationale changes, which is why REFERENCE annotates rather than suppresses.
 
 The regime and weak-identification diagnostics run under both conventions;
 under REFERENCE they annotate the output instead of suppressing it. Every
@@ -37,6 +48,12 @@ class Convention:
     negative_drift: str
     drift_window_days: int
     vol_window_days: int
+    # "st_plus_half_lt" -> D = 1.0*ST + 0.5*LT ; "total_liabilities" -> the
+    # Total Liabilities line (field fallback + provenance, never silent).
+    barrier_field: str = "st_plus_half_lt"
+    # "suppress" -> an applicability gate suppresses the letter (documented);
+    # "annotate" -> the gate classifies and annotates, the letter is produced.
+    applicability: str = "suppress"
 
 
 DOCUMENTED = Convention(
@@ -53,6 +70,8 @@ REFERENCE = Convention(
     negative_drift="abs",
     drift_window_days=250,
     vol_window_days=250,
+    barrier_field="total_liabilities",
+    applicability="annotate",
 )
 
 _PRESETS = {c.name: c for c in (DOCUMENTED, REFERENCE)}

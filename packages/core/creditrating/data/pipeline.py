@@ -283,6 +283,27 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
         from creditrating.model import tic as measures
 
         conv = conventions.get(cfg.convention)
+        # Barrier field. DOCUMENTED keeps the panel's D = 1.0*ST + 0.5*LT
+        # untouched. REFERENCE replaces the panel's barrier with the Total
+        # Liabilities line, mapped through the SAME statement each row already
+        # used (StatementPeriodEnd carries the as-of/filing-lag alignment), so
+        # no new join and no look-ahead. A missing TL row is surfaced as an
+        # error, never silently substituted with the documented default point.
+        if conv.barrier_field == "total_liabilities":
+            tl, tl_row = transforms.total_liabilities_by_period(balance_for_debt)
+            if tl_row is None or data.panel.empty or "StatementPeriodEnd" not in data.panel:
+                data.em_error = (
+                    "REFERENCE barrier: no total-liabilities row in the "
+                    "balance sheet; refusing to substitute the documented "
+                    "default point silently"
+                )
+                LOG.warning("  %s", data.em_error)
+                return data
+            data.panel["DefaultPointDebt_D"] = data.panel["StatementPeriodEnd"].map(tl)
+            data.barrier_source = tl_row
+            LOG.info("  barrier (reference convention): %s", tl_row)
+        else:
+            data.barrier_source = "ST_PLUS_HALF_LT"
         # Pass the full drift window; em.estimate takes sigma_A from its
         # trailing vol window and the drift from the whole span. Both windows
         # come from the convention (DOCUMENTED: ~5y drift / 252d vol --
@@ -407,7 +428,10 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             data.rating_determination = conversion.classify_determination(
                 ttc.basis, ttc.at_floor, ttc.risk_score
             ).value
-            if not data.model_applicable:
+            from creditrating.model import convention as conventions
+
+            _conv = conventions.get(cfg.convention)
+            if not data.model_applicable and _conv.applicability == "suppress":
                 data.sp_rating = None
                 data.outlook = None
                 data.rating_determination = "MODEL_NOT_APPLICABLE"
@@ -418,6 +442,12 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
             ):
                 data.sp_rating = conversion.sp_rating(tables, ttc.value)
                 data.outlook = conversion.outlook(data.pit_pd, ttc.value)
+                if not data.model_applicable:
+                    LOG.warning(
+                        "  gate annotation (reference convention): %s -- the "
+                        "classification is retained, the letter is produced",
+                        data.applicability_reason,
+                    )
                 LOG.info(
                     "  rating: TTC_PD=%.4f  S&P=%-4s Outlook=%+.4f  " "basis=%s%s",
                     data.ttc_pd,

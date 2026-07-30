@@ -226,6 +226,34 @@ def statement_available_at(quarterly: pd.DataFrame, annual: pd.DataFrame) -> dic
     return out
 
 
+# Reference-convention barrier: the whole liability side. Candidates in
+# preference order; the matched row name is recorded as provenance so the
+# validation sheet can say which line supplied the barrier on this vendor
+# payload (mirrors the debt-leg fallback machinery).
+TOTAL_LIABILITIES_CANDIDATES: tuple[str, ...] = (
+    "Total Liabilities Net Minority Interest",
+    "Total Liab",
+)
+
+
+def total_liabilities_by_period(balance: pd.DataFrame):
+    """(period_end -> total liabilities) plus the matched row name.
+
+    Returns ``(pd.Series, str | None)``; an empty series and ``None`` when no
+    candidate row exists -- the caller must surface that, never substitute
+    the documented default point silently.
+    """
+    if balance is None or balance.empty:
+        return pd.Series(dtype=float), None
+    for row in TOTAL_LIABILITIES_CANDIDATES:
+        if row in balance.index:
+            s = pd.to_numeric(balance.loc[row], errors="coerce").dropna()
+            if not s.empty:
+                s.index = pd.to_datetime(s.index)
+                return s.sort_index(), row
+    return pd.Series(dtype=float), None
+
+
 def default_point_debt(short_term: pd.Series, long_term: pd.Series) -> pd.Series:
     """D = 100% short-term debt + 50% long-term debt (the model's strike).
 

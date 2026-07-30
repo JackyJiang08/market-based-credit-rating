@@ -245,6 +245,7 @@ def credit_record(c: CompanyData) -> dict[str, Any]:
         "weakly_identified": c.weakly_identified,
         "convention": c.convention,
         "mu_uses_abs_drift": c.mu_uses_abs_drift,
+        "barrier_source": c.barrier_source,
         "boot_sigma_lo": c.boot_sigma_lo,
         "boot_sigma_hi": c.boot_sigma_hi,
         "boot_defective_fraction": c.boot_defective_fraction,
@@ -349,6 +350,8 @@ def validation_row(c: CompanyData) -> dict[str, Any]:
             f"MODEL_NOT_APPLICABLE ({code}): "
             f"{_sectors.REASON_TEXT.get(code, 'see docs/adr/0003')}"
         )
+    if r["barrier_source"] and r["barrier_source"] != "ST_PLUS_HALF_LT":
+        flags.append(f"barrier field: {r['barrier_source']} (reference convention)")
     if r["mu_uses_abs_drift"]:
         flags.append(
             "MU_USES_ABS_DRIFT: eta < 0; the reference convention divides " "mu/CCM by |eta|"
@@ -508,6 +511,28 @@ def _run_convention(companies: list[CompanyData]):
     return conventions.get(name)
 
 
+def _default_point_line(companies: list[CompanyData]) -> str:
+    conv = _run_convention(companies)
+    if conv.barrier_field == "total_liabilities":
+        rows = sorted({c.barrier_source for c in companies if c.barrier_source})
+        return (
+            "Total liabilities (reference convention). Matched balance-sheet "
+            f"row(s): {', '.join(rows) if rows else 'n/a'}. The documented "
+            "convention's 1.0 x ST + 0.5 x LT default point is not used in "
+            "this run."
+        )
+    return (
+        "1.0 x short-term debt + 0.5 x long-term debt. The 0.5 is a "
+        "convention, not a measurement; its sweep range is w in "
+        "{0, 0.25, 0.5, 0.75, 1.0} on the long-term leg plus the prior "
+        "statement vintage (docs/reconciliation/convention_sweep.py, run "
+        + CONVENTION_SWEEP_DATE
+        + "). Per-company rating span from that "
+        "sweep is the 'Convention span (notches)' column on the validation "
+        "and Ratings sheets."
+    )
+
+
 def _convention_line(companies: list[CompanyData]) -> str:
     conv = _run_convention(companies)
     if conv.name == "DOCUMENTED":
@@ -520,7 +545,9 @@ def _convention_line(companies: list[CompanyData]) -> str:
         f"{conv.name}: mu denominator = raw eta (no Ito adjustment); "
         "negative drift -> |eta| with the MU_USES_ABS_DRIFT flag (never "
         f"silent); drift window = volatility window = {conv.drift_window_days} "
-        "trading days. Matches the team's reference implementation; the "
+        "trading days; barrier = total liabilities (matched row recorded per "
+        "company); applicability gates classify and annotate rather than "
+        "suppress. Matches the team's reference implementation; the "
         "documented convention remains the run of record."
     )
 
@@ -626,14 +653,7 @@ def readme_frame(companies: list[CompanyData]) -> pd.DataFrame:
         ),
         (
             "Default point D",
-            "1.0 x short-term debt + 0.5 x long-term debt. The 0.5 is a "
-            "convention, not a measurement; its sweep range is w in "
-            "{0, 0.25, 0.5, 0.75, 1.0} on the long-term leg plus the prior "
-            "statement vintage (docs/reconciliation/convention_sweep.py, run "
-            + CONVENTION_SWEEP_DATE
-            + "). Per-company rating span from that "
-            "sweep is the 'Convention span (notches)' column on the validation "
-            "and Ratings sheets.",
+            _default_point_line(companies),
         ),
         (
             "Long-term debt field",
