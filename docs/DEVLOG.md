@@ -35,6 +35,41 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-29 - REFERENCE gains the confirmed total-liabilities barrier
+
+- **Fourth switch:** Convention.barrier_field -- DOCUMENTED keeps
+  D = 1.0*ST + 0.5*LT untouched; REFERENCE uses the Total Liabilities line
+  (team-confirmed from the reconciliation's implied-barrier match), riding
+  the existing as-of/filing-lag alignment via StatementPeriodEnd (no new
+  join, no look-ahead) with field fallback + matched-row provenance on the
+  company record, validation Warnings, and the workbook README sheet. A
+  missing TL row errors, never silently substitutes.
+- **Gate philosophy:** Convention.applicability -- under REFERENCE the
+  financial-firm and market gates classify and ANNOTATE (the letter is
+  produced); the documented convention still suppresses; the currency gate
+  suppresses under both. PNC under REFERENCE rates BB (SCALE_RESOLVED)
+  against its whole liability side with BANK_DEPOSIT_FUNDED retained as an
+  annotation.
+- **Reconciliation r2 (2026-07-27 close):** implied leverage ln(A/D) now
+  matches the reference within 0.2-1.0% on every reference-valued name
+  (AMZN 1.826/1.829, COST 2.1913/2.1909, INTU 1.687/1.704, ORCL
+  0.929/0.934) -- the barrier was the input gap. Remaining residuals are
+  (sigma, eta) only: eta gaps within one drift-SE on a ~1y window; sigma
+  gaps 4-16% pointing at the reference's estimation scheme (EM iteration
+  vs one-pass -- not identifiable from displayed values). Ablation gains
+  step (d): the barrier is the dominant switch and the first to move
+  RiskScore.
+- **Artifacts:** deliverable-reference-r2 tagged (r1 tag untouched);
+  site reference blocks rebuilt (PNC now included), toggle explainer and
+  README Conventions table carry all four switches.
+- **Validation run:** pytest 404/404 (6 new barrier tests); DOCUMENTED
+  byte-identity re-proven (regenerated COST golden CSV byte-identical to
+  the committed one); pinned ruff/black/mypy clean; bundle-safety full OK;
+  tsc/build; vitest 18/18; Playwright 20/20.
+- Follow-ups: DELL/KHC/KO/PNC reference inputs still outstanding for the
+  formula lock; the reference's sigma estimation scheme would close the
+  last residual class.
+
 ### 2026-07-29 - Switchable REFERENCE convention, reconciliation, ablation
 
 - **Convention switch (surgical):** creditrating.model.convention with two
