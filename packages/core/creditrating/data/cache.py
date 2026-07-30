@@ -72,6 +72,27 @@ def _normalize_datetimes(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def normalize_datetimes(obj):
+    """Public chokepoint: coerce frames (or dicts of frames) to [ns] datetimes.
+
+    The read path already routes through ``_normalize_datetimes``; the LIVE
+    acquisition path must route through this too, because fresh vendor frames
+    arrive in whatever unit the vendor/pandas pair produces ([s] from newer
+    price downloads, [us] from to_datetime under pandas 3) and pandas 3
+    refuses to as-of join mixed units. One unit, everywhere, both paths.
+    """
+    import pandas as _pd
+
+    if isinstance(obj, dict):
+        return {
+            k: (_normalize_datetimes(v) if isinstance(v, _pd.DataFrame) else v)
+            for k, v in obj.items()
+        }
+    if isinstance(obj, _pd.DataFrame):
+        return _normalize_datetimes(obj)
+    return obj
+
+
 def cache_dir() -> str:
     return os.environ.get("MDT_CACHE_DIR", os.path.join(_ROOT, "data", "cache"))
 

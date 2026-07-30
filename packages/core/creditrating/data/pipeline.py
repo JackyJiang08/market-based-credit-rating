@@ -89,7 +89,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     prices = cache.load_prices(ticker)
     if prices is None:
         try:
-            prices = sources.get_history(tk, cfg.cutoff_date)
+            prices = cache.normalize_datetimes(sources.get_history(tk, cfg.cutoff_date))
             if prices is None or prices.empty:
                 raise raw_errors.NoDataError("no price history returned")
             cache.save_prices(ticker, prices)
@@ -148,7 +148,7 @@ def fetch_company(ticker: str, cfg: RunConfig, rates: pd.DataFrame) -> Optional[
     stmts = cache.load_statements(ticker)
     if stmts is None:
         try:
-            stmts = sources.get_statements(tk)
+            stmts = cache.normalize_datetimes(sources.get_statements(tk))
             if not any(v is not None and not v.empty for v in (stmts or {}).values()):
                 raise raw_errors.NoDataError("no statements returned")
             cache.save_statements(ticker, stmts)
@@ -558,7 +558,7 @@ def run(cfg: RunConfig) -> list[CompanyData]:
         if cached_rates is not None:
             rates = cached_rates
         else:
-            rates = sources.fetch_rates(cfg.years)
+            rates = cache.normalize_datetimes(sources.fetch_rates(cfg.years))
             cache.save_rates(rates)
 
     # One company end to end, isolated: an exception is recorded and returned,
