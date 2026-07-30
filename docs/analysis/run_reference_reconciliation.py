@@ -44,7 +44,8 @@ STEPS = [
     ("DOCUMENTED", DOCUMENTED),
     ("(a) window 250d", Convention("ABLATION_A", "ito_drift", "not_rated", 250, 250)),
     ("(b) + raw eta", Convention("ABLATION_B", "raw_eta", "not_rated", 250, 250)),
-    ("(c) + abs = REFERENCE", REFERENCE),
+    ("(c) + abs", Convention("ABLATION_C", "raw_eta", "abs", 250, 250)),
+    ("(d) + TL barrier = REFERENCE", REFERENCE),
 ]
 
 
@@ -72,7 +73,7 @@ def main() -> None:
     )
     print("|---|---|---|---|---|---|")
     for t in NAMES:
-        r = rows[t]["(c) + abs = REFERENCE"]
+        r = rows[t]["(d) + TL barrier = REFERENCE"]
         ref = REFERENCE_VALUES.get(t)
         if ref is None:
             print(

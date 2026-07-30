@@ -96,3 +96,23 @@ licensed workbook's values; overlaps are the publicly stated 2bp TTC floor
 (0.0002, the single documented exception), computed `Bootstrap defective %`
 values, and sub-1e-9 rounding collisions of computed EDF/PIT PDs. No licensed
 content.
+
+
+---
+
+# deliverable-reference-r2 (2026-07-29)
+
+| File | Role |
+|---|---|
+| `submission_20260730T023434Z.xlsx` | **Reference-convention deliverable, revision 2.** Adds the team-confirmed fourth switch: the barrier is the Total Liabilities line (matched row recorded on the README sheet and every validation row) and the applicability gates annotate rather than suppress. Same 2026-07-27 close as r1. The `deliverable-reference-r2` tag ships this workbook; the r1 tag and workbook stay untouched (tag moves are forbidden). |
+
+Headline movements r1 → r2 (all barrier-driven): implied leverage now matches
+the team reference implementation within 0.2–1.0% on every reference-valued
+name; PNC — gated under the documented convention because ST+0.5·LT ignores
+deposits — produces measures against its whole liability side and rates BB
+(`SCALE_RESOLVED`) with the deposit-funded classification retained as an
+annotation. ORCL, INTU and KHC carry `MU_USES_ABS_DRIFT`.
+
+**IP spot-check (this archive):** same method and result as r1 — the 2bp-floor
+exception, computed defective-percentages, and sub-1e-9 EDF/PIT rounding
+collisions only. No licensed content.
