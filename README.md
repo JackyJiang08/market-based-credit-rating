@@ -330,6 +330,11 @@ deliverables), and every output row carries a `Convention` field.
 | µ denominator | η − σ²/2 (Ito drift) | raw η (no Ito adjustment) |
 | negative drift | `NOT_RATED` (defective regime) | abs(η), flagged `MU_USES_ABS_DRIFT` |
 | drift window | ~5y (volatility 252d separate) | 250 trading days, one shared span |
+| barrier field | D = 1.0·ST + 0.5·LT | Total Liabilities (matched row recorded) |
+
+Under the reference convention the applicability gates classify and annotate
+rather than suppress — the financial-firm gate's rationale is `ST + 0.5·LT`
+ignoring deposits, which changes under a total-liabilities barrier.
 
 Equivalence on the deliverable names, given the reference implementation's
 own inputs (formula lock: `tests/test_reference_convention.py`; "n.p." =
@@ -343,11 +348,12 @@ reference inputs not provided, recorded rather than guessed):
 | ORCL | 2.7583 / 2.7583 | 21.3328 / 21.3296 | flagged |
 | DELL, KHC, KO, PNC | n.p. | n.p. | — |
 
-End-to-end on our own data, the residual against the reference is one named
-input: the reference's default point is total liabilities where ours is
-`ST + 0.5·LT`, and an ablation shows the 250-day window alone explains only
-the sign flips on the negative-drift names while worsening the rest. The full
-per-switch table: [reference reconciliation](docs/analysis/reference_reconciliation.md).
+End-to-end at the same close, the extended reference convention brings
+implied leverage within 0.2–1.0% of the reference on every reference-valued
+name; the ablation shows the barrier is the dominant switch (the 250-day
+window alone only flips drift signs and worsens the positive-drift names),
+and what remains is (σ, η) estimation noise/scheme. The full per-switch
+table: [reference reconciliation](docs/analysis/reference_reconciliation.md).
 
 ## Limitations
 

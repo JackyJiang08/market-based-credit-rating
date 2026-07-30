@@ -63,8 +63,8 @@ export function ConventionToggle({
       <CardContent className="space-y-2 text-[13px]">
         <p className="text-xs leading-relaxed text-zinc-400">
           {isRef
-            ? "Reference convention: µ divides by the raw η (no Ito adjustment), a negative η becomes |η| with a flag, and drift shares the 250-day volatility window. Same committed data vintage."
-            : "Documented convention (the run of record everywhere on this site): µ divides by η − σ²/2, a negative drift is NOT_RATED, drift uses a ~5-year window."}
+            ? "Reference convention: µ divides by the raw η (no Ito adjustment), a negative η becomes |η| with a flag, drift shares the 250-day volatility window, and the barrier is the total-liabilities line. Same committed data vintage."
+            : "Documented convention (the run of record everywhere on this site): µ divides by η − σ²/2, a negative drift is NOT_RATED, drift uses a ~5-year window, and the barrier is D = ST + 0.5·LT."}
         </p>
         <table className="w-full tabular-nums">
           <tbody>

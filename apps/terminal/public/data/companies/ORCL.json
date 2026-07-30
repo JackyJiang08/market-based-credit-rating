@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "9360b37",
-  "generated_utc": "2026-07-30T02:06:30Z",
+  "git_sha": "73aed8a",
+  "generated_utc": "2026-07-30T02:35:47Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -10,11 +10,11 @@
  "convention": "DOCUMENTED",
  "reference": {
   "convention": "REFERENCE",
-  "risk_score": 12.52657720896957,
-  "sigma_a": 0.5705567605887203,
-  "eta_a": -0.45655054347922364,
-  "mu": 3.5309680011109785,
-  "ccm": 0.4423094328831762,
+  "risk_score": 30.771464463074295,
+  "sigma_a": 0.500515288336769,
+  "eta_a": -0.328181103731524,
+  "mu": 2.7493478685529835,
+  "ccm": 0.8460146023380718,
   "mu_uses_abs_drift": true,
   "note": "reference convention: raw-eta denominator, |eta| on negative drift (flagged), 250-day shared window; same committed data vintage as the documented values"
  },

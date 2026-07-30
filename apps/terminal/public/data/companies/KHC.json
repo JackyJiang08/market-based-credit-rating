@@ -1,7 +1,7 @@
 {
  "meta": {
-  "git_sha": "9360b37",
-  "generated_utc": "2026-07-30T02:06:30Z",
+  "git_sha": "73aed8a",
+  "generated_utc": "2026-07-30T02:35:47Z",
   "package_version": "0.4.0",
   "data_vintage": "2026-07-24",
   "source": "committed fixtures and committed run-of-record results"
@@ -10,12 +10,12 @@
  "convention": "DOCUMENTED",
  "reference": {
   "convention": "REFERENCE",
-  "risk_score": 2.195200321916759,
-  "sigma_a": 0.18983816979768045,
-  "eta_a": 0.0026597626382553943,
-  "mu": 481.7298725909984,
-  "ccm": 10.57493571388679,
-  "mu_uses_abs_drift": false,
+  "risk_score": 4.3667446083746935,
+  "sigma_a": 0.11337425630353468,
+  "eta_a": -0.01760411076434701,
+  "mu": 30.819207186010384,
+  "ccm": 1.3457960681389343,
+  "mu_uses_abs_drift": true,
   "note": "reference convention: raw-eta denominator, |eta| on negative drift (flagged), 250-day shared window; same committed data vintage as the documented values"
  },
  "name": "The Kraft Heinz Company",
