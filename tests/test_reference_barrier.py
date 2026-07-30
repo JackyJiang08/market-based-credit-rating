@@ -15,9 +15,15 @@ from creditrating.data import cache
 from creditrating.data import cleaning as transforms
 from creditrating.data.pipeline import RunConfig, fetch_company
 from creditrating.model import convention as conventions
+from creditrating.model import conversion
 
 HAS_COST = os.path.exists(os.path.join(cache.cache_dir(), "COST", "prices.parquet"))
 HAS_PNC = os.path.exists(os.path.join(cache.cache_dir(), "PNC", "prices.parquet"))
+# The letter layer needs the licensed workbook; without it the conversion
+# never runs and determinations stay None (the documented no-workbook
+# contract, asserted by the golden tests). Letter-level assertions below are
+# conditional on it, measure-level assertions are not.
+HAS_WORKBOOK = os.path.exists(conversion.DEFAULT_XLSX)
 
 
 def test_total_liabilities_extraction_prefers_the_canonical_row():
@@ -86,12 +92,19 @@ def test_gated_bank_is_annotated_not_suppressed_under_reference():
     # the classification keeps running...
     assert ref.applicability_reason == "BANK_DEPOSIT_FUNDED"
     assert ref.model_applicable is False
-    # ...but under REFERENCE it annotates: the letter is produced when the
-    # conversion tables are available.
-    if ref.ttc_pd is not None:
-        assert ref.sp_rating is not None
-        assert ref.rating_determination != "MODEL_NOT_APPLICABLE"
-    # DOCUMENTED still suppresses.
+    # ...and the measures are produced against the whole liability side.
+    assert ref.risk_score is not None
+    # DOCUMENTED still suppresses the letter either way.
     doc = fetch_company("PNC", RunConfig(tickers=["PNC"]), cache.load_rates())
     assert doc.sp_rating is None
-    assert doc.rating_determination == "MODEL_NOT_APPLICABLE"
+    if HAS_WORKBOOK:
+        # With the conversion tables: REFERENCE produces the letter and keeps
+        # the classification as an annotation; DOCUMENTED stamps the
+        # not-applicable determination.
+        assert ref.sp_rating is not None
+        assert ref.rating_determination != "MODEL_NOT_APPLICABLE"
+        assert doc.rating_determination == "MODEL_NOT_APPLICABLE"
+    else:
+        # Without them the conversion never runs: no letter, no
+        # determination -- the documented no-workbook contract.
+        assert ref.sp_rating is None and doc.rating_determination is None

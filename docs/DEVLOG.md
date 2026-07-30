@@ -35,6 +35,21 @@ single push when they represent the same unit of work.
 
 ## Recent changes
 
+### 2026-07-29 - Fix: PNC gate test respects the no-workbook contract
+
+- The barrier push went red on CI: test_gated_bank_is_annotated_not_
+  suppressed_under_reference asserted the MODEL_NOT_APPLICABLE
+  determination unconditionally, but without local/ the conversion never
+  runs and determinations are None (the documented no-workbook contract).
+  Local runs passed because local/ is present here -- exactly the
+  fresh-clone blind spot the acceptance gates warn about.
+- Fixed by asserting both real branches (workbook present: letter under
+  REFERENCE + suppression under DOCUMENTED; absent: no letter, no
+  determination), mirroring the golden-test pattern.
+- Validation: main repo 404/404 (workbook present); the same test file
+  green in the fresh clone without local/ (both branches exercised).
+- Follow-ups: None.
+
 ### 2026-07-29 - REFERENCE gains the confirmed total-liabilities barrier
 
 - **Fourth switch:** Convention.barrier_field -- DOCUMENTED keeps
